@@ -13,17 +13,17 @@
 
 本文档承接以下设计：
 
-- [`2026-03-24-intelligent-ops-platform-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-intelligent-ops-platform-design.md)
-- [`2026-03-24-platform-ai-integration-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-platform-ai-integration-design.md)
-- [`2026-03-24-unified-object-model-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-unified-object-model-design.md)
-- [`2026-03-24-event-stream-and-timeline-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-event-stream-and-timeline-design.md)
+- [`2026-03-24-intelligent-ops-platform-design.md`](docs/plans/2026-03-24-intelligent-ops-platform-design.md)
+- [`2026-03-24-platform-ai-integration-design.md`](docs/plans/2026-03-24-platform-ai-integration-design.md)
+- [`2026-03-24-unified-object-model-design.md`](docs/plans/2026-03-24-unified-object-model-design.md)
+- [`2026-03-24-event-stream-and-timeline-design.md`](docs/plans/2026-03-24-event-stream-and-timeline-design.md)
 
 ## 2. 当前实现现状
 
 当前 assistant 主链路位于：
 
-- [`backend/internal/assistant/service.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/service.go)
-- [`backend/internal/assistant/handler.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/handler.go)
+- [`backend/internal/assistant/service.go`](backend/internal/assistant/service.go)
+- [`backend/internal/assistant/handler.go`](backend/internal/assistant/handler.go)
 
 现有流程大致为：
 
@@ -124,7 +124,7 @@ assistant 最终不能只返回纯文本，而应产出统一决策结构。
 
 现有落点：
 
-- [`handler.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/handler.go)
+- [`handler.go`](backend/internal/assistant/handler.go)
 
 ### 4.2 会话上下文层
 

@@ -9,7 +9,7 @@
 - 页面入口、聊天入口、工具层和事件回写如何打通
 - 集成顺序和最小改造范围如何定义
 
-本文档是 [`2026-03-24-intelligent-ops-platform-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-intelligent-ops-platform-design.md) 的配套实现设计，聚焦“如何接到现有平台里”。
+本文档是 [`2026-03-24-intelligent-ops-platform-design.md`](docs/plans/2026-03-24-intelligent-ops-platform-design.md) 的配套实现设计，聚焦“如何接到现有平台里”。
 
 ## 2. 集成原则
 
@@ -59,7 +59,7 @@
 智能能力在前端采用双入口结构：
 
 - `全局入口`
-  继续使用 [`AIChatbot.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/components/AIChatbot.tsx)
+  继续使用 [`AIChatbot.tsx`](frontend/src/components/AIChatbot.tsx)
 - `页面内入口`
   在业务页面增加“智能分析”“智能建议”“解释一下”入口
 
@@ -79,7 +79,7 @@
 
 全局聊天入口已存在：
 
-- [`AIChatbot.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/components/AIChatbot.tsx)
+- [`AIChatbot.tsx`](frontend/src/components/AIChatbot.tsx)
 
 ### 3.2 前端集成方式
 
@@ -110,10 +110,10 @@ frontend/src/components/
 
 页面：
 
-- [`AppReleasePage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/deploy/AppReleasePage.tsx)
-- [`DeployHistoryPage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/deploy/DeployHistoryPage.tsx)
-- [`ArchivePage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/deploy/ArchivePage.tsx)
-- [`ArchiveHistoryPage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/deploy/ArchiveHistoryPage.tsx)
+- [`AppReleasePage.tsx`](frontend/src/pages/deploy/AppReleasePage.tsx)
+- [`DeployHistoryPage.tsx`](frontend/src/pages/deploy/DeployHistoryPage.tsx)
+- [`ArchivePage.tsx`](frontend/src/pages/deploy/ArchivePage.tsx)
+- [`ArchiveHistoryPage.tsx`](frontend/src/pages/deploy/ArchiveHistoryPage.tsx)
 
 建议增加：
 
@@ -126,8 +126,8 @@ frontend/src/components/
 
 页面：
 
-- [`AlertEventsPage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/alarm/AlertEventsPage.tsx)
-- [`AlertRulesPage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/alarm/AlertRulesPage.tsx)
+- [`AlertEventsPage.tsx`](frontend/src/pages/alarm/AlertEventsPage.tsx)
+- [`AlertRulesPage.tsx`](frontend/src/pages/alarm/AlertRulesPage.tsx)
 
 建议增加：
 
@@ -139,9 +139,9 @@ frontend/src/components/
 
 页面：
 
-- [`TaskList.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/security/TaskList.tsx)
-- [`VulnerabilityList.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/security/VulnerabilityList.tsx)
-- [`VulnDetail.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/security/VulnDetail.tsx)
+- [`TaskList.tsx`](frontend/src/pages/security/TaskList.tsx)
+- [`VulnerabilityList.tsx`](frontend/src/pages/security/VulnerabilityList.tsx)
+- [`VulnDetail.tsx`](frontend/src/pages/security/VulnDetail.tsx)
 
 建议增加：
 
@@ -153,9 +153,9 @@ frontend/src/components/
 
 页面：
 
-- [`ProjectsPage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/cmdb/ProjectsPage.tsx)
-- [`ApplicationsPage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/cmdb/ApplicationsPage.tsx)
-- [`ServersPage.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/cmdb/ServersPage.tsx)
+- [`ProjectsPage.tsx`](frontend/src/pages/cmdb/ProjectsPage.tsx)
+- [`ApplicationsPage.tsx`](frontend/src/pages/cmdb/ApplicationsPage.tsx)
+- [`ServersPage.tsx`](frontend/src/pages/cmdb/ServersPage.tsx)
 
 建议增加：
 
@@ -187,16 +187,16 @@ frontend/src/components/
 
 现有智能主链路位于：
 
-- [`backend/internal/assistant/`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant)
+- [`backend/internal/assistant/`](backend/internal/assistant)
 
 现有业务模块位于：
 
-- [`backend/internal/cmdb/`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cmdb)
-- [`backend/internal/cicd/`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cicd)
-- [`backend/internal/consul/`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/consul)
-- [`backend/internal/alert/`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/alert)
-- [`backend/internal/monitor/`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/monitor)
-- [`backend/internal/security/`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security)
+- [`backend/internal/cmdb/`](backend/internal/cmdb)
+- [`backend/internal/cicd/`](backend/internal/cicd)
+- [`backend/internal/consul/`](backend/internal/consul)
+- [`backend/internal/alert/`](backend/internal/alert)
+- [`backend/internal/monitor/`](backend/internal/monitor)
+- [`backend/internal/security/`](backend/internal/security)
 
 ### 4.2 后端集成原则
 
@@ -498,12 +498,12 @@ backend/internal/assistant/tools/
 
 ### 前端
 
-- 保留现有 [`AIChatbot.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/components/AIChatbot.tsx)
+- 保留现有 [`AIChatbot.tsx`](frontend/src/components/AIChatbot.tsx)
 - 在 `deploy`、`alarm`、`security` 页面增加一个 `AIInsightPanel`
 
 ### 后端
 
-- 保留现有 [`backend/internal/assistant/`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant)
+- 保留现有 [`backend/internal/assistant/`](backend/internal/assistant)
 - 从 `cmdb`、`cicd`、`alert`、`security` 抽只读工具
 - 增加统一审计写入
 

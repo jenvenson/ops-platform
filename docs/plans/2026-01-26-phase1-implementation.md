@@ -718,7 +718,7 @@ JWT_SECRET=your-secret-key-change-in-production
 **Step 2: 测试构建**
 
 ```bash
-cd /Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework
+cd /path/to/ops-platform
 docker-compose -f deploy/docker-compose.yml config
 ```
 
@@ -1098,7 +1098,7 @@ git commit -m "feat: 用户认证功能
 **Step 1: 启动所有服务**
 
 ```bash
-cd /Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework
+cd /path/to/ops-platform
 docker-compose -f deploy/docker-compose.yml up -d
 ```
 

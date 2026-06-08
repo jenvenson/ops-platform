@@ -106,8 +106,8 @@ func TestExtractAppNameFromJob(t *testing.T) {
 		{
 			name:    "strip same env prefix plus numeric segment",
 			view:    "mscs_dev-185",
-			jobName: "mscs_dev-180-fscr-awd",
-			want:    "fscr-awd",
+			jobName: "myapp_dev-180-app-awd",
+			want:    "app-awd",
 		},
 	}
 

@@ -77,7 +77,7 @@ func TestShouldRunFullNucleiForTargetDowngradesPagesAndAgreementEndpoints(t *tes
 		},
 		{
 			name: "term api",
-			item: DiscoveredTarget{URL: "http://demo.example.com/base/common/get-term?app_id=fscr-base", Kind: "api", Source: "browser-request"},
+			item: DiscoveredTarget{URL: "http://demo.example.com/base/common/get-term?app_id=app-base", Kind: "api", Source: "browser-request"},
 			want: false,
 		},
 		{

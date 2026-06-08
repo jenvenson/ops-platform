@@ -17,11 +17,11 @@ func TestArchiveBuildNumberFromRecentBuildsMatchesParameters(t *testing.T) {
 		case "/job/gkd-app_on-site_update/api/json":
 			_, _ = w.Write([]byte(`{"builds":[{"number":33},{"number":32},{"number":31}]}`))
 		case "/job/gkd-app_on-site_update/33/api/json":
-			_, _ = w.Write([]byte(buildInfoJSON("fscr-base", "gkd", "all", start.Add(2*time.Minute))))
+			_, _ = w.Write([]byte(buildInfoJSON("app-base", "gkd", "all", start.Add(2*time.Minute))))
 		case "/job/gkd-app_on-site_update/32/api/json":
-			_, _ = w.Write([]byte(buildInfoJSON("fscr-pex", "gkd", "all", start.Add(1*time.Minute))))
+			_, _ = w.Write([]byte(buildInfoJSON("app-pex", "gkd", "all", start.Add(1*time.Minute))))
 		case "/job/gkd-app_on-site_update/31/api/json":
-			_, _ = w.Write([]byte(buildInfoJSON("fscr-cex", "gkd", "all", start.Add(30*time.Second))))
+			_, _ = w.Write([]byte(buildInfoJSON("app-cex", "gkd", "all", start.Add(30*time.Second))))
 		default:
 			t.Fatalf("unexpected Jenkins API path: %s", r.URL.Path)
 		}
@@ -29,7 +29,7 @@ func TestArchiveBuildNumberFromRecentBuildsMatchesParameters(t *testing.T) {
 	defer server.Close()
 
 	record := &ArchiveRecord{
-		AppName:        "fscr-pex",
+		AppName:        "app-pex",
 		EnvName:        "gkd",
 		DeployType:     "all",
 		JenkinsJob:     "gkd-app_on-site_update",
@@ -47,7 +47,7 @@ func TestArchiveBuildNumberFromRecentBuildsMatchesParameters(t *testing.T) {
 func TestArchiveBuildMatchesRecordRejectsOlderBuild(t *testing.T) {
 	start := time.Date(2026, 5, 14, 15, 37, 18, 0, time.Local)
 	record := &ArchiveRecord{
-		AppName:    "fscr-pex",
+		AppName:    "app-pex",
 		EnvName:    "gkd",
 		DeployType: "all",
 		StartTime:  &start,
@@ -58,7 +58,7 @@ func TestArchiveBuildMatchesRecordRejectsOlderBuild(t *testing.T) {
 		"actions": []interface{}{
 			map[string]interface{}{
 				"parameters": []interface{}{
-					map[string]interface{}{"name": "app", "value": "fscr-pex"},
+					map[string]interface{}{"name": "app", "value": "app-pex"},
 					map[string]interface{}{"name": "tag", "value": "gkd"},
 					map[string]interface{}{"name": "scope", "value": "all"},
 				},

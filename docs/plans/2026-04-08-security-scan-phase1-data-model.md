@@ -356,7 +356,7 @@ Phase 1 只做基础模型，不改业务口径：
 
 配套 DDL 草案见：
 
-- [2026-04-08-security-scan-phase1-ddl-draft.sql](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-04-08-security-scan-phase1-ddl-draft.sql)
+- [2026-04-08-security-scan-phase1-ddl-draft.sql](docs/plans/2026-04-08-security-scan-phase1-ddl-draft.sql)
 - 正式迁移草案见：
 
-- [2026-04-09-security-scan-phase1-foundation.sql](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/deploy/migrations/2026-04-09-security-scan-phase1-foundation.sql)
+- [2026-04-09-security-scan-phase1-foundation.sql](deploy/migrations/2026-04-09-security-scan-phase1-foundation.sql)

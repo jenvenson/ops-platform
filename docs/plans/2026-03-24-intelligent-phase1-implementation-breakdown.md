@@ -14,11 +14,11 @@
 
 本文档承接以下设计：
 
-- [`2026-03-24-intelligent-ops-platform-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-intelligent-ops-platform-design.md)
-- [`2026-03-24-platform-ai-integration-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-platform-ai-integration-design.md)
-- [`2026-03-24-unified-object-model-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-unified-object-model-design.md)
-- [`2026-03-24-event-stream-and-timeline-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-event-stream-and-timeline-design.md)
-- [`2026-03-24-assistant-orchestration-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-assistant-orchestration-design.md)
+- [`2026-03-24-intelligent-ops-platform-design.md`](docs/plans/2026-03-24-intelligent-ops-platform-design.md)
+- [`2026-03-24-platform-ai-integration-design.md`](docs/plans/2026-03-24-platform-ai-integration-design.md)
+- [`2026-03-24-unified-object-model-design.md`](docs/plans/2026-03-24-unified-object-model-design.md)
+- [`2026-03-24-event-stream-and-timeline-design.md`](docs/plans/2026-03-24-event-stream-and-timeline-design.md)
+- [`2026-03-24-assistant-orchestration-design.md`](docs/plans/2026-03-24-assistant-orchestration-design.md)
 
 ## 2. 一期目标与边界
 
@@ -89,10 +89,10 @@
 
 主要涉及模块：
 
-- [`backend/internal/assistant/service.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/service.go)
-- [`backend/internal/assistant/handler.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/handler.go)
-- [`backend/internal/assistant/types.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/types.go)
-- [`backend/internal/models/assistant.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/assistant.go)
+- [`backend/internal/assistant/service.go`](backend/internal/assistant/service.go)
+- [`backend/internal/assistant/handler.go`](backend/internal/assistant/handler.go)
+- [`backend/internal/assistant/types.go`](backend/internal/assistant/types.go)
+- [`backend/internal/models/assistant.go`](backend/internal/models/assistant.go)
 
 一期交付要求：
 
@@ -183,11 +183,11 @@
 
 主要涉及模块：
 
-- [`backend/internal/cicd`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cicd)
-- [`backend/internal/alert`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/alert)
-- [`backend/internal/security`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security)
-- [`backend/internal/cmdb`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cmdb)
-- [`backend/internal/assistant`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant)
+- [`backend/internal/cicd`](backend/internal/cicd)
+- [`backend/internal/alert`](backend/internal/alert)
+- [`backend/internal/security`](backend/internal/security)
+- [`backend/internal/cmdb`](backend/internal/cmdb)
+- [`backend/internal/assistant`](backend/internal/assistant)
 
 一期交付要求：
 
@@ -218,7 +218,7 @@
 
 主要涉及模块：
 
-- [`frontend/src/components/AIChatbot.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/components/AIChatbot.tsx)
+- [`frontend/src/components/AIChatbot.tsx`](frontend/src/components/AIChatbot.tsx)
 - `frontend/src/pages/deploy/*`
 - `frontend/src/pages/alert/*`
 - `frontend/src/pages/security/*`

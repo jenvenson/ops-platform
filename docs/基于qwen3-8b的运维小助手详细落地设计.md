@@ -445,12 +445,12 @@ type ChatRequest struct {
 
 ### 11.1 首批知识源
 
-- [docs/deploy.md](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/deploy.md)
-- [docs/design.md](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/design.md)
-- [docs/testing.md](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/testing.md)
-- [docs/user_manual.md](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/user_manual.md)
-- [docs/project-structure.md](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/project-structure.md)
-- [docs/运维小助手技术方案.md](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/运维小助手技术方案.md)
+- [docs/deploy.md](docs/deploy.md)
+- [docs/design.md](docs/design.md)
+- [docs/testing.md](docs/testing.md)
+- [docs/user_manual.md](docs/user_manual.md)
+- [docs/project-structure.md](docs/project-structure.md)
+- [docs/运维小助手技术方案.md](docs/运维小助手技术方案.md)
 
 ### 11.2 分片规则
 
@@ -522,7 +522,7 @@ type Tool interface {
 
 ## 13. 前端改造建议
 
-现有 [AIChatbot.tsx](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/components/AIChatbot.tsx) 可以继续使用，但建议扩展响应结构支持：
+现有 [AIChatbot.tsx](frontend/src/components/AIChatbot.tsx) 可以继续使用，但建议扩展响应结构支持：
 
 - `answer`
 - `intent`

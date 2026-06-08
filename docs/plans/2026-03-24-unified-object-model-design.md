@@ -11,8 +11,8 @@
 
 本文档是以下设计的基础支撑：
 
-- [`2026-03-24-intelligent-ops-platform-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-intelligent-ops-platform-design.md)
-- [`2026-03-24-platform-ai-integration-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-platform-ai-integration-design.md)
+- [`2026-03-24-intelligent-ops-platform-design.md`](docs/plans/2026-03-24-intelligent-ops-platform-design.md)
+- [`2026-03-24-platform-ai-integration-design.md`](docs/plans/2026-03-24-platform-ai-integration-design.md)
 
 ## 2. 设计原则
 
@@ -200,7 +200,7 @@ action_executed
 
 现有来源：
 
-- [`cmdb.Project`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cmdb/models.go)
+- [`cmdb.Project`](backend/internal/cmdb/models.go)
 
 关键属性：
 
@@ -227,7 +227,7 @@ action_executed
 
 现有来源：
 
-- [`cmdb.Environment`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cmdb/models.go)
+- [`cmdb.Environment`](backend/internal/cmdb/models.go)
 
 关键属性：
 
@@ -244,7 +244,7 @@ action_executed
 
 现有来源：
 
-- [`cmdb.Server`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cmdb/models.go)
+- [`cmdb.Server`](backend/internal/cmdb/models.go)
 
 关键属性：
 
@@ -274,7 +274,7 @@ action_executed
 
 现有来源：
 
-- [`cmdb.Application`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cmdb/models.go)
+- [`cmdb.Application`](backend/internal/cmdb/models.go)
 
 关键属性：
 
@@ -294,8 +294,8 @@ action_executed
 
 现有来源：
 
-- [`models.Asset`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/security.go)
-- [`models.SecurityAsset`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/security.go)
+- [`models.Asset`](backend/internal/models/security.go)
+- [`models.SecurityAsset`](backend/internal/models/security.go)
 
 说明：
 
@@ -312,7 +312,7 @@ action_executed
 
 现有来源：
 
-- [`alert.AlertRule`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/alert/models.go)
+- [`alert.AlertRule`](backend/internal/alert/models.go)
 
 关键属性：
 
@@ -327,7 +327,7 @@ action_executed
 
 现有来源：
 
-- [`alert.AlertEvent`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/alert/models.go)
+- [`alert.AlertEvent`](backend/internal/alert/models.go)
 
 关键属性：
 
@@ -346,7 +346,7 @@ action_executed
 
 现有来源：
 
-- [`models.SecurityVulnerability`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/security.go)
+- [`models.SecurityVulnerability`](backend/internal/models/security.go)
 
 关键属性：
 
@@ -364,7 +364,7 @@ action_executed
 
 现有来源：
 
-- [`models.VulnTicket`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/security.go)
+- [`models.VulnTicket`](backend/internal/models/security.go)
 
 关键属性：
 
@@ -381,7 +381,7 @@ action_executed
 
 现有来源：
 
-- [`cmdb.DeployRecord`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cmdb/models.go)
+- [`cmdb.DeployRecord`](backend/internal/cmdb/models.go)
 
 关键属性：
 
@@ -401,7 +401,7 @@ action_executed
 
 现有来源：
 
-- [`cmdb.ArchiveRecord`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cmdb/models.go)
+- [`cmdb.ArchiveRecord`](backend/internal/cmdb/models.go)
 
 关键属性：
 
@@ -418,8 +418,8 @@ action_executed
 
 现有来源：
 
-- [`models.AggregatePackageTask`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/aggregate_package.go)
-- [`models.AggregatedHistory`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/aggregated_history.go)
+- [`models.AggregatePackageTask`](backend/internal/models/aggregate_package.go)
+- [`models.AggregatedHistory`](backend/internal/models/aggregated_history.go)
 
 逻辑定义：
 
@@ -430,8 +430,8 @@ action_executed
 
 现有来源：
 
-- [`models.AssistantSession`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/assistant.go)
-- [`models.AssistantMessage`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/assistant.go)
+- [`models.AssistantSession`](backend/internal/models/assistant.go)
+- [`models.AssistantMessage`](backend/internal/models/assistant.go)
 
 关键属性：
 

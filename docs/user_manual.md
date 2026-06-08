@@ -97,7 +97,7 @@
 #### 导入命名说明
 - 支持从 Job 名中自动去掉常见视图前缀，例如 `prod166-technical-research` -> `technical-research`
 - 支持去掉版本型前缀，例如 `fat-70-V2.5.1-firmware-research` 配合 `V2.5.1-` -> `firmware-research`
-- 支持同环境前缀加数字号段的场景，例如 `mscs_dev-180-fscr-awd` -> `fscr-awd`
+- 支持同环境前缀加数字号段的场景，例如 `myapp_dev-180-app-awd` -> `app-awd`
 
 ## 3. 变更发布
 

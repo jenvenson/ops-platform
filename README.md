@@ -309,7 +309,7 @@ docker compose logs --tail 50 nginx
 推荐发布顺序：
 
 ```bash
-cd /Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/deploy
+cd deploy
 ./deploy-update.sh migrate
 ./deploy-update.sh
 ```

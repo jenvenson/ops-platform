@@ -14,8 +14,8 @@
 
 现有实现位于：
 
-- [backend/internal/security/handler.go](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security/handler.go)
-- [backend/internal/security/engine.go](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security/engine.go)
+- [backend/internal/security/handler.go](backend/internal/security/handler.go)
+- [backend/internal/security/engine.go](backend/internal/security/engine.go)
 
 当前认证链路的核心限制：
 
@@ -352,14 +352,14 @@ nuclei -> local auth proxy -> target app
 
 重点改造文件：
 
-- [backend/internal/security/handler.go](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security/handler.go)
-- [backend/internal/security/engine.go](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security/engine.go)
+- [backend/internal/security/handler.go](backend/internal/security/handler.go)
+- [backend/internal/security/engine.go](backend/internal/security/engine.go)
 
 建议新增文件：
 
-- [backend/internal/security/auth_types.go](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security/auth_types.go)
-- [backend/internal/security/auth_flow.go](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security/auth_flow.go)
-- [backend/internal/security/request_signer.go](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/security/request_signer.go)
+- [backend/internal/security/auth_types.go](backend/internal/security/auth_types.go)
+- [backend/internal/security/auth_flow.go](backend/internal/security/auth_flow.go)
+- [backend/internal/security/request_signer.go](backend/internal/security/request_signer.go)
 
 建议的函数级改造：
 
@@ -379,8 +379,8 @@ nuclei -> local auth proxy -> target app
 
 重点改造文件：
 
-- [frontend/src/api/security.ts](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/api/security.ts)
-- [frontend/src/pages/security/TaskList.tsx](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/pages/security/TaskList.tsx)
+- [frontend/src/api/security.ts](frontend/src/api/security.ts)
+- [frontend/src/pages/security/TaskList.tsx](frontend/src/pages/security/TaskList.tsx)
 
 建议：
 
@@ -396,7 +396,7 @@ nuclei -> local auth proxy -> target app
 
 ## 数据与安全建议
 
-当前任务表 [backend/internal/models/security.go](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/security.go) 没有认证配置快照字段。
+当前任务表 [backend/internal/models/security.go](backend/internal/models/security.go) 没有认证配置快照字段。
 
 建议补充：
 

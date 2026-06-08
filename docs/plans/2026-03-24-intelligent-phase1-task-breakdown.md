@@ -14,7 +14,7 @@
 
 本文档承接：
 
-- [`2026-03-24-intelligent-phase1-implementation-breakdown.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-intelligent-phase1-implementation-breakdown.md)
+- [`2026-03-24-intelligent-phase1-implementation-breakdown.md`](docs/plans/2026-03-24-intelligent-phase1-implementation-breakdown.md)
 
 ## 2. 首批任务总览
 
@@ -48,9 +48,9 @@
 
 主要改动范围：
 
-- [`backend/internal/assistant/types.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/types.go)
-- [`backend/internal/assistant/service.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/service.go)
-- [`backend/internal/models/assistant.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/models/assistant.go)
+- [`backend/internal/assistant/types.go`](backend/internal/assistant/types.go)
+- [`backend/internal/assistant/service.go`](backend/internal/assistant/service.go)
+- [`backend/internal/models/assistant.go`](backend/internal/models/assistant.go)
 
 实施要点：
 
@@ -86,9 +86,9 @@
 
 主要改动范围：
 
-- [`frontend/src/components/AIChatbot.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/components/AIChatbot.tsx)
-- [`backend/internal/assistant/handler.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/handler.go)
-- [`backend/internal/assistant/types.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/types.go)
+- [`frontend/src/components/AIChatbot.tsx`](frontend/src/components/AIChatbot.tsx)
+- [`backend/internal/assistant/handler.go`](backend/internal/assistant/handler.go)
+- [`backend/internal/assistant/types.go`](backend/internal/assistant/types.go)
 
 建议字段：
 
@@ -129,7 +129,7 @@
 
 主要改动范围：
 
-- [`backend/internal/assistant/service.go`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant/service.go)
+- [`backend/internal/assistant/service.go`](backend/internal/assistant/service.go)
 - 可能新增 `backend/internal/assistant/tools.go`
 - 可能新增 `backend/internal/assistant/tool_registry.go`
 
@@ -173,9 +173,9 @@
 
 主要改动范围：
 
-- [`backend/internal/cicd`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/cicd)
-- [`backend/internal/alert`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/alert)
-- [`backend/internal/assistant`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant)
+- [`backend/internal/cicd`](backend/internal/cicd)
+- [`backend/internal/alert`](backend/internal/alert)
+- [`backend/internal/assistant`](backend/internal/assistant)
 
 实施要点：
 
@@ -266,7 +266,7 @@
 - 可能新增 `backend/internal/platformevent`
 - `backend/internal/cicd`
 - `backend/internal/alert`
-- [`backend/internal/assistant`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant)
+- [`backend/internal/assistant`](backend/internal/assistant)
 
 建议表字段：
 
@@ -309,7 +309,7 @@
 
 主要改动范围：
 
-- [`frontend/src/components/AIChatbot.tsx`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/src/components/AIChatbot.tsx)
+- [`frontend/src/components/AIChatbot.tsx`](frontend/src/components/AIChatbot.tsx)
 - `frontend/src/pages/deploy/*`
 - `frontend/src/pages/alert/*`
 
@@ -350,9 +350,9 @@
 
 主要改动范围：
 
-- [`backend/internal/assistant`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/backend/internal/assistant)
+- [`backend/internal/assistant`](backend/internal/assistant)
 - 新增对象/事件模块测试
-- [`frontend/scripts/ui-acceptance-smoke.cjs`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/frontend/scripts/ui-acceptance-smoke.cjs)
+- [`frontend/scripts/ui-acceptance-smoke.cjs`](frontend/scripts/ui-acceptance-smoke.cjs)
 
 前置依赖：
 

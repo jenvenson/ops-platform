@@ -11,9 +11,9 @@
 
 本文档承接以下设计文档：
 
-- [`2026-03-24-intelligent-ops-platform-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-intelligent-ops-platform-design.md)
-- [`2026-03-24-unified-object-model-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-unified-object-model-design.md)
-- [`2026-03-24-platform-ai-integration-design.md`](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/docs/plans/2026-03-24-platform-ai-integration-design.md)
+- [`2026-03-24-intelligent-ops-platform-design.md`](docs/plans/2026-03-24-intelligent-ops-platform-design.md)
+- [`2026-03-24-unified-object-model-design.md`](docs/plans/2026-03-24-unified-object-model-design.md)
+- [`2026-03-24-platform-ai-integration-design.md`](docs/plans/2026-03-24-platform-ai-integration-design.md)
 
 ## 2. 设计原则
 

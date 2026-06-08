@@ -4,8 +4,8 @@
 
 当前仅保留两份最新部署文档：
 
-- [README.md](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/README.md)：项目入口与部署概览
-- [deploy/DEPLOY.md](/Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/deploy/DEPLOY.md)：生产部署与本地执行发布清单
+- [README.md](README.md)：项目入口与部署概览
+- [deploy/DEPLOY.md](deploy/DEPLOY.md)：生产部署与本地执行发布清单
 
 推荐阅读顺序：
 
