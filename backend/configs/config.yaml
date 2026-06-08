@@ -1,0 +1,27 @@
+port: 8080
+log_level: info
+database:
+  # 从环境变量 DB_HOST 读取，默认 localhost
+  port: 3306
+  # 从环境变量 DB_USER 读取，默认 root
+  # 从环境变量 DB_PASSWORD 读取（必需）
+  name: ops_platform
+redis:
+  # 从环境变量 REDIS_HOST 读取，默认 localhost
+  port: 6379
+  # 从环境变量 REDIS_PASSWORD 读取
+jwt:
+  # 从环境变量 JWT_SECRET 读取（必需）
+
+# Jenkins 配置
+jenkins:
+  # Jenkins 基础地址，从环境变量 JENKINS_URL 读取
+  url: "http://js.zbnsec.com"
+  # Jenkins 用户名，从环境变量 JENKINS_USERNAME 读取
+  username: ""
+  # Jenkins API Token，从环境变量 JENKINS_TOKEN 读取
+  token: ""
+  # 请求超时（秒）
+  timeout: 30
+  # 状态轮询间隔（秒）
+  poll_interval: 5

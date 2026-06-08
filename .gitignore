@@ -1,0 +1,55 @@
+# Large binary files
+ollama.tar
+
+# Logs
+logs/
+*.log
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+*.test
+*.out
+
+# Docker
+docker-compose.override.yml
+
+# Git worktrees
+.worktrees/
+
+# Test artifacts / screenshots
+frontend/artifacts/
+
+# Compiled binaries
+backend/bin/
+backend/cmd/server/ops-server
+
+# Temp
+tmp/
+temp/

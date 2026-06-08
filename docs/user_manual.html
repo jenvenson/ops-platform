@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运维管理平台用户使用手册</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #5a7385;
+            margin-top: 25px;
+        }
+        h4 {
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid #3498db;
+        }
+        .nav-path {
+            background-color: #e8f4fd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #2980b9;
+        }
+        .feature-highlight {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .tip {
+            background-color: #d4edda;
+            border: 1px solid #c3e6c3;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .warning {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .toc h3 {
+            margin-top: 0;
+        }
+        .toc ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>运维管理平台用户使用手册</h1>
+
+        <div class="toc">
+            <h3>目录</h3>
+            <ul>
+                <li><a href="#section1">1. 系统概述</a></li>
+                <li><a href="#section2">2. 资产中心</a></li>
+                <li><a href="#section3">3. 变更发布</a></li>
+                <li><a href="#section4">4. Jenkins管理</a></li>
+                <li><a href="#section5">5. 监控中心</a></li>
+                <li><a href="#section6">6. 告警事件</a></li>
+                <li><a href="#section7">7. 安全中心</a></li>
+                <li><a href="#section8">8. 系统管理</a></li>
+                <li><a href="#section9">9. AI助手使用指南</a></li>
+                <li><a href="#section10">10. 故障排除</a></li>
+                <li><a href="#section11">11. 最佳实践</a></li>
+            </ul>
+        </div>
+
+        <h2 id="section1">1. 系统概述</h2>
+        <p>运维管理平台是一个集中化的管理平台，提供资产中心、变更发布、监控中心、告警事件、安全中心、系统管理等功能。用户可以通过统一的界面管理多个项目和环境。</p>
+
+        <h3>1.1 平台架构</h3>
+        <ul>
+            <li><span class="nav-path">资产中心</span>：项目、环境、主机、应用流水线管理 (路径: /cmdb/projects, /cmdb/environments, /cmdb/servers, /cmdb/applications)</li>
+            <li><span class="nav-path">变更发布</span>：迭代部署、部署记录、归档打包、聚合打包、Consul配置变更、Jenkins任务 (路径: /deploy/release, /deploy/history, /deploy/archive, /deploy/aggregate-package, /consul/config, /jenkins/views)</li>
+            <li><span class="nav-path">监控中心</span>：监控大屏、概览、Grafana集成 (路径: /monitor/bigscreen, /monitor/overview, /monitor/dashboards)</li>
+            <li><span class="nav-path">告警事件</span>：事件中心、规则、联系人管理 (路径: /alarm/events, /alarm/rules, /alarm/contacts)</li>
+            <li><span class="nav-path">安全中心</span>：安全扫描、安全资产、漏洞管理 (路径: /security/tasks, /security/assets, /security/vulnerabilities)</li>
+            <li><span class="nav-path">系统管理</span>：用户、角色、菜单管理 (路径: /admin/users, /admin/roles, /admin/menus)</li>
+        </ul>
+
+        <h3>1.2 登录与认证</h3>
+        <p>首次访问系统时，请使用您的账户凭据登录。系统采用多因素认证，确保安全性。</p>
+
+        <h2 id="section2">2. 资产中心</h2>
+
+        <h3>2.1 项目管理 (/cmdb/projects)</h3>
+        <p>项目是所有其他资源的顶层容器，所有环境、服务器都属于某个项目。</p>
+
+        <h4>创建项目</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/cmdb/projects</span></li>
+            <li>点击"新增项目"按钮</li>
+            <li>输入项目名称、描述、负责人等信息</li>
+            <li>设置预算和资源配额</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h4>编辑项目</h4>
+        <ol>
+            <li>在项目列表中选择目标项目</li>
+            <li>点击"编辑"按钮</li>
+            <li>修改所需信息</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h4>删除项目</h4>
+        <p class="warning">注意：删除项目将同时删除该项目下的所有环境和资源，请谨慎操作。</p>
+
+        <h3>2.2 环境管理 (/cmdb/environments)</h3>
+        <p>环境管理模块允许创建不同的部署环境，如开发、测试、预生产、生产环境。</p>
+
+        <h4>创建环境</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/cmdb/environments</span></li>
+            <li>点击"新增环境"按钮</li>
+            <li>选择所属项目</li>
+            <li>输入环境名称（如dev、test、prod）</li>
+            <li>配置环境参数和访问权限</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h4>环境类型</h4>
+        <ul>
+            <li><strong>开发环境</strong>：用于开发人员日常开发和测试</li>
+            <li><strong>测试环境</strong>：用于QA团队的功能验证</li>
+            <li><strong>预生产环境</strong>：模拟生产环境进行最终验证</li>
+            <li><strong>生产环境</strong>：线上正式运行环境</li>
+        </ul>
+
+        <h3>2.3 服务器管理 (/cmdb/servers)</h3>
+        <p>服务器管理模块用于管理所有物理机、虚拟机、容器等基础设施资源。</p>
+
+        <h4>添加服务器</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/cmdb/servers</span></li>
+            <li>点击"添加服务器"按钮</li>
+            <li>选择服务器类型（物理机、虚拟机、容器）</li>
+            <li>输入服务器基本信息（主机名、IP地址、操作系统等）</li>
+            <li>配置连接参数和访问凭证</li>
+            <li>标记服务器角色和用途</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h4>服务器属性</h4>
+        <ul>
+            <li>主机名</li>
+            <li>IP地址</li>
+            <li>操作系统类型及版本</li>
+            <li>CPU和内存配置</li>
+            <li>磁盘空间</li>
+            <li>所属环境和项目</li>
+        </ul>
+
+        <h3>2.4 应用流水线管理 (/cmdb/applications)</h3>
+        <p>应用流水线管理页面用于维护应用与 Jenkins 流水线的关联信息，便于后续迭代部署、归档和批量导入。</p>
+
+        <h4>新增应用流水线</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/cmdb/applications</span></li>
+            <li>点击"新增应用流水线"按钮</li>
+            <li>输入应用名称</li>
+            <li>选择所属项目</li>
+            <li>选择项目环境</li>
+            <li>按需填写 Jenkins 发布流水线、Jenkins 归档流水线和描述</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h4>从 Jenkins 导入流水线</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/cmdb/applications</span></li>
+            <li>点击"从 Jenkins 导入流水线"</li>
+            <li>输入视图名称并获取 Jobs 预览</li>
+            <li>如 Job 名带有环境号、版本号或自定义前缀，可在"应用名前缀清理规则"中输入要去掉的前缀，例如 <code>190-</code>、<code>V2.5.1-</code></li>
+            <li>预览中的应用名称会实时按相同规则清洗，导入时也会按相同规则落库</li>
+        </ol>
+
+        <h4>导入命名说明</h4>
+        <ul>
+            <li>支持从 Job 名中自动去掉常见视图前缀，例如 <code>prod166-technical-research</code> -&gt; <code>technical-research</code></li>
+            <li>支持去掉版本型前缀，例如 <code>fat-70-V2.5.1-firmware-research</code> 配合 <code>V2.5.1-</code> -&gt; <code>firmware-research</code></li>
+            <li>支持同环境前缀加数字号段的场景，例如 <code>mscs_dev-180-fscr-awd</code> -&gt; <code>fscr-awd</code></li>
+        </ul>
+
+        <h2 id="section3">3. 变更发布</h2>
+
+        <h3>3.1 迭代部署 (/deploy/release)</h3>
+        <p>迭代部署功能用于按项目和应用触发发布，并支持选择部署类型。</p>
+
+        <h4>部署准备</h4>
+        <ol>
+            <li>确保目标环境可用</li>
+            <li>检查部署资源充足</li>
+            <li>准备部署包和配置文件</li>
+        </ol>
+
+        <h4>执行部署</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/deploy/release</span></li>
+            <li>选择需要部署的项目和应用</li>
+            <li>选择要发布的应用</li>
+            <li>选择目标环境</li>
+            <li>选择部署类型（全部部署：前端+后端、前端部署、后端部署）</li>
+            <li>确认发布信息</li>
+            <li>点击"开始部署"</li>
+        </ol>
+
+        <h4>部署类型</h4>
+        <ul>
+            <li><strong>全部部署（前端+后端）</strong>：同时触发前端和后端部署</li>
+            <li><strong>前端部署</strong>：仅部署前端资源</li>
+            <li><strong>后端部署</strong>：仅部署后端服务</li>
+        </ul>
+
+        <h3>3.2 归档打包 (/deploy/archive)</h3>
+        <p>归档打包功能用于触发项目下应用的归档任务，并保存对应版本产物，便于后续追溯与回滚。</p>
+
+        <h4>归档应用</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/deploy/archive</span></li>
+            <li>选择要归档的项目</li>
+            <li>选择需要归档的应用，最多支持 3 个应用并发归档</li>
+            <li>进入确认页后选择归档类型：全部归档、前端归档或后端归档</li>
+            <li>点击“开始归档”并等待结果</li>
+            <li>如需查看历史记录，可进入 <span class="nav-path">/deploy/archived</span></li>
+        </ol>
+
+        <h4>归档策略</h4>
+        <ul>
+            <li>自动归档最近10个版本</li>
+            <li>手动归档重要里程碑版本</li>
+            <li>设置过期策略清理旧版本</li>
+        </ul>
+
+        <h3>3.3 归档历史 (/deploy/archived)</h3>
+        <p>归档历史页面用于查看历史归档记录、归档结果和相关版本信息。</p>
+
+        <h4>查看归档历史</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/deploy/archived</span></li>
+            <li>查看归档历史记录列表</li>
+            <li>根据应用名称或归档结果筛选目标记录</li>
+            <li>按需查看归档详情和版本信息</li>
+        </ol>
+
+        <h4>下载归档产物</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/deploy/archived</span></li>
+            <li>在归档历史列表中找到目标记录的“下载地址”</li>
+            <li>点击“查看文件”打开归档文件列表</li>
+            <li>在文件列表中点击“下载”获取相关归档包，或点击“复制链接”后在新窗口打开下载</li>
+        </ol>
+
+        <h3>3.4 部署记录 (/deploy/history)</h3>
+        <p>部署记录页面用于查看最近的部署结果、状态和触发时间。</p>
+
+        <h4>查看部署记录</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/deploy/history</span></li>
+            <li>查看部署记录列表</li>
+            <li>根据应用名称、部署状态和时间定位目标记录</li>
+            <li>按需刷新列表获取最新部署结果</li>
+        </ol>
+
+        <h3>3.5 聚合打包功能 (/deploy/aggregate-package)</h3>
+        <p>聚合打包功能用于一次性打包多个应用，从Consul获取配置并触发Jenkins任务。</p>
+
+        <h4>执行聚合打包</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/deploy/aggregate-package</span></li>
+            <li>输入项目名称</li>
+            <li>在应用名称列表中输入需要打包的应用名称（每行一个）</li>
+            <li>点击"开始聚合打包"</li>
+            <li>系统将自动从Consul获取各应用的tag配置，并触发Jenkins任务</li>
+        </ol>
+
+        <h4>打包参数</h4>
+        <ul>
+            <li><strong>项目名称</strong>：要打包的项目名</li>
+            <li><strong>应用名称列表</strong>：要包含在聚合打包中的应用名称，每行一个</li>
+            <li><strong>Jenkins任务</strong>：系统将使用 <code>http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/</code> 任务</li>
+            <li><strong>Consul路径</strong>：系统从 <code>plugin/fscr-aggregation/</code> 路径获取各应用的tag值</li>
+        </ul>
+
+        <h3>3.6 聚合历史 (/deploy/aggregated-history)</h3>
+        <p>聚合历史页面用于查看聚合打包任务的执行结果、状态和下载地址。</p>
+
+        <h4>查看聚合历史</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/deploy/aggregated-history</span></li>
+            <li>查看聚合历史记录列表</li>
+            <li>根据项目名称、Tag、状态或时间筛选目标记录</li>
+            <li>按需查看日志、进度和下载地址</li>
+        </ol>
+
+        <h4>下载聚合包</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/deploy/aggregated-history</span></li>
+            <li>在聚合历史列表中找到目标记录的“下载地址”</li>
+            <li>直接点击下载链接下载聚合包</li>
+        </ol>
+
+        <h3>3.7 Consul配置 (/consul/config)</h3>
+        <p>Consul配置页面用于维护 Consul 实例连接信息，支持新增、编辑、删除、测试连接和设置默认配置。</p>
+
+        <h4>添加配置</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/consul/config</span></li>
+            <li>点击"添加配置"按钮</li>
+            <li>输入配置名称、Consul地址和数据中心</li>
+            <li>按需填写 Token、用户名和密码</li>
+            <li>点击保存</li>
+        </ol>
+
+        <h4>常用操作</h4>
+        <ul>
+            <li><strong>测试连接</strong>：验证当前配置是否可以正常连接到 Consul</li>
+            <li><strong>设为默认</strong>：将该配置设置为默认 Consul 配置</li>
+        </ul>
+
+        <h3>3.8 批量配置下发 (/consul/batch-all)</h3>
+        <p>批量配置下发用于按后缀批量复制或替换 Consul Key 内容。</p>
+
+        <h4>执行批量配置下发</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/consul/batch-all</span></li>
+            <li>选择 Consul 配置</li>
+            <li>输入源后缀和目标后缀</li>
+            <li>按需开启递归复制或原后缀内替换</li>
+            <li>可选指定"项目选择"，只对选中的项目下发；留空表示处理当前 Consul 配置下的全部项目</li>
+            <li>根据需要填写 Tag、Server、Branch 等替换规则</li>
+            <li>点击"执行批量配置下发"</li>
+            <li>在结果区域查看成功和失败统计</li>
+        </ol>
+
+        <h4>批量下发说明</h4>
+        <ul>
+            <li>递归复制默认开启，既支持复制目录下的子键，也支持复制形如 <code>plugin/&lt;项目&gt;/&lt;后缀&gt;</code> 的单个 Key</li>
+            <li>如果结果显示"成功 0，失败 0"，通常表示当前所选项目或源后缀下没有匹配到可复制的 Key</li>
+            <li>原后缀内替换不会创建新 Key，而是直接修改原后缀下已有内容</li>
+        </ul>
+
+        <h2 id="section4">4. Jenkins管理 (/jenkins/views)</h2>
+
+        <h3>4.1 视图复制功能</h3>
+        <p>Jenkins视图复制功能可以将一个视图中的所有Job复制到另一个视图，支持Job名称和Tag值的自动替换。</p>
+
+        <h4>执行视图复制</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/jenkins/views</span></li>
+            <li>在"Jenkins地址"字段输入Jenkins服务器地址（默认为 <code>http://js.zbnsec.com</code>）</li>
+            <li>输入"源视图名称"（要复制的源视图名称）</li>
+            <li>输入"目标视图名称"（要创建的目标视图名称）</li>
+            <li>（可选）在"Job名称替换"部分输入原Job名称模式和新Job名称模式</li>
+            <li>（可选）在"流水线Tag值替换"部分输入原Tag值模式和新Tag值模式</li>
+            <li>点击"执行视图复制"按钮</li>
+        </ol>
+
+        <h4>复制规则说明</h4>
+        <ul>
+            <li>Job 名称替换按字面量处理；如果同一个原模式填写了多条规则，系统以最后一条为准</li>
+            <li>流水线 Tag 值替换只作用于 <code>tag</code> 参数上下文，不会误改其他 <code>defaultValue</code></li>
+            <li>例如原 Tag 为 <code>15s_dev</code>、新 Tag 为 <code>prod166</code> 时，会保持为 <code>prod166</code>，不会被截断成 <code>prod</code></li>
+            <li>系统会尝试自动审批 Jenkins <code>pending scripts</code>；如果 Jenkins 还存在 <code>pending signatures</code> 等其他审批项，仍需到 Script Approval 页面手工处理</li>
+        </ul>
+
+        <h4>复制结果查看</h4>
+        <p>执行完成后，系统将显示复制结果：</p>
+        <ul>
+            <li>成功复制的Job数量</li>
+            <li>失败的Job数量</li>
+            <li>跳过的Job数量</li>
+            <li>脚本自动审批的数量</li>
+        </ul>
+
+        <h3>4.2 视图删除功能</h3>
+        <p>Jenkins视图删除功能允许您删除指定视图及其中的Job。</p>
+
+        <h4>删除视图步骤</h4>
+        <ol>
+            <li>在"视图删除"区域输入要删除的视图名称</li>
+            <li>点击"查询视图"按钮</li>
+            <li>系统将列出该视图下的所有Job</li>
+            <li>您可以进行以下操作：
+                <ul>
+                    <li><strong>删除选中</strong>：删除勾选的Job</li>
+                    <li><strong>仅删除视图</strong>：只删除视图本身，保留所有Job</li>
+                    <li><strong>删除视图及全部Job</strong>：删除整个视图及其中的所有Job</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>4.3 凭据管理功能</h3>
+        <p>Jenkins凭据管理功能用于创建SSH密钥凭据。</p>
+
+        <h4>创建SSH凭据</h4>
+        <ol>
+            <li>在"新增Jenkins凭据"区域填写以下信息：
+                <ul>
+                    <li>凭据ID（通常是主机IP地址）</li>
+                    <li>用户名（默认为root）</li>
+                    <li>描述（可选）</li>
+                    <li>私钥内容（完整的SSH私钥）</li>
+                </ul>
+            </li>
+            <li>点击"创建凭据"按钮</li>
+        </ol>
+
+        <h2 id="section5">5. 监控中心</h2>
+
+        <h3>5.1 监控大屏 (/monitor/bigscreen)</h3>
+        <p>监控大屏展示关键业务指标和系统运行状态的实时视图。</p>
+
+        <h4>自定义大屏</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/monitor/bigscreen</span></li>
+            <li>点击"编辑布局"按钮</li>
+            <li>拖拽添加监控图表组件</li>
+            <li>配置图表数据源和展示参数</li>
+            <li>保存布局</li>
+        </ol>
+
+        <h3>5.2 概览 (/monitor/overview)</h3>
+        <p>概览页面提供系统的整体运行状况，包括CPU、内存、磁盘、网络等基础指标，以及应用层面的性能数据。</p>
+
+        <h4>指标类型</h4>
+        <ul>
+            <li><strong>系统指标</strong>：CPU使用率、内存占用、磁盘IO、网络流量</li>
+            <li><strong>应用指标</strong>：响应时间、吞吐量、错误率、并发连接数</li>
+            <li><strong>业务指标</strong>：交易成功率、关键业务流程耗时</li>
+        </ul>
+
+        <h3>5.3 Grafana集成 (/monitor/dashboards)</h3>
+        <p>平台集成了Grafana，用户可以通过嵌入的Grafana界面创建专业的监控图表和仪表板。</p>
+
+        <h4>创建仪表板</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/monitor/dashboards</span></li>
+            <li>点击"新建仪表板"按钮</li>
+            <li>选择数据源（Prometheus、MySQL等）</li>
+            <li>添加面板和查询</li>
+            <li>配置样式和告警规则</li>
+            <li>保存仪表板</li>
+        </ol>
+
+        <h2 id="section6">6. 告警事件</h2>
+
+        <h3>6.1 告警事件 (/alarm/events)</h3>
+        <p>告警事件模块汇总所有触发的告警，包括系统告警和业务告警。</p>
+
+        <h4>查看告警</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/alarm/events</span></li>
+            <li>查看告警列表和详细信息</li>
+            <li>确认或关闭告警</li>
+            <li>记录处理备注</li>
+        </ol>
+
+        <h4>告警级别</h4>
+        <ul>
+            <li><strong>严重</strong>：系统不可用或关键功能故障</li>
+            <li><strong>警告</strong>：性能下降或潜在风险</li>
+            <li><strong>信息</strong>：一般性通知</li>
+        </ul>
+
+        <h3>6.2 告警规则 (/alarm/rules)</h3>
+        <p>告警规则允许用户自定义监控指标和报警条件。</p>
+
+        <h4>创建告警规则</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/alarm/rules</span></li>
+            <li>点击"新建规则"按钮</li>
+            <li>选择监控指标</li>
+            <li>设置阈值和触发条件</li>
+            <li>配置通知渠道和联系人</li>
+            <li>启用规则</li>
+        </ol>
+
+        <h3>6.3 联系人管理 (/alarm/contacts)</h3>
+        <p>联系人管理用于配置告警通知的接收人。</p>
+
+        <h4>添加联系人</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/alarm/contacts</span></li>
+            <li>点击"新增联系人"按钮</li>
+            <li>输入姓名、联系方式（邮箱、手机号）</li>
+            <li>分配告警级别权限</li>
+            <li>设置值班时间</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h2 id="section7">7. 安全中心</h2>
+
+        <h3>7.1 安全扫描 (/security/tasks)</h3>
+        <p>安全扫描页面用于创建和查看漏洞扫描任务。当前新建入口仅保留网站漏洞和主机漏洞两类任务。</p>
+
+        <h4>创建网站漏洞扫描</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/security/tasks</span></li>
+            <li>点击"新建漏洞扫描"</li>
+            <li>选择"网站漏洞"</li>
+            <li>输入目标 URL（http/https）</li>
+            <li>按需填写登录态信息</li>
+            <li>查看"接入预检查"结果</li>
+            <li>点击"创建并开始扫描"</li>
+        </ol>
+
+        <h4>创建主机漏洞扫描</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/security/tasks</span></li>
+            <li>点击"新建漏洞扫描"</li>
+            <li>选择"主机漏洞"</li>
+            <li>输入一个或多个目标 IP</li>
+            <li>点击"创建并开始扫描"</li>
+        </ol>
+
+        <h4>网站漏洞扫描说明</h4>
+        <ul>
+            <li>当前 Web 扫描主路径已收敛为登录后 Web 扫描，匿名 Web 扫描已禁用</li>
+            <li>"接入预检查"会给出 <code>可直接接入</code>、<code>需要定制认证流</code>、<code>暂不建议自动扫描</code> 三类结论</li>
+            <li>如对站点接入方式拿不准，可点击"不确定？问小助手"</li>
+            <li>为控制扫描时长，部分低价值目标只做规则检测，不一定运行完整模板验证</li>
+        </ul>
+
+        <h3>7.2 安全资产 (/security/assets)</h3>
+        <p>安全资产集中管理所有的IT资产，包括硬件、软件、许可证等。</p>
+
+        <h4>资产登记</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/security/assets</span></li>
+            <li>点击"新增资产"按钮</li>
+            <li>选择资产类型（硬件、软件、网络设备）</li>
+            <li>输入资产信息（型号、序列号、采购日期等）</li>
+            <li>分配责任人和存放位置</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h3>7.3 漏洞管理 (/security/vulnerabilities)</h3>
+        <p>漏洞管理模块跟踪和管理发现的安全漏洞，从发现、评估、修复到验证的全生命周期管理。</p>
+
+        <h4>漏洞处理流程</h4>
+        <ol>
+            <li>发现漏洞（自动扫描或人工上报）</li>
+            <li>评估风险等级和影响范围</li>
+            <li>分配修复任务和截止日期</li>
+            <li>实施修复措施</li>
+            <li>验证修复效果</li>
+            <li>关闭漏洞记录</li>
+        </ol>
+
+        <h2 id="section8">8. 系统管理</h2>
+
+        <h3>8.1 用户管理 (/admin/users)</h3>
+        <p>用户管理模块负责管理平台的所有用户账号。</p>
+
+        <h4>新增用户</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/admin/users</span></li>
+            <li>点击"新建用户"按钮</li>
+            <li>输入用户基本信息（用户名、姓名、邮箱）</li>
+            <li>分配角色和权限</li>
+            <li>设置初始密码</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h4>用户权限</h4>
+        <ul>
+            <li><strong>系统管理员</strong>：完全访问权限</li>
+            <li><strong>运维工程师</strong>：资产中心、变更发布、监控中心权限</li>
+            <li><strong>开发人员</strong>：查看权限，有限的部署权限</li>
+            <li><strong>安全管理员</strong>：安全中心相关权限</li>
+        </ul>
+
+        <h3>8.2 角色管理 (/admin/roles)</h3>
+        <p>角色管理用于定义不同用户角色及其权限。</p>
+
+        <h4>创建角色</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/admin/roles</span></li>
+            <li>点击"新建角色"按钮</li>
+            <li>输入角色名称和描述</li>
+            <li>分配权限（菜单、操作、数据范围）</li>
+            <li>点击"保存"</li>
+        </ol>
+
+        <h3>8.3 菜单管理 (/admin/menus)</h3>
+        <p>菜单管理允许管理员自定义用户界面菜单结构。</p>
+
+        <h4>自定义菜单</h4>
+        <ol>
+            <li>导航至 <span class="nav-path">/admin/menus</span></li>
+            <li>点击"编辑菜单"按钮</li>
+            <li>添加、修改或删除菜单项</li>
+            <li>设置菜单可见性和访问权限</li>
+            <li>保存菜单配置</li>
+        </ol>
+
+        <h3>8.4 我的资料 (/profile)</h3>
+        <p>我的资料页面用于查看当前登录用户的个人信息和安全设置。</p>
+
+        <h4>修改密码</h4>
+        <ol>
+            <li>点击右上角用户下拉菜单中的“我的资料”，或直接访问 <span class="nav-path">/profile</span></li>
+            <li>在“安全设置”区域找到“登录密码”</li>
+            <li>点击“修改密码”按钮</li>
+            <li>输入当前密码</li>
+            <li>输入新密码并再次确认新密码</li>
+            <li>点击确定完成修改</li>
+        </ol>
+
+        <h2 id="section9">9. AI助手使用指南</h2>
+
+        <h3>9.1 访问AI助手</h3>
+        <p>AI助手可通过右下角的浮动按钮访问。点击按钮打开聊天界面，即可开始咨询。</p>
+
+        <h3>9.2 常见咨询示例</h3>
+        <ul>
+            <li>"如何创建新项目？" -> <span class="nav-path">[NAVIGATE:/cmdb/projects]</span></li>
+            <li>"如何部署应用？" -> <span class="nav-path">[NAVIGATE:/deploy/release]</span></li>
+            <li>"如何查看监控大屏？" -> <span class="nav-path">[NAVIGATE:/monitor/bigscreen]</span></li>
+            <li>"如何配置告警规则？" -> <span class="nav-path">[NAVIGATE:/alarm/rules]</span></li>
+            <li>"如何添加新服务器？" -> <span class="nav-path">[NAVIGATE:/cmdb/servers]</span></li>
+            <li>"如何使用聚合打包功能？" -> <span class="nav-path">[NAVIGATE:/deploy/aggregate-package]</span></li>
+            <li>"如何复制Jenkins视图？" -> <span class="nav-path">[NAVIGATE:/jenkins/views]</span></li>
+            <li>"如何修改用户密码？" -> <span class="nav-path">[NAVIGATE:/profile]</span></li>
+        </ul>
+
+        <h3>9.3 智能导航</h3>
+        <p>AI助手会在回答中提供导航链接，点击即可直接跳转到相关功能页面。</p>
+
+        <h3>9.4 会话管理</h3>
+        <p>AI助手支持对历史会话进行重命名、归档、恢复和删除。</p>
+
+        <h4>删除会话</h4>
+        <ol>
+            <li>点击右下角浮动按钮打开 AI 助手</li>
+            <li>点击左上角的会话按钮展开历史会话列表</li>
+            <li>在目标会话右侧点击“删除”</li>
+            <li>在确认框中点击“确定”，删除该会话及其全部消息</li>
+            <li>删除完成后，会话会从列表中移除</li>
+        </ol>
+
+        <h2 id="section10">10. 故障排除</h2>
+
+        <h3>10.1 常见问题</h3>
+        <ol>
+            <li><strong>登录失败</strong>：检查用户名密码，确认账户未被锁定</li>
+            <li><strong>部署失败</strong>：检查目标环境状态和资源可用性</li>
+            <li><strong>监控数据缺失</strong>：确认监控代理正常运行</li>
+            <li><strong>Jenkins任务失败</strong>：检查Jenkins服务状态和凭据配置</li>
+        </ol>
+
+        <h2 id="section11">11. 最佳实践</h2>
+
+        <h3>11.1 项目组织</h3>
+        <ul>
+            <li>按业务线或产品线创建项目</li>
+            <li>为不同环境设置明确的命名规范</li>
+            <li>定期清理不用的资源</li>
+        </ul>
+
+        <h3>11.2 安全规范</h3>
+        <ul>
+            <li>定期更新系统和应用补丁</li>
+            <li>实施最小权限原则</li>
+            <li>定期进行安全审计</li>
+        </ul>
+
+        <h3>11.3 监控建议</h3>
+        <ul>
+            <li>为关键业务指标设置告警</li>
+            <li>定期审查告警规则，避免告警疲劳</li>
+            <li>建立清晰的事件响应流程</li>
+        </ul>
+
+        <h3>11.4 Jenkins管理建议</h3>
+        <ul>
+            <li>合理使用视图复制功能，避免重复创建相同Job</li>
+            <li>定期清理不再使用的Jenkins视图和Job</li>
+            <li>妥善保管SSH凭据，定期更新密钥</li>
+            <li>利用聚合打包功能提高部署效率</li>
+        </ul>
+    </div>
+</body>
+</html>

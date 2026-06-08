@@ -1,0 +1,44 @@
+# Alertmanager 完整配置示例：保留原有 email，并增加运维平台 Webhook
+# 使用方式：将此文件复制为 alertmanager.yml，或启动时指定：
+#   alertmanager --config.file=alertmanager-with-ops.yml
+# 请将 <运维平台后端地址> 替换为实际地址，例如：ops-backend:8080 或 10.x.x.x:8080
+
+global:
+  resolve_timeout: 5m
+
+route:
+  # 使用同时包含邮件+运维平台的接收器，告警会同时发邮件和推送到运维平台
+  receiver: 'email-and-ops'
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  # 保留原有 email 接收器（若其他子路由单独引用可保留）
+  - name: 'email'
+    email_configs:
+      - to: '****@zbn***.com'
+        send_resolved: true
+
+  # 仅运维平台 Webhook（若某条子路由只想推平台可单独引用）
+  - name: 'ops-platform'
+    webhook_configs:
+      - url: 'http://<运维平台后端地址>:8080/api/alert/webhook'
+        send_resolved: true
+
+  # 默认路由使用：同时发邮件 + 推运维平台（一条告警发往两处）
+  - name: 'email-and-ops'
+    email_configs:
+      - to: '****@zbn***.com'
+        send_resolved: true
+    webhook_configs:
+      - url: 'http://<运维平台后端地址>:8080/api/alert/webhook'
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']

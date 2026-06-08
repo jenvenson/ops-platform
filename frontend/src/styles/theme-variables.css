@@ -1,0 +1,124 @@
+/**
+ * CYBER OPS - 专业商务主题 CSS 变量
+ * Professional Business Theme CSS Variables
+ */
+
+:root {
+  /* ==================== 主色调（登录页风格） ==================== */
+  --primary: #40a9ff;
+  --primary-hover: #1890ff;
+  --primary-light: rgba(64, 169, 255, 0.12);
+  --primary-foreground: #FFFFFF;
+  --primary-gradient: linear-gradient(135deg, #40a9ff 0%, #096dd9 100%);
+  --primary-gradient-hover: linear-gradient(135deg, #69c0ff 0%, #40a9ff 100%);
+
+  /* ==================== 侧边栏 ==================== */
+  --sidebar-bg: #0B0E14;
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-active-bg: #0D192B;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 68px;
+  --sidebar-height: 100vh;
+  --sidebar-logo-height: 56px;
+  --sidebar-logo-padding: 1rem;
+  --sidebar-menu-padding: 0.75rem 0;
+  --sidebar-toggle-size: 24px;
+  --sidebar-toggle-offset: -12px;
+  --sidebar-toggle-top: 72px;
+
+  /* ==================== 内容区 ==================== */
+  --content-bg: #F5F7FA;
+  --card-bg: #FFFFFF;
+  --card-bg-secondary: #FAFBFC;
+  --card-bg-hover: #F8FAFB;
+  --border-color: #E5E7EB;
+  --border-color-light: rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  /* ==================== 文字色 ==================== */
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --text-sidebar: #E5E7EB;
+  --text-sidebar-muted: #6B7280;
+
+  /* ==================== 状态色 ==================== */
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --success-foreground: #065F46;
+  --warning: #D97706;
+  --warning-bg: #FEF3C7;
+  --warning-foreground: #92400E;
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+  --danger-foreground: #991B1B;
+
+  /* ==================== 组件 ==================== */
+  --badge-bg: rgba(255, 255, 255, 0.1);
+
+  /* ==================== 字体 ==================== */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.7rem;
+  --font-size-sm: 0.8rem;
+  --font-size-base: 0.875rem;
+  --font-size-md: 0.9rem;
+  --font-size-lg: 1rem;
+  --font-size-xl: 1.125rem;
+  --font-size-2xl: 1.375rem;
+  --font-size-3xl: 1.75rem;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-tracking-tight: -0.025em;
+
+  /* ==================== 间距 ==================== */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.25rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+
+  /* ==================== 圆角 ==================== */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ==================== 阴影 ==================== */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* ==================== 动画 ==================== */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================== 深色主题 ==================== */
+[data-theme="dark"] {
+  /* ==================== 内容区 ==================== */
+  --content-bg: #0f1219;
+  --card-bg: #1a1f2e;
+  --card-bg-secondary: #232938;
+  --card-bg-hover: #2a3042;
+  --border-color: #2d3548;
+  --border-color-light: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  /* ==================== 文字色 ==================== */
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-sidebar: #E5E7EB;
+  --text-sidebar-muted: #6B7280;
+}

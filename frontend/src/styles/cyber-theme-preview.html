@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER OPS - 专业商务主题预览</title>
+  <link rel="stylesheet" href="theme.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="sidebar-logo-text">CYBER OPS</span>
+    </div>
+
+    <!-- 菜单 -->
+    <div class="sidebar-menu">
+      <!-- 工作台 -->
+      <div class="menu-group" id="group-workbench">
+        <div class="menu-group-title" onclick="toggleGroup('group-workbench')" data-tooltip="工作台">
+          <span>工作台</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-items">
+          <div class="menu-item active" data-tooltip="工作台首页">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </span>
+            <span class="text">工作台首页</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 资产管理 -->
+      <div class="menu-group" id="group-cmdb">
+        <div class="menu-group-title" onclick="toggleGroup('group-cmdb')" data-tooltip="资产管理">
+          <span>资产管理</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-items">
+          <div class="menu-item" data-tooltip="项目管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </span>
+            <span class="text">项目管理</span>
+          </div>
+          <div class="menu-item" data-tooltip="环境管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </span>
+            <span class="text">环境管理</span>
+          </div>
+          <div class="menu-item" data-tooltip="主机管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1"/><circle cx="6" cy="18" r="1"/></svg>
+            </span>
+            <span class="text">主机管理</span>
+            <span class="badge">128</span>
+          </div>
+          <div class="menu-item" data-tooltip="应用管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </span>
+            <span class="text">应用管理</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 部署中心 -->
+      <div class="menu-group" id="group-deploy">
+        <div class="menu-group-title" onclick="toggleGroup('group-deploy')" data-tooltip="部署中心">
+          <span>部署中心</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-items">
+          <div class="menu-item" data-tooltip="部署发布">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </span>
+            <span class="text">部署发布</span>
+          </div>
+          <div class="menu-item" data-tooltip="归档管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+            </span>
+            <span class="text">归档管理</span>
+          </div>
+          <div class="menu-item" data-tooltip="聚合打包">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </span>
+            <span class="text">聚合打包</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 安全中心 -->
+      <div class="menu-group" id="group-security">
+        <div class="menu-group-title" onclick="toggleGroup('group-security')" data-tooltip="安全中心">
+          <span>安全中心</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-items">
+          <div class="menu-item" data-tooltip="FIM巡检">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            </span>
+            <span class="text">FIM巡检</span>
+            <span class="badge">3</span>
+          </div>
+          <div class="menu-item" data-tooltip="漏洞管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </span>
+            <span class="text">漏洞管理</span>
+          </div>
+          <div class="menu-item" data-tooltip="安全工单">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            </span>
+            <span class="text">安全工单</span>
+          </div>
+          <div class="menu-item" data-tooltip="安全资产">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            </span>
+            <span class="text">安全资产</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 监控中心 -->
+      <div class="menu-group" id="group-monitor">
+        <div class="menu-group-title" onclick="toggleGroup('group-monitor')" data-tooltip="监控中心">
+          <span>监控中心</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-items">
+          <div class="menu-item" data-tooltip="监控大屏">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </span>
+            <span class="text">监控大屏</span>
+          </div>
+          <div class="menu-item" data-tooltip="仪表盘">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </span>
+            <span class="text">仪表盘</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 告警中心 -->
+      <div class="menu-group" id="group-alarm">
+        <div class="menu-group-title" onclick="toggleGroup('group-alarm')" data-tooltip="告警中心">
+          <span>告警中心</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-items">
+          <div class="menu-item" data-tooltip="告警事件">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </span>
+            <span class="text">告警事件</span>
+            <span class="badge">12</span>
+          </div>
+          <div class="menu-item" data-tooltip="规则管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+            <span class="text">规则管理</span>
+          </div>
+          <div class="menu-item" data-tooltip="联系人管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <span class="text">联系人管理</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 平台管理 -->
+      <div class="menu-group" id="group-platform">
+        <div class="menu-group-title" onclick="toggleGroup('group-platform')" data-tooltip="平台管理">
+          <span>平台管理</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-items">
+          <div class="menu-item" data-tooltip="平台事件">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </span>
+            <span class="text">平台事件</span>
+          </div>
+          <div class="menu-item" data-tooltip="审计日志">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </span>
+            <span class="text">审计日志</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 系统设置 -->
+      <div class="menu-group" id="group-system">
+        <div class="menu-group-title" onclick="toggleGroup('group-system')" data-tooltip="系统设置">
+          <span>系统设置</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-items">
+          <div class="menu-item" data-tooltip="用户管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <span class="text">用户管理</span>
+          </div>
+          <div class="menu-item" data-tooltip="角色管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            </span>
+            <span class="text">角色管理</span>
+          </div>
+          <div class="menu-item" data-tooltip="菜单管理">
+            <span class="icon">
+              <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </span>
+            <span class="text">菜单管理</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 切换按钮 -->
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+      <span class="arrow">‹</span>
+    </div>
+  </div>
+
+  <div class="main-content" id="main-content">
+    <!-- 顶部栏 -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>智能运维平台</h1>
+        <p>欢迎使用 CYBER OPS 运维管理系统</p>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          搜索... <span>⌘K</span>
+        </div>
+        <div class="icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div class="icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </div>
+        <div class="avatar">A</div>
+      </div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">在线主机</div>
+        <div class="stat-value">1,284</div>
+        <div class="stat-trend up">↑ 12.5%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">成功部署</div>
+        <div class="stat-value" style="color: var(--success);">98.6%</div>
+        <div class="stat-trend up">↑ 0.3%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">活跃告警</div>
+        <div class="stat-value" style="color: var(--warning);">23</div>
+        <div class="stat-trend down">↓ 5</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">AI 会话</div>
+        <div class="stat-value">5,721</div>
+        <div class="stat-trend up">↑ 234</div>
+      </div>
+    </div>
+
+    <!-- 卡片区域 -->
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              部署趋势
+            </div>
+            <div class="card-subtitle">最近 7 天部署情况</div>
+          </div>
+          <div class="quick-actions">
+            <span class="quick-btn">1D</span>
+            <span class="quick-btn">1W</span>
+            <span class="quick-btn">1M</span>
+          </div>
+        </div>
+        <div style="background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%); border: 1px dashed #E5E7EB; border-radius: 8px; padding: 2rem; display: flex; align-items: center; justify-content: center; color: var(--text-muted); min-height: 180px;">
+          图表区域 - 柱状图显示每日部署数量
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+              资源分布
+            </div>
+            <div class="card-subtitle">按类型分组</div>
+          </div>
+        </div>
+        <div style="background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%); border: 1px dashed #E5E7EB; border-radius: 8px; padding: 2rem; display: flex; align-items: center; justify-content: center; color: var(--text-muted); min-height: 180px;">
+          图表区域 - 饼图显示资源分布
+        </div>
+      </div>
+    </div>
+
+    <!-- 标签页 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1"/><circle cx="6" cy="18" r="1"/></svg>
+          主机列表
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <div class="tabs">
+            <div class="tab active">全部</div>
+            <div class="tab">在线</div>
+            <div class="tab">离线</div>
+          </div>
+          <button class="btn btn-outline btn-sm">查看全部</button>
+        </div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>主机名称</th>
+              <th>IP 地址</th>
+              <th>状态</th>
+              <th>CPU</th>
+              <th>内存</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: 500;">prod-web-01</td>
+              <td style="color: var(--text-secondary);">192.168.1.101</td>
+              <td><span class="status-badge success"><svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg> 在线</span></td>
+              <td>
+                <div class="progress-bar">
+                  <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 45%; background: var(--primary);"></div></div>
+                  <span class="progress-bar-label">45%</span>
+                </div>
+              </td>
+              <td>
+                <div class="progress-bar">
+                  <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 68%; background: var(--success);"></div></div>
+                  <span class="progress-bar-label">68%</span>
+                </div>
+              </td>
+              <td><button class="btn btn-outline btn-sm">详情</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500;">prod-web-02</td>
+              <td style="color: var(--text-secondary);">192.168.1.102</td>
+              <td><span class="status-badge success"><svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg> 在线</span></td>
+              <td>
+                <div class="progress-bar">
+                  <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 72%; background: var(--warning);"></div></div>
+                  <span class="progress-bar-label">72%</span>
+                </div>
+              </td>
+              <td>
+                <div class="progress-bar">
+                  <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 55%; background: var(--primary);"></div></div>
+                  <span class="progress-bar-label">55%</span>
+                </div>
+              </td>
+              <td><button class="btn btn-outline btn-sm">详情</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500;">prod-db-01</td>
+              <td style="color: var(--text-secondary);">192.168.1.201</td>
+              <td><span class="status-badge warning"><svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg> 维护中</span></td>
+              <td>
+                <div class="progress-bar">
+                  <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 23%; background: var(--primary);"></div></div>
+                  <span class="progress-bar-label">23%</span>
+                </div>
+              </td>
+              <td>
+                <div class="progress-bar">
+                  <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 89%; background: var(--danger);"></div></div>
+                  <span class="progress-bar-label">89%</span>
+                </div>
+              </td>
+              <td><button class="btn btn-outline btn-sm">详情</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 配色方案 -->
+    <div class="card" style="margin-top: 2rem;">
+      <div class="card-title" style="margin-bottom: 1rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.5-2.5-4.5l-1.5 1.5A5.5 5.5 0 0 1 12 13a5.5 5.5 0 0 1-5.5 4H5a7 7 0 0 0 7 7z"/></svg>
+        专业商务配色方案
+      </div>
+      <div class="color-palette">
+        <div class="color-swatch">
+          <div class="color-block" style="background: #0061AF;"></div>
+          <div class="color-name">Primary</div>
+          <div class="color-hex">#0061AF</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background: #059669;"></div>
+          <div class="color-name">Success</div>
+          <div class="color-hex">#059669</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background: #D97706;"></div>
+          <div class="color-name">Warning</div>
+          <div class="color-hex">#D97706</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background: #DC2626;"></div>
+          <div class="color-name">Danger</div>
+          <div class="color-hex">#DC2626</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background: #0B0E14;"></div>
+          <div class="color-name">Sidebar</div>
+          <div class="color-hex">#0B0E14</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background: #F9FAFB; border: 1px solid #E5E7EB;"></div>
+          <div class="color-name">Content</div>
+          <div class="color-hex">#F9FAFB</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background: #FFFFFF; border: 1px solid #E5E7EB;"></div>
+          <div class="color-name">Card</div>
+          <div class="color-hex">#FFFFFF</div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background: #111827;"></div>
+          <div class="color-name">Text</div>
+          <div class="color-hex">#111827</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 一级菜单分组折叠/展开
+    function toggleGroup(groupId) {
+      const group = document.getElementById(groupId);
+      group.classList.toggle('collapsed');
+    }
+
+    // 侧边栏收起/展开
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('main-content');
+
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('expanded');
+    }
+  </script>
+</body>
+</html>

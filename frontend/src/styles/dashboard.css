@@ -1,0 +1,417 @@
+/**
+ * Dashboard 工作台专属样式
+ * 参考 fortress-dashboard 风格
+ */
+
+/* ==================== 工作台容器 ==================== */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ==================== 统计卡片网格 ==================== */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 扩展统计卡片网格 - 次级指标 */
+.dashboard-stats-extended {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .dashboard-stats-extended {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats-extended {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 扩展统计卡片样式 - 更紧凑 */
+.dashboard-stat-card.extended {
+  padding: 1rem;
+}
+
+.dashboard-stat-card.extended .stat-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+}
+
+.dashboard-stat-card.extended .stat-value {
+  font-size: 1.25rem;
+}
+
+.dashboard-stat-card.extended .stat-label {
+  font-size: 0.75rem;
+}
+
+/* 零值弱化 */
+.stat-value.muted {
+  color: var(--text-muted);
+}
+
+/* ==================== 统计卡片 ==================== */
+.dashboard-stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dashboard-stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #D1D5DB;
+  transform: translateY(-2px);
+  background: var(--card-bg-hover);
+}
+
+.dashboard-stat-card:hover::before {
+  opacity: 1;
+}
+
+.dashboard-stat-card.primary::before {
+  opacity: 1;
+}
+
+.dashboard-stat-card .stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-stat-card .stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.dashboard-stat-card .stat-icon.blue {
+  background: rgba(0, 97, 175, 0.1);
+  color: var(--primary);
+}
+
+.dashboard-stat-card .stat-icon.green {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+}
+
+.dashboard-stat-card .stat-icon.orange {
+  background: rgba(217, 119, 6, 0.1);
+  color: var(--warning);
+}
+
+.dashboard-stat-card .stat-icon.purple {
+  background: rgba(114, 46, 209, 0.1);
+  color: #722ed1;
+}
+
+.dashboard-stat-card .stat-icon.red {
+  background: rgba(244, 67, 54, 0.1);
+  color: var(--danger);
+}
+
+.dashboard-stat-card .stat-trend {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dashboard-stat-card .stat-trend.up {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.dashboard-stat-card .stat-trend.down {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.dashboard-stat-card .stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-stat-card .stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.dashboard-stat-card .stat-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color-light);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* ==================== 平台事件卡片 ==================== */
+.dashboard-events-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.dashboard-events-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color-light);
+}
+
+.dashboard-events-card .card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.dashboard-events-card .card-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+.dashboard-events-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 992px) {
+  .dashboard-events-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-events-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-event-stat {
+  background: var(--content-bg);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.dashboard-event-stat:hover {
+  background: var(--content-bg);
+}
+
+.dashboard-event-stat .event-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+}
+
+.dashboard-event-stat .event-value.danger {
+  color: var(--danger);
+}
+
+.dashboard-event-stat .event-value.warning {
+  color: var(--warning);
+}
+
+/* 零值使用弱化灰色 */
+.dashboard-event-stat .event-value.muted {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.dashboard-event-stat .event-value.zero {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.dashboard-event-stat .event-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* ==================== 双列卡片网格 ==================== */
+.dashboard-dual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-dual-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==================== 数据卡片 ==================== */
+.dashboard-data-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.dashboard-data-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-data-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color-light);
+  background: var(--card-bg-secondary);
+}
+
+.dashboard-data-card .card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dashboard-data-card .card-body {
+  padding: 0;
+}
+
+/* ==================== 表格样式覆盖 ==================== */
+.dashboard-data-card .ant-table {
+  font-size: 0.8rem;
+}
+
+.dashboard-data-card .ant-table-thead > tr > th {
+  background: var(--card-bg-secondary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  padding: 0.625rem 1rem;
+}
+
+.dashboard-data-card .ant-table-tbody > tr > td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color-light);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.dashboard-data-card .ant-table-tbody > tr:hover > td {
+  background: var(--content-bg);
+}
+
+.dashboard-data-card .ant-table-tbody > tr:last-child > td {
+  border-bottom: none;
+}
+
+/* ==================== 标签样式 ==================== */
+.dashboard-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+/* ==================== 更多动态标签页 ==================== */
+.dashboard-more-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.dashboard-more-card .card-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color-light);
+  background: var(--card-bg-secondary);
+}
+
+.dashboard-more-card .card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dashboard-more-card .card-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+.dashboard-more-card .ant-tabs-nav {
+  margin-bottom: 0;
+  padding: 0 1.25rem;
+  background: var(--card-bg-secondary);
+}
+
+.dashboard-more-card .ant-tabs-tab {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.75rem 0;
+}
+
+.dashboard-more-card .ant-tabs-content {
+  padding: 0;
+}

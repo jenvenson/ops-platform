@@ -1,0 +1,446 @@
+/**
+ * 菜单样式覆盖
+ * 用于覆盖 Ant Design 默认菜单样式以匹配新主题
+ */
+
+/* 侧边栏切换按钮 */
+.sidebar-toggle {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  font-size: 14px !important;
+  line-height: 24px !important;
+  transition: background 0.2s ease, transform 0.2s ease !important;
+}
+
+.sidebar-toggle:hover {
+  transform: scale(1.15) !important;
+  box-shadow: 0 4px 16px rgba(61, 155, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.toggle-arrow {
+  transition: color 0.2s ease !important;
+}
+
+/* Ant Design 菜单覆盖样式 */
+.ant-layout-sider {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow-x: hidden !important;
+}
+
+.ant-layout-sider-custom.ant-layout-sider-collapsed {
+  overflow: visible !important;
+}
+
+/* 侧边栏菜单隐藏横向滚动条 */
+.ant-menu-dark {
+  overflow-x: hidden !important;
+}
+
+.ant-layout-sider .ant-layout-sider-children {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  /* 隐藏滚动条但保留滚动功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.ant-layout-sider .ant-layout-sider-children::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+/* 菜单项样式 */
+.ant-menu-dark {
+  background: #0B0E14 !important;
+}
+
+.ant-menu-dark .ant-menu-item,
+.ant-menu-dark .ant-menu-submenu-title {
+  color: #94A3B8 !important;
+  border-radius: 6px !important;
+  margin: 2px 8px !important;
+  font-weight: 500 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+.ant-menu-dark .ant-menu-item:hover,
+.ant-menu-dark .ant-menu-submenu-title:hover {
+  color: #FFFFFF !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected,
+.ant-menu-dark .ant-menu-item-selected:hover {
+  background: #0D192B !important;
+  color: #3D9BFF !important;
+  font-weight: 600 !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected::after {
+  display: none !important;
+}
+
+/* 选中菜单项的图标颜色 */
+.ant-menu-dark .ant-menu-item-selected .anticon,
+.ant-menu-dark .ant-menu-submenu-title:hover .anticon {
+  color: #3D9BFF !important;
+}
+
+/* 子菜单样式 */
+.ant-menu-dark .ant-menu-sub {
+  background: #0B0E14 !important;
+}
+
+.ant-menu-dark .ant-menu-sub .ant-menu-item {
+  margin-left: 8px !important;
+  margin-right: 8px !important;
+}
+
+/* 移除左侧蓝色竖线指示器 */
+.ant-menu-dark .ant-menu-item::after {
+  display: none !important;
+}
+
+/* 菜单图标样式 */
+.ant-menu-dark .ant-menu-item .anticon,
+.ant-menu-dark .ant-menu-submenu-title .anticon {
+  font-size: 16px !important;
+  color: inherit !important;
+  transition: color 0.15s ease !important;
+}
+
+.ant-menu-dark .ant-menu-item:hover .anticon,
+.ant-menu-dark .ant-menu-submenu-title:hover .anticon {
+  color: inherit !important;
+}
+
+/* 折叠状态下的菜单 */
+.ant-menu-inline-collapsed {
+  width: 68px !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item,
+.ant-menu-inline-collapsed .ant-menu-submenu-title {
+  padding: 0 !important;
+  justify-content: center !important;
+  margin: 2px 4px !important;
+  width: calc(100% - 8px) !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item .anticon,
+.ant-menu-inline-collapsed .ant-menu-submenu-title .anticon {
+  font-size: 18px !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item .ant-menu-title-content,
+.ant-menu-inline-collapsed .ant-menu-submenu-title .ant-menu-title-content {
+  display: none !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item {
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item .ant-menu-title-content,
+.ant-menu-inline-collapsed .ant-menu-submenu-title .ant-menu-title-content {
+  display: none !important;
+}
+
+/* 折叠状态下子菜单不显示 */
+.ant-menu-collapsed .ant-menu-submenu {
+  display: none !important;
+}
+
+/* 搜索框样式 */
+.menu-search-trigger:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.menu-search-trigger:hover {
+  border-color: var(--border-color) !important;
+}
+
+/* 标签页样式调整 - 卡片风格 */
+.ant-tabs-nav {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: var(--card-bg) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.ant-tabs-nav-list {
+  padding: 8px 0 0 !important;
+  overflow-x: auto !important;
+  flex-wrap: nowrap !important;
+  scrollbar-width: thin !important;
+}
+
+.ant-tabs-nav-list::-webkit-scrollbar {
+  height: 4px !important;
+}
+
+.ant-tabs-nav-list::-webkit-scrollbar-thumb {
+  background: var(--border-color) !important;
+  border-radius: 2px !important;
+}
+
+.ant-tabs-nav-list::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.ant-tabs-tab {
+  padding: 8px 14px !important;
+  margin: 0 2px 0 0 !important;
+  background: var(--content-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-bottom: none !important;
+  border-radius: 8px 8px 0 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  line-height: 1.4 !important;
+  position: relative;
+}
+
+.ant-tabs-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+  height: 3px;
+  background: var(--content-bg);
+  border-radius: 0 0 8px 8px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.ant-tabs-tab:hover {
+  color: var(--text-primary) !important;
+  background: var(--content-bg) !important;
+}
+
+.ant-tabs-tab:hover::after {
+  opacity: 1;
+}
+
+.ant-tabs-tab-active {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  border-bottom: none !important;
+  color: var(--primary) !important;
+  font-weight: 600 !important;
+  z-index: 1;
+}
+
+.ant-tabs-tab-active::after {
+  background: var(--card-bg);
+  opacity: 1;
+}
+
+.ant-tabs-tab-active:hover {
+  color: var(--primary) !important;
+  background: var(--card-bg) !important;
+}
+
+.ant-tabs-tab .anticon {
+  font-size: 13px !important;
+  margin-right: 6px !important;
+}
+
+.ant-tabs-tab-close {
+  margin-left: 8px !important;
+  color: var(--text-muted) !important;
+  opacity: 0.6 !important;
+  width: 16px !important;
+  height: 16px !important;
+  font-size: 11px !important;
+}
+
+.ant-tabs-tab-close:hover {
+  color: var(--danger) !important;
+  opacity: 1 !important;
+  background: var(--danger-bg) !important;
+  border-radius: 4px !important;
+}
+
+.ant-tabs-ink-bar {
+  display: none !important;
+}
+
+.ant-tabs-nav-add {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-secondary) !important;
+  min-width: 24px !important;
+  padding: 6px 8px !important;
+}
+
+.ant-tabs-nav-add:hover {
+  color: var(--primary) !important;
+}
+
+/* 头部样式 */
+.ant-layout-header {
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 内容区样式 */
+.ant-layout-content {
+  transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ==================== 表格卡片样式 ==================== */
+/* 表格容器 - 卡片风格 */
+.ant-table-wrapper {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.ant-table {
+  border-radius: 12px;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--card-bg-secondary) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 14px 16px !important;
+}
+
+.ant-table-tbody > tr > td {
+  padding: 14px 16px !important;
+  border-bottom: 1px solid var(--border-color-light) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: var(--content-bg) !important;
+}
+
+.ant-table-tbody > tr:last-child > td {
+  border-bottom: none !important;
+}
+
+/* 监控概览表格标题不折行 */
+.monitor-overview-table .ant-table-thead > tr > th {
+  white-space: nowrap !important;
+}
+
+.monitor-overview-table .ant-table-tbody > tr > td {
+  white-space: nowrap !important;
+}
+
+/* 表格分页器 */
+.ant-pagination {
+  margin: 16px 0 !important;
+  padding: 0 16px 16px !important;
+}
+
+.ant-pagination-item {
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color) !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  line-height: 30px !important;
+}
+
+.ant-pagination-item:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+.ant-pagination-item-active {
+  background: var(--primary-gradient) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 2px 8px rgba(64, 169, 255, 0.3) !important;
+}
+
+.ant-pagination-item-active a {
+  color: var(--primary-foreground) !important;
+}
+
+.ant-pagination-prev,
+.ant-pagination-next {
+  border-radius: 8px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+}
+
+.ant-pagination-prev:hover,
+.ant-pagination-next:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+.ant-pagination-options {
+  margin-left: 12px !important;
+}
+
+.ant-select-selector {
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color) !important;
+  height: 32px !important;
+}
+
+.ant-pagination-options-quick-jumper {
+  height: 32px !important;
+  line-height: 32px !important;
+}
+
+.ant-pagination-options-quick-jumper input {
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color) !important;
+  height: 32px !important;
+}
+
+/* 表格内按钮 */
+.ant-table .ant-btn-link {
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+}
+
+.ant-table .ant-btn-link:hover {
+  background: var(--primary-light) !important;
+}
+
+/* 搜索弹窗居中 */
+.ant-modal-root .ant-modal {
+  top: 80px !important;
+}
+
+/* 搜索结果列表项左对齐 */
+.ant-modal .ant-list-item {
+  text-align: left !important;
+  justify-content: flex-start !important;
+}
+
+.ant-modal .ant-list-item-meta {
+  text-align: left !important;
+}
+
+.ant-modal .ant-list-item-action {
+  text-align: left !important;
+}
+
+/* ==================== 数字标签样式 ==================== */
+.stat-value-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
