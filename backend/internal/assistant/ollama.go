@@ -59,6 +59,13 @@ func newOllamaClient(baseURL, model string, temperature float64) *ollamaClient {
 	}
 }
 
+func (c *ollamaClient) ModelName() string {
+	if c == nil || c.model == "" {
+		return "ollama"
+	}
+	return c.model
+}
+
 func (c *ollamaClient) prepareRequest(req *http.Request) {
 	if c == nil || req == nil || req.URL == nil {
 		return
@@ -69,7 +76,7 @@ func (c *ollamaClient) prepareRequest(req *http.Request) {
 	}
 }
 
-func (c *ollamaClient) chat(ctx context.Context, system string, history []historyMessage) (string, int, int, error) {
+func (c *ollamaClient) Chat(ctx context.Context, system string, history []historyMessage) (string, int, int, error) {
 	if c == nil || c.baseURL == "" || c.model == "" {
 		return "", 0, 0, fmt.Errorf("ollama client not configured")
 	}
@@ -120,7 +127,7 @@ func (c *ollamaClient) chat(ctx context.Context, system string, history []histor
 	return strings.TrimSpace(chatResp.Message.Content), chatResp.PromptEvalCount, chatResp.EvalCount, nil
 }
 
-func (c *ollamaClient) embed(ctx context.Context, model string, inputs []string) ([][]float64, error) {
+func (c *ollamaClient) Embed(ctx context.Context, model string, inputs []string) ([][]float64, error) {
 	if c == nil || c.baseURL == "" || model == "" {
 		return nil, fmt.Errorf("ollama embed client not configured")
 	}

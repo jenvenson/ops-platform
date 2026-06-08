@@ -50,28 +50,32 @@ type knowledgeBase struct {
 	docs          []documentEntry
 	chunks        []documentChunk
 	routes        []routeEntry
-	ollama        *ollamaClient
+	embedProvider EmbedProvider
 	embedModel    string
 	embedEnabled  bool
 	embeddingsErr error
 	embeddingsMu  sync.Mutex
 }
 
-func loadKnowledgeBase(cfg *config.Config, client *ollamaClient) *knowledgeBase {
+func loadKnowledgeBase(cfg *config.Config, embedProvider EmbedProvider) *knowledgeBase {
 	docs := loadDocuments()
 	embedModel := ""
 	embedEnabled := false
-	if cfg != nil && cfg.Assistant.Enabled && cfg.Assistant.OllamaEmbedModel != "" && client != nil {
+	if cfg != nil && cfg.Assistant.Enabled && cfg.Assistant.OllamaEmbedModel != "" && embedProvider != nil {
 		embedModel = cfg.Assistant.OllamaEmbedModel
 		embedEnabled = true
 	}
+	if cfg != nil && cfg.Assistant.Enabled && cfg.Assistant.EmbedModel != "" && embedProvider != nil {
+		embedModel = cfg.Assistant.EmbedModel
+		embedEnabled = true
+	}
 	return &knowledgeBase{
-		docs:         docs,
-		chunks:       buildChunks(docs),
-		routes:       loadRoutes(),
-		ollama:       client,
-		embedModel:   embedModel,
-		embedEnabled: embedEnabled,
+		docs:          docs,
+		chunks:        buildChunks(docs),
+		routes:        loadRoutes(),
+		embedProvider: embedProvider,
+		embedModel:    embedModel,
+		embedEnabled:  embedEnabled,
 	}
 }
 
@@ -830,7 +834,7 @@ func trimResultsToPreferredModules(results []scoredChunk, preferredModules []str
 }
 
 func (k *knowledgeBase) semanticScores(query string) []float64 {
-	if k == nil || !k.embedEnabled || k.embedModel == "" || k.ollama == nil || strings.TrimSpace(query) == "" {
+	if k == nil || !k.embedEnabled || k.embedModel == "" || k.embedProvider == nil || strings.TrimSpace(query) == "" {
 		return nil
 	}
 	if err := k.ensureEmbeddings(); err != nil {
@@ -840,7 +844,7 @@ func (k *knowledgeBase) semanticScores(query string) []float64 {
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 
-	vectors, err := k.ollama.embed(ctx, k.embedModel, []string{query})
+	vectors, err := k.embedProvider.Embed(ctx, k.embedModel, []string{query})
 	if err != nil || len(vectors) == 0 {
 		return nil
 	}
@@ -857,7 +861,7 @@ func (k *knowledgeBase) semanticScores(query string) []float64 {
 }
 
 func (k *knowledgeBase) ensureEmbeddings() error {
-	if k == nil || !k.embedEnabled || k.embedModel == "" || k.ollama == nil {
+	if k == nil || !k.embedEnabled || k.embedModel == "" || k.embedProvider == nil {
 		return nil
 	}
 
@@ -893,7 +897,7 @@ func (k *knowledgeBase) ensureEmbeddings() error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	vectors, err := k.ollama.embed(ctx, k.embedModel, inputs)
+	vectors, err := k.embedProvider.Embed(ctx, k.embedModel, inputs)
 	if err != nil {
 		k.embeddingsErr = err
 		return err

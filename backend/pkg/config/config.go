@@ -31,6 +31,10 @@ type AssistantConfig struct {
 	OllamaBaseURL      string  `mapstructure:"ollama_base_url"`
 	OllamaChatModel    string  `mapstructure:"ollama_chat_model"`
 	OllamaEmbedModel   string  `mapstructure:"ollama_embed_model"`
+	APIKey             string  `mapstructure:"api_key"`
+	BaseURL            string  `mapstructure:"base_url"`
+	ChatModel          string  `mapstructure:"chat_model"`
+	EmbedModel         string  `mapstructure:"embed_model"`
 	MaxContextMessages int     `mapstructure:"max_context_messages"`
 	MaxMessageRunes    int     `mapstructure:"max_message_runes"`
 	RequestTimeoutSec  int     `mapstructure:"request_timeout_sec"`
@@ -173,6 +177,18 @@ func Load() (*Config, error) {
 	}
 	if assistantRateLimit := os.Getenv("ASSISTANT_RATE_LIMIT_PER_MINUTE"); assistantRateLimit != "" {
 		fmt.Sscanf(assistantRateLimit, "%d", &cfg.Assistant.RateLimitPerMinute)
+	}
+	if apiKey := os.Getenv("ASSISTANT_API_KEY"); apiKey != "" {
+		cfg.Assistant.APIKey = apiKey
+	}
+	if baseURL := os.Getenv("ASSISTANT_BASE_URL"); baseURL != "" {
+		cfg.Assistant.BaseURL = baseURL
+	}
+	if chatModel := os.Getenv("ASSISTANT_CHAT_MODEL"); chatModel != "" {
+		cfg.Assistant.ChatModel = chatModel
+	}
+	if embedModel := os.Getenv("ASSISTANT_EMBED_MODEL"); embedModel != "" {
+		cfg.Assistant.EmbedModel = embedModel
 	}
 
 	// 验证配置

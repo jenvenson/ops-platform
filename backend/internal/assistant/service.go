@@ -13,21 +13,24 @@ import (
 
 type Service struct {
 	cfg           *config.Config
-	ollama        *ollamaClient
+	chatProvider  ChatProvider
 	knowledge     *knowledgeBase
 	readonlyTools []assistantTool
 }
 
 func NewService(cfg *config.Config) *Service {
-	var client *ollamaClient
-	if cfg != nil && cfg.Assistant.Enabled && strings.EqualFold(cfg.Assistant.Provider, "ollama") {
-		client = newOllamaClient(cfg.Assistant.OllamaBaseURL, cfg.Assistant.OllamaChatModel, cfg.Assistant.Temperature)
+	var chatProvider ChatProvider
+	if cfg != nil && cfg.Assistant.Enabled {
+		chatProvider = newChatProvider(cfg.Assistant)
+	}
+	if chatProvider == nil {
+		cfg.Assistant.Enabled = false
 	}
 
 	return &Service{
 		cfg:           cfg,
-		ollama:        client,
-		knowledge:     loadKnowledgeBase(cfg, client),
+		chatProvider:  chatProvider,
+		knowledge:     loadKnowledgeBase(cfg, newEmbedProvider(cfg.Assistant, chatProvider)),
 		readonlyTools: buildReadonlyToolRegistry(),
 	}
 }
@@ -189,8 +192,8 @@ func executionPlanID(intent AssistantIntent, steps []AssistantExecutionPlanStep)
 }
 
 func (s *Service) modelName() string {
-	if s != nil && s.ollama != nil && s.ollama.model != "" {
-		return s.ollama.model
+	if s != nil && s.chatProvider != nil {
+		return s.chatProvider.ModelName()
 	}
 	return "ops-assistant"
 }
@@ -203,7 +206,7 @@ func (s *Service) responseModelName(answer string, err error) string {
 }
 
 func (s *Service) generateModelAnswer(ctx context.Context, intent, message string, history []historyMessage, citations []Citation, actions []Action, toolResult *toolContext, pageContext *AssistantPageContext) (string, int, int, error) {
-	if s == nil || s.ollama == nil {
+	if s == nil || s.chatProvider == nil {
 		return "", 0, 0, fmt.Errorf("assistant model unavailable")
 	}
 
@@ -213,7 +216,7 @@ func (s *Service) generateModelAnswer(ctx context.Context, intent, message strin
 		Content: buildUserPrompt(intent, message, citations, actions, toolResult, pageContext),
 	})
 
-	return s.ollama.chat(ctx, systemPrompt, promptHistory)
+	return s.chatProvider.Chat(ctx, systemPrompt, promptHistory)
 }
 
 const systemPrompt = "你是 OPS Platform 的运维小助手。你的职责是帮助用户理解平台功能、定位页面入口、总结查询结果。你只能根据给定上下文回答，不要编造不存在的页面、状态或操作结果。请使用中文，回答简洁、明确、可执行。"

@@ -17,8 +17,8 @@ func TestNewServiceKeepsModelDisabledByDefault(t *testing.T) {
 			OllamaChatModel: "qwen3:8b",
 		},
 	})
-	if service.ollama != nil {
-		t.Fatalf("expected ollama client to stay disabled, got %#v", service.ollama)
+	if service.chatProvider != nil {
+		t.Fatalf("expected chat provider to stay disabled, got %#v", service.chatProvider)
 	}
 }
 
