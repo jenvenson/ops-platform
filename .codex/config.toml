@@ -1,5 +1,0 @@
-[mcp_servers.WebSearch]
-url = "https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/mcp"
-
-[mcp_servers.WebSearch.http_headers]
-Authorization = "sk-2fd108fcf091424891cb1e886a24d3e9"

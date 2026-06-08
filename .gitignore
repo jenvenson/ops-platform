@@ -49,6 +49,13 @@ frontend/artifacts/
 # Compiled binaries
 backend/bin/
 backend/cmd/server/ops-server
+deploy/server
+
+# Go build cache
+.gocache/
+
+# AI tool local config
+.codex/
 
 # Temp
 tmp/
