@@ -25,6 +25,7 @@ func newChatProvider(cfg config.AssistantConfig) ChatProvider {
 		"qwen", "tongyi",
 		"zhipu", "glm",
 		"moonshot", "kimi",
+		"minimax",
 		"doubao", "volcano",
 		"baichuan",
 		"hunyuan",

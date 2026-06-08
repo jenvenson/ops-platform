@@ -100,6 +100,8 @@ func resolveOpenAIBaseURL(cfg config.AssistantConfig) string {
 		return "https://open.bigmodel.cn/api/paas/v4"
 	case "moonshot", "kimi":
 		return "https://api.moonshot.cn/v1"
+	case "minimax":
+		return "https://api.minimax.chat/v1"
 	case "doubao", "volcano":
 		return "https://ark.cn-beijing.volces.com/api/v3"
 	case "baichuan":
@@ -123,6 +125,8 @@ func defaultModelForProvider(provider string) string {
 		return "glm-4-flash"
 	case "moonshot", "kimi":
 		return "moonshot-v1-8k"
+	case "minimax":
+		return "abab6.5s-chat"
 	case "doubao", "volcano":
 		return "doubao-pro-32k"
 	case "baichuan":

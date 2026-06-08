@@ -78,13 +78,18 @@ services:
       # 智谱 GLM:
       # - ASSISTANT_PROVIDER=zhipu
       # - ASSISTANT_API_KEY=your-api-key
-      # Kimi/Moonshot:
-      # - ASSISTANT_PROVIDER=moonshot
+      # Kimi:
+      # - ASSISTANT_PROVIDER=kimi
       # - ASSISTANT_API_KEY=sk-your-api-key
-      # 豆包/火山引擎:
+      # MiniMax:
+      # - ASSISTANT_PROVIDER=minimax
+      # - ASSISTANT_API_KEY=your-api-key
+      # 豆包:
       # - ASSISTANT_PROVIDER=doubao
       # - ASSISTANT_API_KEY=your-api-key
-      # 自定义 OpenAI 兼容 API:
+      # 任意 provider 可通过 ASSISTANT_BASE_URL 指定中转/代理地址:
+      # - ASSISTANT_BASE_URL=https://your-relay.example.com/v1
+      # 完全自定义:
       # - ASSISTANT_PROVIDER=custom
       # - ASSISTANT_API_KEY=your-api-key
       # - ASSISTANT_BASE_URL=https://your-api.example.com/v1
