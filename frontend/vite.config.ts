@@ -20,11 +20,11 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/grafana-proxy": {
-        target: "http://10.99.99.172:3000",
+        target: "http://grafana.internal:3000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/grafana-proxy/, ''),
         headers: {
-          'Authorization': 'Basic YWRtaW46WkJuc2VjQDIwMjY='
+          'Authorization': 'Basic ${btoa("admin:your_grafana_password")}'
         }
       }
     }

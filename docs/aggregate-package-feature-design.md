@@ -32,9 +32,9 @@ CREATE TABLE aggregate_package_tasks (
     task_name VARCHAR(255) NOT NULL COMMENT '任务名称',
     project_name VARCHAR(255) NOT NULL COMMENT '项目名称',
     app_names JSON COMMENT '参与打包的应用名称列表(JSON格式)',
-    jenkins_job_name VARCHAR(255) DEFAULT 'fscr-aggregation' COMMENT 'Jenkins任务名称',
-    jenkins_job_url VARCHAR(500) DEFAULT 'http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/' COMMENT 'Jenkins任务地址',
-    consul_config_path VARCHAR(500) DEFAULT 'plugin/fscr-aggregation/' COMMENT 'Consul配置路径',
+    jenkins_job_name VARCHAR(255) DEFAULT 'aggregation' COMMENT 'Jenkins任务名称',
+    jenkins_job_url VARCHAR(500) DEFAULT 'http://your-jenkins-server/view/auto-archive-deploy/job/aggregation/' COMMENT 'Jenkins任务地址',
+    consul_config_path VARCHAR(500) DEFAULT 'plugin/aggregation/' COMMENT 'Consul配置路径',
     build_params JSON COMMENT '构建参数(JSON格式)',
     status ENUM('pending', 'building', 'success', 'failed', 'cancelled') DEFAULT 'pending' COMMENT '任务状态',
     triggered_by VARCHAR(255) COMMENT '触发人',
@@ -119,7 +119,7 @@ Response:
         "task_name": "FSCR聚合打包_20231201",
         "project_name": "FSCR项目",
         "app_count": 3,
-        "jenkins_job_name": "fscr-aggregation",
+        "jenkins_job_name": "aggregation",
         "status": "success",
         "triggered_by": "张三",
         "duration": 1200,
@@ -145,8 +145,8 @@ Response:
       "task_name": "FSCR聚合打包_20231201",
       "project_name": "FSCR项目",
       "app_names": ["app1", "app2", "app3"],
-      "jenkins_job_name": "fscr-aggregation",
-      "jenkins_job_url": "http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/",
+      "jenkins_job_name": "aggregation",
+      "jenkins_job_url": "http://your-jenkins-server/view/auto-archive-deploy/job/aggregation/",
       "status": "success",
       "triggered_by": "张三",
       "start_time": "2023-12-01 10:30:00",
@@ -257,8 +257,8 @@ func (c *ConsulClient) GetTagsFromPath(basePath string, appNames []string) (map[
 ```
 
 ### 4.2 Consul配置路径
-- Consul地址：`http://10.99.99.98:8500`
-- 配置路径：`plugin/fscr-aggregation/`
+- Consul地址：`http://your-consul-server:8500`
+- 配置路径：`plugin/aggregation/`
 - 获取到的tag将用于Jenkins构建参数
 
 ## 5. Jenkins集成设计
@@ -421,9 +421,9 @@ func (jc *JenkinsClient) GetBuildInfo(jobPath string, buildNum int) (map[string]
 ```
 
 ### 5.2 构建参数传递
-对于指定的Jenkins作业 `http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/`，需要传递以下参数：
+对于指定的Jenkins作业 `http://your-jenkins-server/view/auto-archive-deploy/job/aggregation/`，需要传递以下参数：
 
-- `app`: `fscr-aggregation` （固定值）
+- `app`: `aggregation` （固定值）
 - `tag`: 从Consul获取的tag值
 - `scope`: `all` （固定值）
 
@@ -466,7 +466,7 @@ func (h *Handler) CreateAggregatePackageTask(c *gin.Context) {
     }
 
     // 获取Consul客户端
-    consulAddr := "10.99.99.98:8500" // 可以从配置中获取
+    consulAddr := "your-consul-server:8500" // 可以从配置中获取
     consulClient, err := NewConsulClient(consulAddr)
     if err != nil {
         c.JSON(500, gin.H{"error": "failed to connect to Consul"})
@@ -474,7 +474,7 @@ func (h *Handler) CreateAggregatePackageTask(c *gin.Context) {
     }
 
     // 从Consul获取tag信息
-    tagMap, err := consulClient.GetTagsFromPath("plugin/fscr-aggregation/", req.AppNames)
+    tagMap, err := consulClient.GetTagsFromPath("plugin/aggregation/", req.AppNames)
     if err != nil {
         // 如果Consul获取失败，记录错误但仍继续处理
         log.Printf("Warning: Could not get tags from Consul: %v", err)
@@ -482,7 +482,7 @@ func (h *Handler) CreateAggregatePackageTask(c *gin.Context) {
 
     // 准备Jenkins构建参数
     buildParams := map[string]string{
-        "app":   "fscr-aggregation",
+        "app":   "aggregation",
         "scope": "all",
     }
 
@@ -501,9 +501,9 @@ func (h *Handler) CreateAggregatePackageTask(c *gin.Context) {
         TaskName:     req.TaskName,
         ProjectName:  req.ProjectName,
         AppNames:     req.AppNames,
-        JenkinsJobName: "fscr-aggregation",
-        JenkinsJobUrl: "http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/",
-        ConsulConfigPath: "plugin/fscr-aggregation/",
+        JenkinsJobName: "aggregation",
+        JenkinsJobUrl: "http://your-jenkins-server/view/auto-archive-deploy/job/aggregation/",
+        ConsulConfigPath: "plugin/aggregation/",
         BuildParams:  buildParams, // 存储构建参数
         Status:       "pending",
         TriggeredBy:  c.GetString("username"),
@@ -527,7 +527,7 @@ func (h *Handler) CreateAggregatePackageTask(c *gin.Context) {
     }
 
     // 异步触发Jenkins构建
-    go h.triggerJenkinsBuild(task.ID, "/view/auto-archive-deploy/job/fscr-aggregation/", buildParams)
+    go h.triggerJenkinsBuild(task.ID, "/view/auto-archive-deploy/job/aggregation/", buildParams)
 
     c.JSON(200, gin.H{"success": true, "data": gin.H{"task_id": task.ID}})
 }
@@ -566,7 +566,7 @@ func (h *Handler) triggerJenkinsBuild(taskID int64, jobPath string, params map[s
 
     // 初始化Jenkins客户端
     jenkinsClient := NewJenkinsClient(
-        "http://js.zbnsec.com",  // Jenkins基础URL
+        "http://your-jenkins-server",  // Jenkins基础URL
         "your-jenkins-username", // 从配置获取
         "your-jenkins-password", // 从配置获取
     )
@@ -660,7 +660,7 @@ func (h *Handler) checkQueueStatus(queueID int64) (int, string, error) {
 func (h *Handler) getBuildStatus(jobPath string, buildNum int) (BuildStatus, error) {
     // 初始化Jenkins客户端
     jenkinsClient := NewJenkinsClient(
-        "http://js.zbnsec.com",
+        "http://your-jenkins-server",
         "your-jenkins-username",
         "your-jenkins-password",
     )
@@ -1112,8 +1112,8 @@ func (h *Handler) handleJenkinsError(taskID int64, err error) {
 ## 10. 部署配置
 
 ### 10.1 环境变量
-- `CONSUL_ADDR`: Consul服务器地址，默认 `http://10.99.99.98:8500`
-- `JENKINS_BASE_URL`: Jenkins基础URL，默认 `http://js.zbnsec.com`
+- `CONSUL_ADDR`: Consul服务器地址，默认 `http://your-consul-server:8500`
+- `JENKINS_BASE_URL`: Jenkins基础URL，默认 `http://your-jenkins-server`
 - `JENKINS_USERNAME`: Jenkins用户名
 - `JENKINS_PASSWORD`: Jenkins密码
 - `AGGREGATE_PACKAGE_POLL_INTERVAL`: 状态轮询间隔，默认 `5000` 毫秒
@@ -1150,8 +1150,8 @@ func (h *Handler) handleJenkinsError(taskID int64, err error) {
 ## 12. 部署和运维注意事项
 
 ### 12.1 环境要求
-- Consul服务可用且配置正确 (`http://10.99.99.98:8500`)
-- Jenkins服务可用且具有指定作业 (`http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/`)
+- Consul服务可用且配置正确 (`http://your-consul-server:8500`)
+- Jenkins服务可用且具有指定作业 (`http://your-jenkins-server/view/auto-archive-deploy/job/aggregation/`)
 - 数据库连接正常
 - 网络能够访问指定的Consul和Jenkins服务
 
@@ -1162,6 +1162,6 @@ func (h *Handler) handleJenkinsError(taskID int64, err error) {
 - 任务执行时间过长时发送告警
 
 此设计文档详细描述了安装包聚合打包功能的实现方案，特别是与您指定的Jenkins作业地址和Consul配置的集成。系统将接收项目名称和应用名称列表，从Consul获取相应的tag参数，然后触发指定的Jenkins作业，并传递以下参数：
-- `app`: `fscr-aggregation`
-- `tag`: 从Consul `plugin/fscr-aggregation/` 路径下获取
+- `app`: `aggregation`
+- `tag`: 从Consul `plugin/aggregation/` 路径下获取
 - `scope`: `all`ALTER TABLE security_vulnerabilities ADD COLUMN vuln_type VARCHAR(50);

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -90,7 +91,12 @@ func buildAuditAlertEventRecord(event AlertEvent) auditAlertEventRecord {
 }
 
 // Prometheus 配置
-var prometheusURL = "http://10.99.99.172:9090"
+var prometheusURL = func() string {
+	if u := os.Getenv("PROMETHEUS_URL"); u != "" {
+		return u
+	}
+	return "http://localhost:9090"
+}()
 
 // queryCurrentValue 查询 Prometheus 获取当前指标值
 // 根据 ruleName 确定正确的查询表达式
@@ -1512,7 +1518,7 @@ func buildSampleData() TemplateData {
 	return TemplateData{
 		RuleName:      "DiskUsageHigh",
 		Content:       "/dev/sda1 磁盘使用率达到 95%，请及时清理",
-		Source:        "10.99.99.100:9100",
+		Source:        "node-exporter:9100",
 		Severity:      "critical",
 		SeverityLabel: "严重",
 		Status:        "firing",

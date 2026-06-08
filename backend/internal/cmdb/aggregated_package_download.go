@@ -5,13 +5,19 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
 	"time"
 )
 
-const aggregatedPackageBaseURL = "http://10.99.99.65:8888/aggregation/"
+var aggregatedPackageBaseURL = func() string {
+	if u := os.Getenv("AGGREGATED_PACKAGE_BASE_URL"); u != "" {
+		return u
+	}
+	return "http://localhost:8888/aggregation/"
+}()
 
 var tarLinkPattern = regexp.MustCompile(`href=["']?([^"' >]+\.tar)["']?`)
 

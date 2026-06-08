@@ -307,7 +307,7 @@ func sendEmailWithContent(channel *NotifyChannel, title, content, severity strin
 //   ### 🔴 【告警】磁盘使用率过高
 //   > **规则名称**：DiskUsageHigh
 //   > **告警内容**：/dev/sda1 磁盘使用率达到 95%
-//   > **来源**：10.99.99.100:9100
+//   > **来源**：node-exporter:9100
 //   > **级别**：严重
 //   > **分类**：磁盘
 //   > **状态**：告警中

@@ -393,7 +393,7 @@ export default function ArchiveHistoryPage() {
                 刷新
               </Button>
             )}
-            <a href="http://10.99.99.65/update/readme.html" target="_blank" rel="noopener noreferrer">
+            <a href="http://your-update-server/update/readme.html" target="_blank" rel="noopener noreferrer">
               更新说明
             </a>
             {record.jenkins_console_url && (

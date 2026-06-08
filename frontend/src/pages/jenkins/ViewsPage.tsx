@@ -404,7 +404,7 @@ export default function ViewsPage() {
           layout="vertical"
           onFinish={handleCopyView}
           initialValues={{
-            source_view: '', target_view: '', jenkins_url: 'http://js.zbnsec.com',
+            source_view: '', target_view: '', jenkins_url: '',
             pipeline_tag_old_pattern: '', pipeline_tag_new_pattern: '',
             job_name_old_pattern: '', job_name_new_pattern: ''
           }}
@@ -412,7 +412,7 @@ export default function ViewsPage() {
           <Row gutter={24}>
             <Col span={8}>
               <Form.Item name="jenkins_url" label="Jenkins地址" rules={[{ required: true, message: '请输入Jenkins地址' }]}>
-                <Input placeholder="如: http://js.zbnsec.com" />
+                <Input placeholder="如: http://your-jenkins-server.com" />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -517,7 +517,7 @@ export default function ViewsPage() {
         <Row gutter={16} align="middle" style={{ marginBottom: 16 }}>
           <Col flex="auto">
             <Input
-              placeholder="输入要删除的视图名称，如: 6f_dev-147"
+              placeholder="输入要删除的视图名称，如: my-view"
               value={deleteViewName}
               onChange={(e) => setDeleteViewName(e.target.value)}
               onPressEnter={handleQueryView}
@@ -609,7 +609,7 @@ export default function ViewsPage() {
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item label="凭据 ID（主机IP）" name="id" rules={[{ required: true, message: '请输入凭据ID' }]}>
-                <Input placeholder="例如: 10.99.99.100" />
+                <Input placeholder="例如: 192.168.1.100" />
               </Form.Item>
             </Col>
             <Col span={8}>

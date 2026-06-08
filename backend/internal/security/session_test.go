@@ -33,7 +33,7 @@ func TestAppendNucleiAuthArgsPrefersProvidedSession(t *testing.T) {
 	}, &WebSession{
 		Headers: []AuthHeader{
 			{Name: "token", Value: "cached-token"},
-			{Name: "tenantkey", Value: "web_01"},
+			{Name: "tenantkey", Value: "default"},
 		},
 	})
 	if err != nil {
@@ -44,7 +44,7 @@ func TestAppendNucleiAuthArgsPrefersProvidedSession(t *testing.T) {
 	if !strings.Contains(joined, "token: cached-token") {
 		t.Fatalf("expected nuclei args to include cached token header, got %v", args)
 	}
-	if !strings.Contains(joined, "tenantkey: web_01") {
+	if !strings.Contains(joined, "tenantkey: default") {
 		t.Fatalf("expected nuclei args to include cached tenant header, got %v", args)
 	}
 }

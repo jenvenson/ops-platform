@@ -12,10 +12,10 @@
 
 ### 2. 修复聚合历史中下载地址格式
 - **问题**：下载地址格式不符合要求
-- **原格式**：`http://10.99.99.65:8888/aggregation/%d.tar`（时间戳）
-- **新格式**：`http://10.99.99.65:8888/aggregation/fscr-V2.5.1-build20260311110022.tar`
+- **原格式**：`http://your-package-server:8888/aggregation/%d.tar`（时间戳）
+- **新格式**：`http://your-package-server:8888/aggregation/app-V2.5.1-build20260311110022.tar`
 - **修复**：修改了 `aggregated_history_handler.go` 中的URL生成逻辑
-- **实现**：使用格式 `http://10.99.99.65:8888/aggregation/%s-%s-build%s.tar`，包含项目名、环境和时间戳
+- **实现**：使用格式 `http://your-package-server:8888/aggregation/%s-%s-build%s.tar`，包含项目名、环境和时间戳
 
 ### 3. 修复聚合历史中操作人显示问题
 - **问题**：操作人显示为"系统"或缺失
@@ -31,7 +31,7 @@
 ### 下载URL格式化
 ```go
 timestampStr := time.Now().Format("20060102150405") // 格式：20260311110022
-downloadURL := fmt.Sprintf("http://10.99.99.65:8888/aggregation/%s-%s-build%s.tar", projectName, envName, timestampStr)
+downloadURL := fmt.Sprintf("http://your-package-server:8888/aggregation/%s-%s-build%s.tar", projectName, envName, timestampStr)
 ```
 
 ### 进度设置

@@ -366,10 +366,10 @@ cd /Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/deploy
 ### 6.3 发布后检查
 
 ```bash
-ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose ps"
-ssh root@10.99.99.150 "curl -sf http://localhost/api/health"
-ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose logs --tail 50 backend"
-ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose logs --tail 50 nginx"
+ssh root@<your-server-ip> "cd /opt/ops-platform/deploy && docker compose ps"
+ssh root@<your-server-ip> "curl -sf http://localhost/api/health"
+ssh root@<your-server-ip> "cd /opt/ops-platform/deploy && docker compose logs --tail 50 backend"
+ssh root@<your-server-ip> "cd /opt/ops-platform/deploy && docker compose logs --tail 50 nginx"
 ```
 
 并手工检查：

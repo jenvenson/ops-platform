@@ -8,9 +8,9 @@ type AggregatePackageTask struct {
 	TaskName         string    `gorm:"type:varchar(255);not null" json:"task_name"`
 	ProjectName      string    `gorm:"type:varchar(255);not null" json:"project_name"`
 	AppNames         []string  `gorm:"serializer:json" json:"app_names"`  // 参与打包的应用名称列表
-	JenkinsJobName   string    `gorm:"type:varchar(255);default:fscr-aggregation" json:"jenkins_job_name"`
-	JenkinsJobUrl    string    `gorm:"type:varchar(500);default:http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/" json:"jenkins_job_url"`
-	ConsulConfigPath string    `gorm:"type:varchar(500);default:plugin/fscr-aggregation/" json:"consul_config_path"`
+	JenkinsJobName   string    `gorm:"type:varchar(255)" json:"jenkins_job_name"`
+	JenkinsJobUrl    string    `gorm:"type:varchar(500)" json:"jenkins_job_url"`
+	ConsulConfigPath string    `gorm:"type:varchar(500)" json:"consul_config_path"`
 	BuildParams      map[string]string `gorm:"serializer:json" json:"build_params"` // 构建参数
 	Status           string    `gorm:"type:enum('pending','building','success','failed','cancelled');default:'pending'" json:"status"`
 	TriggeredBy      string    `gorm:"type:varchar(255)" json:"triggered_by"`

@@ -29,18 +29,18 @@
 
 ## 已定位的目标系统特征
 
-针对 `http://10.99.99.152/web_01/` 的抓取和前端包分析，已经确认以下事实：
+针对 `http://your-app/web_01/` 的抓取和前端包分析，已经确认以下事实：
 
 1. 这是一个 SPA，不是传统后端表单登录页。
-2. `http://10.99.99.152/web_01/login` 返回 `404`，说明不存在可直接复用的传统登录页地址。
+2. `http://your-app/web_01/login` 返回 `404`，说明不存在可直接复用的传统登录页地址。
 3. 前端使用 `localStorage` 保存 `token`，不是依赖登录响应 Cookie 维持会话。
 4. 业务请求会带以下请求头：
    - `token`
    - `language`
    - `tenantkey`
-   - `fscr-request-serial`
-   - `fscr-signature`
-   - `fscr-timestamp`
+   - `x-request-serial`
+   - `x-signature`
+   - `x-timestamp`
 5. 登录接口为：
    - `POST /auth/oauth2/token`
 6. 登录请求还依赖：
@@ -56,12 +56,12 @@
    - `password=Web_01`
 2. `grant_type=password` 是必填参数。
 3. 登录签名规则已经确认：
-   - `fscr-request-serial`: UUID
-   - `fscr-timestamp`: 毫秒时间戳
+   - `x-request-serial`: UUID
+   - `x-timestamp`: 毫秒时间戳
    - `password`: `base64(serial + 明文密码 + timestamp)`
-   - `fscr-signature`: `md5(base64(upper(serial-timestamp-path-method-secret)))`
+   - `x-signature`: `md5(base64(upper(serial-timestamp-path-method-secret)))`
 4. 其中固定密钥为：
-   - `5157F09EFDC096DE15EBE81A47057A7232F1B8E1`
+   - `your-login-secret`
 5. 验证接口结果：
    - `GET /base/user/verify/type/web_01` 返回 `is_identity=false`
    - `GET /base/user/captcha/login/web_01?...` 返回 `data=null`
@@ -78,7 +78,7 @@
   - `tenantkey`
   - `language`
 
-对于已验证的接口，不需要在每个请求上重新计算 `fscr-signature`。
+对于已验证的接口，不需要在每个请求上重新计算 `x-signature`。
 
 结论：
 
@@ -198,7 +198,7 @@ type RequestSigner interface {
 - `none`
 - `fscr`
 
-这样像 `fscr-request-serial`、`fscr-timestamp`、`fscr-signature` 这类头可以由 signer 统一生成。
+这样像 `x-request-serial`、`x-timestamp`、`x-signature` 这类头可以由 signer 统一生成。
 
 ## 分阶段实施方案
 
@@ -259,26 +259,26 @@ type RequestSigner interface {
   "variables": [
     { "name": "tenant_key", "value": "web_01" },
     { "name": "lang", "value": "zh" },
-    { "name": "client_basic", "value": "Basic {{base64:fscr-core-common:xsAQ0FNx7k}}" },
+    { "name": "client_basic", "value": "Basic {{base64:your-client-id:your-client-secret}}" },
     { "name": "request_serial", "value": "{{uuid}}" },
     { "name": "request_ts", "value": "{{now_unix_ms}}" },
-    { "name": "login_secret", "value": "5157F09EFDC096DE15EBE81A47057A7232F1B8E1" },
+    { "name": "login_secret", "value": "your-login-secret" },
     { "name": "sign_source", "value": "{{upper:${request_serial}-${request_ts}-/auth/oauth2/token-POST-${login_secret}}}" },
     { "name": "sign_payload", "value": "{{base64:${sign_source}}}" },
     { "name": "login_signature", "value": "{{md5:${sign_payload}}}" },
     { "name": "encoded_password", "value": "{{base64:${request_serial}${password}${request_ts}}}" }
   ],
   "login": {
-    "url": "http://10.99.99.152/auth/oauth2/token",
+    "url": "http://localhost:8080/auth/oauth2/token",
     "method": "POST",
     "content_type": "form",
     "headers": [
       { "name": "Authorization", "value": "${client_basic}" },
       { "name": "language", "value": "${lang}" },
       { "name": "tenantkey", "value": "${tenant_key}" },
-      { "name": "fscr-request-serial", "value": "${request_serial}" },
-      { "name": "fscr-timestamp", "value": "${request_ts}" },
-      { "name": "fscr-signature", "value": "${login_signature}" }
+      { "name": "x-request-serial", "value": "${request_serial}" },
+      { "name": "x-timestamp", "value": "${request_ts}" },
+      { "name": "x-signature", "value": "${login_signature}" }
     ],
     "body": {
       "grant_type": "password",
@@ -312,7 +312,7 @@ type RequestSigner interface {
 残留风险：
 
 - 尚未证明所有业务接口都不依赖请求级签名
-- 如果后续发现某些接口必须带 `fscr-signature`，仍需要继续演进为“请求级动态签名”或代理模式
+- 如果后续发现某些接口必须带 `x-signature`，仍需要继续演进为“请求级动态签名”或代理模式
 
 前提：
 

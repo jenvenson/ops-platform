@@ -347,8 +347,8 @@
         <ul>
             <li><strong>项目名称</strong>：要打包的项目名</li>
             <li><strong>应用名称列表</strong>：要包含在聚合打包中的应用名称，每行一个</li>
-            <li><strong>Jenkins任务</strong>：系统将使用 <code>http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/</code> 任务</li>
-            <li><strong>Consul路径</strong>：系统从 <code>plugin/fscr-aggregation/</code> 路径获取各应用的tag值</li>
+            <li><strong>Jenkins任务</strong>：系统将使用 <code>http://your-jenkins-server/view/auto-archive-deploy/job/aggregation/</code> 任务</li>
+            <li><strong>Consul路径</strong>：系统从 <code>plugin/aggregation/</code> 路径获取各应用的tag值</li>
         </ul>
 
         <h3>3.6 聚合历史 (/deploy/aggregated-history)</h3>
@@ -417,7 +417,7 @@
         <h4>执行视图复制</h4>
         <ol>
             <li>导航至 <span class="nav-path">/jenkins/views</span></li>
-            <li>在"Jenkins地址"字段输入Jenkins服务器地址（默认为 <code>http://js.zbnsec.com</code>）</li>
+            <li>在"Jenkins地址"字段输入Jenkins服务器地址（默认为 <code>http://your-jenkins-server</code>）</li>
             <li>输入"源视图名称"（要复制的源视图名称）</li>
             <li>输入"目标视图名称"（要创建的目标视图名称）</li>
             <li>（可选）在"Job名称替换"部分输入原Job名称模式和新Job名称模式</li>

@@ -59,7 +59,7 @@ services:
       - JENKINS_USERNAME=${JENKINS_USERNAME}
       - JENKINS_TOKEN=${JENKINS_TOKEN}
       - JENKINS_TIMEOUT=${JENKINS_TIMEOUT}
-      - GRAFANA_URL=${GRAFANA_URL:-http://10.99.99.172:3000}
+      - GRAFANA_URL=${GRAFANA_URL:-http://grafana.internal:3000}
       - GRAFANA_USERNAME=${GRAFANA_USERNAME:-admin}
       - GRAFANA_PASSWORD=${GRAFANA_PASSWORD:-}
       - ASSISTANT_ENABLED=false
@@ -132,8 +132,8 @@ services:
     ports:
       - "8890:80"
     environment:
-      - GRAFANA_UPSTREAM=${GRAFANA_UPSTREAM:-http://10.99.99.172:3000/}
-      - GRAFANA_HOST_HEADER=${GRAFANA_HOST_HEADER:-10.99.99.172:3000}
+      - GRAFANA_UPSTREAM=${GRAFANA_UPSTREAM:-http://grafana.internal:3000/}
+      - GRAFANA_HOST_HEADER=${GRAFANA_HOST_HEADER:-grafana.internal:3000}
       - GRAFANA_BASIC_AUTH=${GRAFANA_BASIC_AUTH:-}
       - GRAFANA_APP_URL=${GRAFANA_APP_URL:-http://localhost:3000/}
     volumes:

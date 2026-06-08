@@ -260,7 +260,7 @@ export default function BatchCopyAllPage() {
           系统会精确匹配键值对格式，如 tag: "V2.5.0" → tag: "V2.5.1"，
           支持有引号和无引号的值格式：<br/>
           &nbsp;&nbsp;- Tag替换：替换版本标签，如 V2.5.0 → test10<br/>
-          &nbsp;&nbsp;- Server替换：替换服务器地址，如 10.70.70.231 → 10.70.70.111<br/>
+          &nbsp;&nbsp;- Server替换：替换服务器地址，如 192.168.1.231 → 192.168.1.111<br/>
           &nbsp;&nbsp;- Branch替换：替换分支名称<br/>
           &nbsp;&nbsp;- SubmoduleBranch替换：替换子模块分支<br/>
           5. （可选）配置高级替换规则 - 使用文本替换或正则替换进行更复杂的替换操作<br/>

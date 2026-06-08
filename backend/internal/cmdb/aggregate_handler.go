@@ -26,7 +26,7 @@ type Handler struct {
 }
 
 // consulAggregationPath Consul 路径常量
-const consulAggregationPath = "plugin/fscr-aggregation/"
+const consulAggregationPath = "plugin/aggregation/"
 
 // getJenkinsURL 构建 Jenkins URL，基础 URL 末尾不带斜杠
 func (h *Handler) getJenkinsURL() string {
@@ -250,7 +250,7 @@ func (h *Handler) QueryAggregateTags(c *gin.Context) {
 		return
 	}
 
-	// 查询 plugin/fscr-aggregation/ 下的所有键
+	// 查询 plugin/aggregation/ 下的所有键
 	keys, err := consulClient.ListKeys(consulAggregationPath)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "failed to list tags from Consul: " + err.Error()})
@@ -260,7 +260,7 @@ func (h *Handler) QueryAggregateTags(c *gin.Context) {
 	// 提取 tag 值（键名的最后一部分）
 	var tags []map[string]interface{}
 	for _, key := range keys {
-		// 去掉前缀 plugin/fscr-aggregation/
+		// 去掉前缀 plugin/aggregation/
 		tag := strings.TrimPrefix(key, consulAggregationPath)
 		if tag != "" && tag != key {
 			// 获取该 tag 的详细信息（可选）
@@ -306,12 +306,12 @@ func (h *Handler) TriggerAggregatePackage(c *gin.Context) {
 	}
 
 	// 准备Jenkins构建参数
-	// Jenkins job fscr-aggregation 需要的参数：
-	// - app: "fscr-aggregation"（固定值）
+	// Jenkins job aggregation 需要的参数：
+	// - app: "aggregation"（固定值）
 	// - tag: 用户选择的 tag 值（如 "V2.5.1", "6f_dev" 等）
 	// - scope: "all"（固定值）
 	buildParams := map[string]string{
-		"app":   "fscr-aggregation",
+		"app":   "aggregation",
 		"scope": "all",
 	}
 
@@ -333,8 +333,8 @@ func (h *Handler) TriggerAggregatePackage(c *gin.Context) {
 		TaskName:         req.TaskName,
 		ProjectName:      req.ProjectName,
 		AppNames:         req.AppNames,
-		JenkinsJobName:   "fscr-aggregation",
-		JenkinsJobUrl:    fmt.Sprintf("%s/view/auto-archive-deploy/job/fscr-aggregation/", h.getJenkinsURL()),
+		JenkinsJobName:   "aggregation",
+		JenkinsJobUrl:    fmt.Sprintf("%s/view/auto-archive-deploy/job/aggregation/", h.getJenkinsURL()),
 		ConsulConfigPath: consulAggregationPath,
 		BuildParams:      buildParams, // 存储构建参数
 		Status:           "pending",
@@ -347,7 +347,7 @@ func (h *Handler) TriggerAggregatePackage(c *gin.Context) {
 	}
 
 	// 立即创建聚合历史记录，状态为"归档中"
-	jenkinsConsoleURL := fmt.Sprintf("%s/view/auto-archive-deploy/job/fscr-aggregation/", h.getJenkinsURL())
+	jenkinsConsoleURL := fmt.Sprintf("%s/view/auto-archive-deploy/job/aggregation/", h.getJenkinsURL())
 	now := time.Now()
 
 	// 获取有效的操作人姓名
@@ -382,7 +382,7 @@ func (h *Handler) TriggerAggregatePackage(c *gin.Context) {
 	}
 
 	// 异步触发Jenkins构建
-	go h.triggerJenkinsBuild(uint(task.ID), "/view/auto-archive-deploy/job/fscr-aggregation/", buildParams)
+	go h.triggerJenkinsBuild(uint(task.ID), "/view/auto-archive-deploy/job/aggregation/", buildParams)
 
 	c.JSON(200, gin.H{"success": true, "data": gin.H{"task_id": task.ID, "history_id": history.ID}})
 }
@@ -580,7 +580,7 @@ func (h *Handler) QueryAppTags(c *gin.Context) {
 	}
 
 	// 从Consul获取tag信息
-	// 使用标准路径 plugin/fscr-aggregation/ 作为基础路径
+	// 使用标准路径 plugin/aggregation/ 作为基础路径
 	basePath := consulAggregationPath
 	tagMap, err := consulClient.GetTagsFromPath(basePath, req.AppNames)
 	if err != nil {
@@ -705,7 +705,7 @@ func (h *Handler) pollJenkinsStatus(taskID uint, queueID int64, jobPath string) 
 
 			if buildNum > 0 {
 				// 更新历史记录的构建号
-				consoleURL := fmt.Sprintf("%s/view/auto-archive-deploy/job/fscr-aggregation/%d/console", h.getJenkinsURL(), buildNum)
+				consoleURL := fmt.Sprintf("%s/view/auto-archive-deploy/job/aggregation/%d/console", h.getJenkinsURL(), buildNum)
 				database.DB.Model(&models.AggregatedHistory{}).Where("task_id = ?", taskID).
 					Updates(map[string]interface{}{
 						"jenkins_build_num":  buildNum,
@@ -876,7 +876,7 @@ func (h *Handler) updateAggregatedHistoryByTaskID(taskID uint, historyStatus str
 	if err := database.DB.Where("task_id = ?", taskID).First(&firstResult).Error; err == nil {
 		if firstResult.JenkinsBuildNum != nil {
 			updates["jenkins_build_num"] = *firstResult.JenkinsBuildNum
-			consoleURL := fmt.Sprintf("%s/view/auto-archive-deploy/job/fscr-aggregation/%d/console", h.getJenkinsURL(), *firstResult.JenkinsBuildNum)
+			consoleURL := fmt.Sprintf("%s/view/auto-archive-deploy/job/aggregation/%d/console", h.getJenkinsURL(), *firstResult.JenkinsBuildNum)
 			updates["jenkins_console_url"] = consoleURL
 		}
 	}

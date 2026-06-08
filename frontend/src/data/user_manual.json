@@ -52,8 +52,8 @@
     },
     "deploy_aggregate_package": {
       "title": "变更发布-聚合打包",
-      "content": "聚合打包功能用于一次性打包多个应用，从Consul获取配置并触发Jenkins任务。执行聚合打包步骤：1.导航至/deploy/aggregate-package，2.输入项目名称，3.在应用名称列表中输入需要打包的应用名称（每行一个），4.点击'开始聚合打包'，5.系统将自动从Consul获取各应用的tag配置，并触发Jenkins任务。打包参数包括：项目名称（要打包的项目名）、应用名称列表（要包含在聚合打包中的应用名称，每行一个）、Jenkins任务（系统将使用http://js.zbnsec.com/view/auto-archive-deploy/job/fscr-aggregation/任务）、Consul路径（系统从plugin/fscr-aggregation/路径获取各应用的tag值）。",
-      "keywords": ["聚合打包", "批量打包", "变更发布", "自动化部署", "Consul", "Jenkins", "应用打包", "fscr-aggregation"]
+      "content": "聚合打包功能用于一次性打包多个应用，从Consul获取配置并触发Jenkins任务。执行聚合打包步骤：1.导航至/deploy/aggregate-package，2.输入项目名称，3.在应用名称列表中输入需要打包的应用名称（每行一个），4.点击'开始聚合打包'，5.系统将自动从Consul获取各应用的tag配置，并触发Jenkins任务。打包参数包括：项目名称（要打包的项目名）、应用名称列表（要包含在聚合打包中的应用名称，每行一个）、Jenkins任务（系统将使用http://your-jenkins-server/view/auto-archive-deploy/job/aggregation/任务）、Consul路径（系统从plugin/aggregation/路径获取各应用的tag值）。",
+      "keywords": ["聚合打包", "批量打包", "变更发布", "自动化部署", "Consul", "Jenkins", "应用打包", "aggregation"]
     },
     "deploy_aggregated_history": {
       "title": "变更发布-聚合历史",
@@ -72,8 +72,8 @@
     },
     "jenkins_views": {
       "title": "变更发布-Jenkins任务-视图管理",
-      "content": "Jenkins视图管理功能包括视图复制、删除和凭据管理。视图复制功能：1.导航至/jenkins/views，2.在Jenkins地址字段输入Jenkins服务器地址（默认为http://js.zbnsec.com），3.输入源视图名称和目标视图名称，4.（可选）配置Job名称替换和流水线Tag值替换，5.点击'执行视图复制'。Job名称替换按字面量处理；如果同一个原模式填写了多条规则，系统以最后一条为准。流水线Tag值替换只作用于tag参数上下文，不会误改其他defaultValue，例如15s_dev替换为prod166时会保持为prod166，不会被截断成prod。系统会尝试自动审批Jenkins pending scripts；如果Jenkins还存在pending signatures等其他审批项，仍需到Script Approval页面手工处理。视图删除功能：1.在视图删除区域输入要删除的视图名称，2.点击'查询视图'，3.选择操作（删除选中、仅删除视图、删除视图及全部Job）。凭据管理：创建SSH密钥凭据，输入凭据ID（主机IP）、用户名、私钥内容等信息。",
-      "keywords": ["Jenkins", "视图", "视图管理", "视图复制", "视图删除", "凭据管理", "SSH", "私钥", "fscr-aggregation", "Tag替换", "prod166", "脚本审批", "pending scripts", "Script Approval"]
+      "content": "Jenkins视图管理功能包括视图复制、删除和凭据管理。视图复制功能：1.导航至/jenkins/views，2.在Jenkins地址字段输入Jenkins服务器地址（默认为http://your-jenkins-server），3.输入源视图名称和目标视图名称，4.（可选）配置Job名称替换和流水线Tag值替换，5.点击'执行视图复制'。Job名称替换按字面量处理；如果同一个原模式填写了多条规则，系统以最后一条为准。流水线Tag值替换只作用于tag参数上下文，不会误改其他defaultValue，例如15s_dev替换为prod166时会保持为prod166，不会被截断成prod。系统会尝试自动审批Jenkins pending scripts；如果Jenkins还存在pending signatures等其他审批项，仍需到Script Approval页面手工处理。视图删除功能：1.在视图删除区域输入要删除的视图名称，2.点击'查询视图'，3.选择操作（删除选中、仅删除视图、删除视图及全部Job）。凭据管理：创建SSH密钥凭据，输入凭据ID（主机IP）、用户名、私钥内容等信息。",
+      "keywords": ["Jenkins", "视图", "视图管理", "视图复制", "视图删除", "凭据管理", "SSH", "私钥", "aggregation", "Tag替换", "prod166", "脚本审批", "pending scripts", "Script Approval"]
     },
     "monitor_bigscreen": {
       "title": "监控中心-监控大屏",

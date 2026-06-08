@@ -61,8 +61,8 @@ export default function AggregatePackagePage() {
   const loadTagOptions = async () => {
     setLoadingTags(true);
     try {
-      // 从Consul的 plugin/fscr-aggregation/ 路径获取Tag列表
-      const response = await aggregatePackageAPI.queryConsulKv('plugin/fscr-aggregation/', {
+      // 从Consul的 plugin/aggregation/ 路径获取Tag列表
+      const response = await aggregatePackageAPI.queryConsulKv('plugin/aggregation/', {
         consul_config_id: selectedConsulConfig,
       });
 

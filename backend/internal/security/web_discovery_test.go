@@ -7,9 +7,9 @@ import (
 
 func TestIsStaticDiscoveryAssetSkipsDefaultBrandingDownloads(t *testing.T) {
 	targets := []string{
-		"http://10.99.99.185/file-manage/v2/downloadGet?uuid=default-favorite-logo",
-		"http://10.99.99.185/file-manage/v2/downloadGet?uuid=default-login-background",
-		"http://10.99.99.185/base/user/get/watermark",
+		"http://198.51.100.1/file-manage/v2/downloadGet?uuid=default-favorite-logo",
+		"http://198.51.100.1/file-manage/v2/downloadGet?uuid=default-login-background",
+		"http://198.51.100.1/base/user/get/watermark",
 	}
 
 	for _, target := range targets {

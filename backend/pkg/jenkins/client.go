@@ -220,9 +220,9 @@ func (c *Client) buildWithCrumb(jobPath string, params map[string]string, crumb,
 	jobPath = strings.TrimSuffix(jobPath, "/")
 
 	// 处理不同类型的 job 路径
-	// 1. 如果以 view/ 开头，不添加 job/ 前缀（例如：view/auto-archive-deploy/job/fscr-aggregation）
-	// 2. 如果已经包含 /job/，不添加前缀（例如：auto-archive-deploy/job/fscr-aggregation）
-	// 3. 否则添加 job/ 前缀（例如：fscr-aggregation -> job/fscr-aggregation）
+	// 1. 如果以 view/ 开头，不添加 job/ 前缀（例如：view/auto-archive-deploy/job/aggregation）
+	// 2. 如果已经包含 /job/，不添加前缀（例如：auto-archive-deploy/job/aggregation）
+	// 3. 否则添加 job/ 前缀（例如：aggregation -> job/aggregation）
 	if strings.HasPrefix(jobPath, "view/") || strings.Contains(jobPath, "/job/") {
 		// 路径已经正确，不需要添加前缀
 	} else if !strings.HasPrefix(jobPath, "job/") {

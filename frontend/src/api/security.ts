@@ -293,7 +293,7 @@ export interface CreateTaskRequest {
 }
 
 export interface GenerateAuthFlowRequest {
-  preset?: 'auto' | 'token-json' | 'token-form' | 'web01-fscr'
+  preset?: 'auto' | 'token-json' | 'token-form' | 'custom-oauth2'
   target_url: string
   login_url?: string
   content_type?: 'form' | 'json'

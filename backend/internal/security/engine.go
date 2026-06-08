@@ -1778,8 +1778,8 @@ func (e *ScanEngine) ExecuteNucleiWithTags(targetURL string, tags []string) ([]N
 // 443/open/tcp//ssl|nginx/1.18.0/
 //
 // RustScan 格式:
-// Open 10.99.99.187:22
-// Open 10.99.99.187:80
+// Open 192.0.2.1:22
+// Open 192.0.2.1:80
 func parseNmapGrepable(output string, result *NmapResult) {
 	// 先移除 ANSI 转义码
 	output = stripANSI(output)
@@ -1797,7 +1797,7 @@ func parseNmapGrepable(output string, result *NmapResult) {
 
 		// 解析 RustScan 格式: "Open IP:port" 或 "Host: IP ()	Status: Up"
 		if strings.HasPrefix(line, "Open ") {
-			// RustScan 格式: Open 10.99.99.187:22
+			// RustScan 格式: Open 192.0.2.1:22
 			parts := strings.SplitN(strings.TrimPrefix(line, "Open "), ":", 2)
 			if len(parts) == 2 {
 				host := strings.TrimSpace(parts[0])

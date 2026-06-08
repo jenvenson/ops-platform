@@ -18,7 +18,7 @@
 | 项目 | 内容 |
 |------|------|
 | **位置** | `backend/internal/cmdb/aggregate_handler.go` |
-| **问题** | 多处硬编码 `http://js.zbnsec.com` |
+| **问题** | 多处硬编码 `http://your-jenkins-server` |
 | **修复** | 添加 `getJenkinsURL()` 方法，使用配置值，移除 fallback |
 | **验证** | 代码中无 `js.zbnsec.com` 字符串 |
 

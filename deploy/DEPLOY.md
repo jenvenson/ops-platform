@@ -15,7 +15,7 @@
 ### 本地打包
 
 ```bash
-cd /Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework
+cd /path/to/ops-platform
 
 # 打包
 tar -czvf ops-platform.tar.gz backend frontend deploy \
@@ -151,13 +151,13 @@ curl http://localhost:8080/health
 在本地发布机执行：
 
 ```bash
-cd /Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/deploy
+cd /path/to/ops-platform/deploy
 ```
 
 先确认前提条件：
 
 - 线上已经执行过 `deploy-init.sh`
-- 本地可以免密 SSH 到 `root@10.99.99.150`
+- 本地可以免密 SSH 到 `root@<your-server-ip>`
 - 线上存在 `/opt/ops-platform/deploy/.env`
 - 本地已安装 `go`、`npm`、`ssh`、`scp`、`tar`
 
@@ -186,7 +186,7 @@ cd /Users/edy/Data/code/claude/ops-platform/.worktrees/phase1-framework/deploy
 迁移完成后，建议立刻核对线上迁移记录：
 
 ```bash
-ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose exec mysql mysql -N -uroot -p\"\${DB_PASSWORD}\" ops_platform -e 'SELECT path, mode, applied_at FROM schema_migrations ORDER BY id DESC LIMIT 10;'"
+ssh root@<your-server-ip> "cd /opt/ops-platform/deploy && docker compose exec mysql mysql -N -uroot -p\"\${DB_PASSWORD}\" ops_platform -e 'SELECT path, mode, applied_at FROM schema_migrations ORDER BY id DESC LIMIT 10;'"
 ```
 
 确认无误后，再执行正式发布：
@@ -245,10 +245,10 @@ ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose exec mysql 
 发布完成后，建议再做一次线上检查：
 
 ```bash
-ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose ps"
-ssh root@10.99.99.150 "curl -sf http://localhost/api/health"
-ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose logs --tail 50 backend"
-ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose logs --tail 50 nginx"
+ssh root@<your-server-ip> "cd /opt/ops-platform/deploy && docker compose ps"
+ssh root@<your-server-ip> "curl -sf http://localhost/api/health"
+ssh root@<your-server-ip> "cd /opt/ops-platform/deploy && docker compose logs --tail 50 backend"
+ssh root@<your-server-ip> "cd /opt/ops-platform/deploy && docker compose logs --tail 50 nginx"
 ```
 
 最后手工打开并检查：
@@ -270,8 +270,8 @@ ssh root@10.99.99.150 "cd /opt/ops-platform/deploy && docker compose logs --tail
 如果远端主机、用户或部署目录和默认值不同，可以通过环境变量覆盖：
 
 ```bash
-REMOTE_HOST=10.0.0.8 REMOTE_USER=deploy REMOTE_DEPLOY_DIR=/srv/ops-platform/deploy ./deploy-update.sh backend
-REMOTE_HOST=10.0.0.8 REMOTE_USER=deploy REMOTE_DEPLOY_DIR=/srv/ops-platform/deploy ./deploy-update.sh migrate
+REMOTE_HOST=<your-server-ip> REMOTE_USER=deploy REMOTE_DEPLOY_DIR=/srv/ops-platform/deploy ./deploy-update.sh backend
+REMOTE_HOST=<your-server-ip> REMOTE_USER=deploy REMOTE_DEPLOY_DIR=/srv/ops-platform/deploy ./deploy-update.sh migrate
 ```
 
 ## 六、常用命令
@@ -373,13 +373,13 @@ which nuclei
 ### 备份数据库
 
 ```bash
-docker compose exec mysql mysqldump -uroot -proot123 ops_platform > backup_$(date +%Y%m%d).sql
+docker compose exec mysql mysqldump -uroot -p"${DB_PASSWORD}" ops_platform > backup_$(date +%Y%m%d).sql
 ```
 
 ### 恢复数据库
 
 ```bash
-docker compose exec -T mysql mysql -uroot -proot123 ops_platform < backup_20260212.sql
+docker compose exec -T mysql mysql -uroot -p"${DB_PASSWORD}" ops_platform < backup_20260212.sql
 ```
 
 恢复完成后，如代码版本比备份更新，继续执行：

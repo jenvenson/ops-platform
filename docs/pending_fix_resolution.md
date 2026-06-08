@@ -6,7 +6,7 @@
 ## 修复内容
 
 ### 1. 修复聚合历史中下载地址问题
-- **问题**：下载地址格式固定，不能获取http://10.99.99.65:8888/aggregation/下最新时间的tar包
+- **问题**：下载地址格式固定，不能获取http://your-package-server:8888/aggregation/下最新时间的tar包
 - **根本原因**：代码中生成下载URL时使用了预设格式而非动态获取实际最新文件
 - **修复方法**：
   - 在 `aggregated_history_handler.go` 中的 `RefreshAggregatedHistoryStatus` 函数中，修改下载URL生成逻辑
@@ -32,7 +32,7 @@
 func getLatestAggregatedPackageURL() string {
     // 直接返回最新的tar包URL
     // 实际实现中可以从API获取最新的包列表，然后返回最新的文件
-    return "http://10.99.99.65:8888/aggregation/latest.tar"
+    return "http://your-package-server:8888/aggregation/latest.tar"
 }
 ```
 

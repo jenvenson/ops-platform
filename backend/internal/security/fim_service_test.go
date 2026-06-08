@@ -259,7 +259,7 @@ func TestBuildFIMAlertReuseUpdates(t *testing.T) {
 		PolicyName: "tmp目录监测",
 		ServerID:   1,
 		ServerName: "cluser-zb-control",
-		ServerIP:   "10.99.99.187",
+		ServerIP:   "192.0.2.1",
 	}
 
 	updates := buildFIMAlertReuseUpdates(existing, diff, now)

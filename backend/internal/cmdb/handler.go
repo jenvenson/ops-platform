@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,6 +19,14 @@ import (
 	"github.com/edy/ops-platform/pkg/jenkins"
 	"github.com/gin-gonic/gin"
 )
+
+// updateBaseURL 返回更新包下载的基础 URL（从环境变量读取）
+var updateBaseURL = func() string {
+	if u := os.Getenv("UPDATE_BASE_URL"); u != "" {
+		return u
+	}
+	return "http://localhost:8888/update"
+}()
 
 // 辅助函数：将 uint 切片转换为逗号分隔的字符串
 func intSliceToString(nums []uint) string {
@@ -1640,13 +1649,13 @@ func refreshArchiveRecordStatus(record *ArchiveRecord, client *jenkins.Client) {
 	case "COMPLETED", "FINALIZED":
 		if buildStatus.Result == "SUCCESS" {
 			record.Status = "success"
-			// 生成下载地址: http://10.99.99.65/update/6f_dev/20260129/
+			// 生成下载地址: http://your-update-server/update/example/20260129/
 			envName := record.EnvName
 			if envName == "" {
 				envName = "unknown"
 			}
 			dateStr := now.Format("20060102")
-			record.DownloadURL = fmt.Sprintf("http://10.99.99.65/update/%s/%s/", envName, dateStr)
+			record.DownloadURL = fmt.Sprintf("%s/%s/%s/", updateBaseURL, envName, dateStr)
 		} else {
 			record.Status = "failed"
 		}
@@ -1660,7 +1669,7 @@ func refreshArchiveRecordStatus(record *ArchiveRecord, client *jenkins.Client) {
 				envName = "unknown"
 			}
 			dateStr := now.Format("20060102")
-			record.DownloadURL = fmt.Sprintf("http://10.99.99.65/update/%s/%s/", envName, dateStr)
+			record.DownloadURL = fmt.Sprintf("%s/%s/%s/", updateBaseURL, envName, dateStr)
 		} else if buildStatus.Result == "FAILURE" {
 			record.Status = "failed"
 		}
@@ -1842,7 +1851,7 @@ func GetArchiveStatus(c *gin.Context, cfg *config.Config) {
 	dateStr := now.Format("20060102")
 
 	// 生成下载地址基础路径
-	baseURL := fmt.Sprintf("http://10.99.99.65/update/%s/%s/", envName, dateStr)
+	baseURL := fmt.Sprintf("%s/%s/%s/", updateBaseURL, envName, dateStr)
 
 	switch phase {
 	case "QUEUED":
@@ -1931,7 +1940,7 @@ func GetArchiveDownloadURL(c *gin.Context, cfg *config.Config) {
 			envName = "unknown"
 		}
 		dateStr := now.Format("20060102")
-		downloadURL := fmt.Sprintf("http://10.99.99.65/update/%s/%s/", envName, dateStr)
+		downloadURL := fmt.Sprintf("%s/%s/%s/", updateBaseURL, envName, dateStr)
 		record.DownloadURL = downloadURL
 		database.DB.Model(&record).Update("download_url", downloadURL)
 	}

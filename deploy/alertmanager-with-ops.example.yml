@@ -18,7 +18,7 @@ receivers:
   # 保留原有 email 接收器（若其他子路由单独引用可保留）
   - name: 'email'
     email_configs:
-      - to: '****@zbn***.com'
+      - to: 'admin@example.com'
         send_resolved: true
 
   # 仅运维平台 Webhook（若某条子路由只想推平台可单独引用）
@@ -30,7 +30,7 @@ receivers:
   # 默认路由使用：同时发邮件 + 推运维平台（一条告警发往两处）
   - name: 'email-and-ops'
     email_configs:
-      - to: '****@zbn***.com'
+      - to: 'admin@example.com'
         send_resolved: true
     webhook_configs:
       - url: 'http://<运维平台后端地址>:8080/api/alert/webhook'

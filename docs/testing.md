@@ -10,7 +10,7 @@
 - [x] 验证前端界面正确显示OperatorName字段
 
 #### 1.2 下载地址格式测试
-- [x] 验证下载地址格式为 `http://10.99.99.65:8888/aggregation/{timestamp}.tar`
+- [x] 验证下载地址格式为 `http://your-package-server:8888/aggregation/{timestamp}.tar`
 - [x] 验证timestamp为Unix时间戳格式
 - [x] 验证下载地址在构建成功后正确生成
 - [x] 验证多个构建任务生成不同的下载地址

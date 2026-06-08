@@ -14,13 +14,13 @@ func TestArchiveBuildNumberFromRecentBuildsMatchesParameters(t *testing.T) {
 	start := time.Date(2026, 5, 14, 15, 37, 18, 0, time.Local)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/job/gkd-fscr_on-site_update/api/json":
+		case "/job/gkd-app_on-site_update/api/json":
 			_, _ = w.Write([]byte(`{"builds":[{"number":33},{"number":32},{"number":31}]}`))
-		case "/job/gkd-fscr_on-site_update/33/api/json":
+		case "/job/gkd-app_on-site_update/33/api/json":
 			_, _ = w.Write([]byte(buildInfoJSON("fscr-base", "gkd", "all", start.Add(2*time.Minute))))
-		case "/job/gkd-fscr_on-site_update/32/api/json":
+		case "/job/gkd-app_on-site_update/32/api/json":
 			_, _ = w.Write([]byte(buildInfoJSON("fscr-pex", "gkd", "all", start.Add(1*time.Minute))))
-		case "/job/gkd-fscr_on-site_update/31/api/json":
+		case "/job/gkd-app_on-site_update/31/api/json":
 			_, _ = w.Write([]byte(buildInfoJSON("fscr-cex", "gkd", "all", start.Add(30*time.Second))))
 		default:
 			t.Fatalf("unexpected Jenkins API path: %s", r.URL.Path)
@@ -32,7 +32,7 @@ func TestArchiveBuildNumberFromRecentBuildsMatchesParameters(t *testing.T) {
 		AppName:        "fscr-pex",
 		EnvName:        "gkd",
 		DeployType:     "all",
-		JenkinsJob:     "gkd-fscr_on-site_update",
+		JenkinsJob:     "gkd-app_on-site_update",
 		StartTime:      &start,
 		JenkinsQueueID: 94081,
 	}

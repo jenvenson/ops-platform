@@ -16,7 +16,7 @@ jwt:
 # Jenkins 配置
 jenkins:
   # Jenkins 基础地址，从环境变量 JENKINS_URL 读取
-  url: "http://js.zbnsec.com"
+  url: "${JENKINS_URL:-}"
   # Jenkins 用户名，从环境变量 JENKINS_USERNAME 读取
   username: ""
   # Jenkins API Token，从环境变量 JENKINS_TOKEN 读取

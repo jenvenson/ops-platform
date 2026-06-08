@@ -12,8 +12,8 @@
 
 ### 2. 下载地址格式标准化
 - **问题**：下载地址格式不符合要求
-- **原格式**：`http://10.99.99.65/update/%s/%s/`
-- **新格式**：`http://10.99.99.65:8888/aggregation/%d.tar`
+- **原格式**：`http://your-update-server/update/%s/%s/`
+- **新格式**：`http://your-package-server:8888/aggregation/%d.tar`
 - **实现方式**：使用Unix时间戳作为tar包文件名
 - **影响文件**：
   - `backend/internal/cmdb/aggregate_handler.go`
@@ -33,7 +33,7 @@
 
 2. **aggregated_history_handler.go**：
    - 修改了多个位置的下载URL生成逻辑
-   - 统一使用 `http://10.99.99.65:8888/aggregation/%d.tar` 格式
+   - 统一使用 `http://your-package-server:8888/aggregation/%d.tar` 格式
    - 移除了未使用的变量
 
 ### 前端变更

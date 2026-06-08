@@ -240,7 +240,7 @@
 ### 已验证结果
 
 - 开发环境登录后 Web 扫描已回归通过，已确认 `security_scan_runs`、`security_scan_targets`、`security_scan_evidences`、`security_scan_finding_occurrences` 正常落库。
-- 正式地址 `http://10.99.99.185/web_01` 已用账号 `web_01` 做真实登录后扫描验证。
+- 正式地址 `http://your-app/web_01` 已用账号 `web_01` 做真实登录后扫描验证。
 - 任务 `18` 已验证“复用首轮登录态”有效，修复了逐目标重复登录导致的 `auth/oauth2/token` 超时失败。
 - 任务 `19` 在当前网络结构下已完成，但由于 browser helper 不可达，只发现 `1` 个入口，说明链路可用、浏览器态发现未生效。
 - 任务 `21` 已验证任务结果提示增强生效：当 browser discovery 回退为 HTTP discovery 时，最终 `message` 会显式提示“因 browser helper 不可达回退为 HTTP 发现”，便于直接从任务结果判断覆盖面边界。
@@ -267,7 +267,7 @@
   - 同样是正式地址 `8` 个入口、`8` 个目标
   - `agreement/get`、`get-term`、`plugin/installed/list`、`verify/type` 不再走 `rule-only`
 - 任务 `37` 已在删除 `security_web_discoveries` 表后重新验证：
-  - 目标 `http://10.99.99.185/web_01/`
+  - 目标 `http://your-app/web_01/`
   - 任务完成后 `latest_run` 摘要正常返回
   - `targets=10`、`evidences=18`、`occurrences=9`、`vulnerabilities=9`
   - 说明详情页和新读接口已不依赖旧 discoveries 表
@@ -284,7 +284,7 @@
   - `标准扫描` 保持当前保守预算，适合首轮排查
   - `专项扫描` 默认全选全部类别，且自动使用更深预算
 - 任务 `36` 已验证新的“专项扫描”端到端生效：
-  - 正式地址 `http://10.99.99.185/web_01`
+  - 正式地址 `http://your-app/web_01`
   - 默认全选全部 `9` 类漏洞类别
   - 最终结果为 `8` 个入口、`8` 个目标、`2 high / 8 medium / 0 low`
   - 最终消息不再出现“低价值目标仅执行规则检测”，说明专项扫描已使用深预算而非标准预算

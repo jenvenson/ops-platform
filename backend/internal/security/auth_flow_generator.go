@@ -31,8 +31,8 @@ func generateAuthFlow(req GenerateAuthFlowRequest) (*GenerateAuthFlowResponse, e
 
 	var flow *AuthFlowConfig
 	switch preset {
-	case "web01-fscr":
-		flow = buildWeb01AuthFlow()
+	case "custom-oauth2":
+		flow = buildCustomOAuth2Flow()
 	case "token-form":
 		flow = buildGenericTokenAuthFlow(req, "form")
 	case "token-json":
@@ -55,8 +55,8 @@ func generateAuthFlow(req GenerateAuthFlowRequest) (*GenerateAuthFlowResponse, e
 
 func inferAuthFlowPreset(targetURL string) string {
 	lower := strings.ToLower(strings.TrimSpace(targetURL))
-	if strings.Contains(lower, "/web_01") || strings.Contains(lower, "10.99.99.152") {
-		return "web01-fscr"
+	if strings.Contains(lower, "/web_01") || strings.Contains(lower, "oauth2/token") {
+		return "custom-oauth2"
 	}
 	return "token-json"
 }
@@ -134,31 +134,31 @@ func buildGenericTokenAuthFlow(req GenerateAuthFlowRequest, fallbackContentType 
 	}
 }
 
-func buildWeb01AuthFlow() *AuthFlowConfig {
+func buildCustomOAuth2Flow() *AuthFlowConfig {
 	return &AuthFlowConfig{
 		Variables: []AuthVariable{
-			{Name: "tenant_key", Value: "web_01"},
+			{Name: "tenant_key", Value: "default"},
 			{Name: "lang", Value: "zh"},
-			{Name: "client_basic", Value: "Basic {{base64:fscr-core-common:xsAQ0FNx7k}}"},
+			{Name: "client_basic", Value: "Basic {{base64:your-client-id:your-client-secret}}"},
 			{Name: "request_serial", Value: "{{uuid}}"},
 			{Name: "request_ts", Value: "{{now_unix_ms}}"},
-			{Name: "login_secret", Value: "5157F09EFDC096DE15EBE81A47057A7232F1B8E1"},
+			{Name: "login_secret", Value: "your-login-secret"},
 			{Name: "sign_source", Value: "{{upper:${request_serial}-${request_ts}-/auth/oauth2/token-POST-${login_secret}}}"},
 			{Name: "sign_payload", Value: "{{base64:${sign_source}}}"},
 			{Name: "login_signature", Value: "{{md5:${sign_payload}}}"},
 			{Name: "encoded_password", Value: "{{base64:${request_serial}${password}${request_ts}}}"},
 		},
 		Login: &AuthRequestConfig{
-			URL:         "http://10.99.99.152/auth/oauth2/token",
+			URL:         "http://localhost:8080/auth/oauth2/token",
 			Method:      "POST",
 			ContentType: "form",
 			Headers: []AuthHeader{
 				{Name: "Authorization", Value: "${client_basic}"},
 				{Name: "language", Value: "${lang}"},
 				{Name: "tenantkey", Value: "${tenant_key}"},
-				{Name: "fscr-request-serial", Value: "${request_serial}"},
-				{Name: "fscr-timestamp", Value: "${request_ts}"},
-				{Name: "fscr-signature", Value: "${login_signature}"},
+				{Name: "x-request-serial", Value: "${request_serial}"},
+				{Name: "x-timestamp", Value: "${request_ts}"},
+				{Name: "x-signature", Value: "${login_signature}"},
 			},
 			Body: map[string]string{
 				"grant_type": "password",

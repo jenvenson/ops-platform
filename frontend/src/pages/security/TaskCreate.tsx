@@ -383,7 +383,7 @@ export default function TaskCreate() {
                       label="登录账号"
                       rules={[{ required: true, message: '请输入账号' }]}
                     >
-                      <Input placeholder="例如：web_01" />
+                      <Input placeholder="例如：default" />
                     </Form.Item>
                   </Col>
                   <Col span={12}>

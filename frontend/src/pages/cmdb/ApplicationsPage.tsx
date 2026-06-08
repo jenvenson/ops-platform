@@ -7,7 +7,7 @@ import SearchBar, { SearchField } from '../../components/SearchBar'
 import { canEdit } from '../../utils/menuAccess'
 
 // 从 Jenkins URL 提取简短显示名称
-// http://js.zbnsec.com/view/6f_dev-187/job/6f_dev-fscr_on-site_update → 6f_dev-187/fscr_on-site_update
+// 例如: http://your-jenkins/view/my-view/job/my-job → my-view/my-job
 const formatJenkinsUrl = (url: string, envName?: string) => {
   if (!url) return '-'
   const viewMatch = url.match(/\/view\/([^/]+)\/job\/([^/]+)/)
@@ -471,7 +471,7 @@ export default function ApplicationsPage() {
           <div>
             <Alert
               message="Jenkins View 必须存在！ 输入 Jenkins View 名称，自动获取该 View 下的所有 Job 并批量导入为流水线"
-              description={<span>例如：输入 <code>6f_dev-187</code> 将获取 <code>http://js.zbnsec.com/view/6f_dev-187/</code> 下的所有 Job</span>}
+              description={<span>例如：输入 <code>my-view</code> 将获取 <code>http://your-jenkins/view/my-view/</code> 下的所有 Job</span>}
               type="info"
               showIcon
               style={{ marginBottom: 16 }}
@@ -479,7 +479,7 @@ export default function ApplicationsPage() {
             <Form layout="vertical">
               <Form.Item label="Jenkins View 名称" required>
                 <Input
-                  placeholder="例如: 6f_dev-187"
+                  placeholder="例如: my-view"
                   value={importViewName}
                   onChange={e => setImportViewName(e.target.value)}
                   onPressEnter={handleFetchJobs}
@@ -553,7 +553,7 @@ export default function ApplicationsPage() {
               {importArchiveJob && (
                 <div style={{ marginTop: 6, fontSize: 12, color: '#52c41a' }}>
                   归档流水线主要用于现场迭代更新的部署包归档。
-                  归档地址：{`${window.location.protocol}//js.zbnsec.com/view/${importViewName}/job/${importArchiveJob}`}
+                  归档地址：{`${window.location.protocol}//your-jenkins/view/${importViewName}/job/${importArchiveJob}`}
                 </div>
               )}
             </div>

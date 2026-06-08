@@ -20,7 +20,7 @@ const templateVars = [
   { var: '{{.RuleName}}', desc: '规则名称', example: 'DiskUsageHigh' },
   { var: '{{.Content}}', desc: '告警内容（触发=原始描述，恢复=恢复内容+当前值）', example: '磁盘使用率达到 95%' },
   { var: '{{.CurrentValue}}', desc: '当前指标值（仅恢复告警时有效）', example: '3.72%' },
-  { var: '{{.Source}}', desc: '告警来源', example: '10.99.99.100:9100' },
+  { var: '{{.Source}}', desc: '告警来源', example: 'node-exporter:9100' },
   { var: '{{.Severity}}', desc: '级别(英文)', example: 'critical' },
   { var: '{{.SeverityLabel}}', desc: '级别(中文)', example: '严重' },
   { var: '{{.Status}}', desc: '状态(英文)', example: 'firing' },

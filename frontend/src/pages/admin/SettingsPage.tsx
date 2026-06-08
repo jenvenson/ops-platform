@@ -309,7 +309,7 @@ export default function SettingsPage() {
           </Space>
           <Divider style={{ marginTop: 8 }}>连通性测试</Divider>
           <Form.Item label="测试主机" name="test_host" rules={[{ required: true, message: '请输入测试主机 IP 或域名' }]}>
-            <Input placeholder="例如 10.99.99.187" />
+            <Input placeholder="例如 192.168.1.100" />
           </Form.Item>
           <Form.Item label="测试端口" name="test_port" initialValue={22}>
             <InputNumber min={1} max={65535} style={{ width: '100%' }} />

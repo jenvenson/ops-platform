@@ -2,7 +2,7 @@
 
 ## 1. 安装包聚合功能增强
 - **操作人显示姓名**：修复操作人显示为用户名的问题，改为显示真实姓名
-- **下载地址格式**：将下载地址从 `http://10.99.99.65/update/%s/%s/` 改为 `http://10.99.99.65:8888/aggregation/%d.tar` 格式
+- **下载地址格式**：将下载地址从 `http://your-update-server/update/%s/%s/` 改为 `http://your-package-server:8888/aggregation/%d.tar` 格式
 - **Jenkins日志查看**：实现操作中的"查看日志"功能，链接到Jenkins的console日志
 
 ## 2. Jenkins视图批量复制功能

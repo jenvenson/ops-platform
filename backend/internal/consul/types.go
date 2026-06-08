@@ -10,7 +10,7 @@ import (
 type ConsulConfig struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	Name      string         `gorm:"size:100;not null" json:"name"`       // 配置名称
-	Address   string         `gorm:"size:255;not null" json:"address"`    // Consul 地址，如 http://10.99.99.98:8500
+	Address   string         `gorm:"size:255;not null" json:"address"`    // Consul 地址，如 http://your-consul-server:8500
 	Datacenter string        `gorm:"size:50;default:dc1" json:"datacenter"` // 数据中心
 	Token     string         `gorm:"size:255" json:"token,omitempty"`     // ACL Token（可选）
 	Username  string         `gorm:"size:100" json:"username,omitempty"`  // 基本认证用户名（可选）
