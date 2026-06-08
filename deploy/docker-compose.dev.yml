@@ -69,10 +69,26 @@ services:
       - OLLAMA_EMBED_MODEL=qwen3-embedding:4b
       - ASSISTANT_REQUEST_TIMEOUT_SEC=60
       # 使用第三方模型示例（替换上面的 ollama 配置）:
+      # DeepSeek:
       # - ASSISTANT_PROVIDER=deepseek
       # - ASSISTANT_API_KEY=sk-your-api-key
-      # - ASSISTANT_CHAT_MODEL=deepseek-chat
-      # - ASSISTANT_BASE_URL=https://api.deepseek.com/v1
+      # 通义千问:
+      # - ASSISTANT_PROVIDER=qwen
+      # - ASSISTANT_API_KEY=sk-your-api-key
+      # 智谱 GLM:
+      # - ASSISTANT_PROVIDER=zhipu
+      # - ASSISTANT_API_KEY=your-api-key
+      # Kimi/Moonshot:
+      # - ASSISTANT_PROVIDER=moonshot
+      # - ASSISTANT_API_KEY=sk-your-api-key
+      # 豆包/火山引擎:
+      # - ASSISTANT_PROVIDER=doubao
+      # - ASSISTANT_API_KEY=your-api-key
+      # 自定义 OpenAI 兼容 API:
+      # - ASSISTANT_PROVIDER=custom
+      # - ASSISTANT_API_KEY=your-api-key
+      # - ASSISTANT_BASE_URL=https://your-api.example.com/v1
+      # - ASSISTANT_CHAT_MODEL=your-model-name
       - OPS_NMAP_PROFILE=dev
       - OPS_BROWSER_DISCOVERY_URL=http://ops-browser-helper-dev:31730/discover
       - NUCLEI_VERSION=v3.6.2

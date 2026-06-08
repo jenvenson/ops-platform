@@ -20,7 +20,15 @@ type EmbedProvider interface {
 
 func newChatProvider(cfg config.AssistantConfig) ChatProvider {
 	switch strings.ToLower(strings.TrimSpace(cfg.Provider)) {
-	case "openai", "deepseek":
+	case "openai",
+		"deepseek",
+		"qwen", "tongyi",
+		"zhipu", "glm",
+		"moonshot", "kimi",
+		"doubao", "volcano",
+		"baichuan",
+		"hunyuan",
+		"ernie", "qianfan":
 		return newOpenAIClient(cfg)
 	case "custom":
 		if cfg.BaseURL != "" {

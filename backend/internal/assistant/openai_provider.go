@@ -88,10 +88,26 @@ func resolveOpenAIBaseURL(cfg config.AssistantConfig) string {
 		return cfg.BaseURL
 	}
 	switch strings.ToLower(strings.TrimSpace(cfg.Provider)) {
-	case "deepseek":
-		return "https://api.deepseek.com/v1"
+	// International
 	case "openai":
 		return "https://api.openai.com/v1"
+	// Chinese mainstream models (all OpenAI-compatible)
+	case "deepseek":
+		return "https://api.deepseek.com/v1"
+	case "qwen", "tongyi":
+		return "https://dashscope.aliyuncs.com/compatible-mode/v1"
+	case "zhipu", "glm":
+		return "https://open.bigmodel.cn/api/paas/v4"
+	case "moonshot", "kimi":
+		return "https://api.moonshot.cn/v1"
+	case "doubao", "volcano":
+		return "https://ark.cn-beijing.volces.com/api/v3"
+	case "baichuan":
+		return "https://api.baichuan-ai.com/v1"
+	case "hunyuan":
+		return "https://api.hunyuan.cloud.tencent.com/v1"
+	case "ernie", "qianfan":
+		return "https://qianfan.baidubce.com/v2"
 	default:
 		return ""
 	}
@@ -101,6 +117,20 @@ func defaultModelForProvider(provider string) string {
 	switch strings.ToLower(strings.TrimSpace(provider)) {
 	case "deepseek":
 		return "deepseek-chat"
+	case "qwen", "tongyi":
+		return "qwen-plus"
+	case "zhipu", "glm":
+		return "glm-4-flash"
+	case "moonshot", "kimi":
+		return "moonshot-v1-8k"
+	case "doubao", "volcano":
+		return "doubao-pro-32k"
+	case "baichuan":
+		return "Baichuan4"
+	case "hunyuan":
+		return "hunyuan-lite"
+	case "ernie", "qianfan":
+		return "ernie-speed-128k"
 	case "openai":
 		return "gpt-4o"
 	default:
