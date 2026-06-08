@@ -34,6 +34,7 @@ type MenuConfig struct {
 
 func RegisterRoutes(r *gin.Engine, cfg *config.Config) {
 	ensureDefaultAuditLogSetting()
+		ensureDefaultAssistantModelSetting()
 
 	auth := r.Group("/api/auth")
 	{
@@ -81,6 +82,8 @@ func RegisterRoutes(r *gin.Engine, cfg *config.Config) {
 		admin.GET("/settings/fim-ssh", GetFIMSSHSetting())
 		admin.PUT("/settings/fim-ssh", UpdateFIMSSHSetting())
 		admin.POST("/settings/fim-ssh/test", TestFIMSSHConnection())
+			admin.GET("/settings/assistant-model", GetAssistantModelSetting())
+			admin.PUT("/settings/assistant-model", UpdateAssistantModelSetting())
 
 		// 平台审计
 		admin.GET("/audit/access-logs", GetPlatformAccessLogs())

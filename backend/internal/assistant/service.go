@@ -35,6 +35,30 @@ func NewService(cfg *config.Config) *Service {
 	}
 }
 
+// ReloadFromRuntimeConfig rebuilds chat and embed providers from runtime config.
+func (s *Service) ReloadFromRuntimeConfig(provider string, enabled bool, apiKey, baseURL, chatModel, embedModel string, temperature float64, timeoutSec int) {
+	if s == nil || s.cfg == nil {
+		return
+	}
+	s.cfg.Assistant.Provider = provider
+	s.cfg.Assistant.Enabled = enabled
+	s.cfg.Assistant.APIKey = apiKey
+	s.cfg.Assistant.BaseURL = baseURL
+	s.cfg.Assistant.ChatModel = chatModel
+	s.cfg.Assistant.EmbedModel = embedModel
+	s.cfg.Assistant.Temperature = temperature
+	if timeoutSec > 0 {
+		s.cfg.Assistant.RequestTimeoutSec = timeoutSec
+	}
+	if !enabled {
+		s.chatProvider = nil
+		s.knowledge = loadKnowledgeBase(s.cfg, nil)
+		return
+	}
+	s.chatProvider = newChatProvider(s.cfg.Assistant)
+	s.knowledge = loadKnowledgeBase(s.cfg, newEmbedProvider(s.cfg.Assistant, s.chatProvider))
+}
+
 func (s *Service) GenerateReply(ctx context.Context, message string, history []historyMessage, pageContext *AssistantPageContext) (MessageResponse, int, int, int64) {
 	start := time.Now()
 	pageContext = sanitizePageContext(pageContext)

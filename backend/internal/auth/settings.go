@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/edy/ops-platform/internal/audit"
@@ -396,4 +397,220 @@ func buildFIMSSHClientConfig() (*ssh.ClientConfig, error) {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         time.Duration(timeoutSec) * time.Second,
 	}, nil
+}
+
+type UpdateAssistantModelSettingRequest struct {
+	Provider    string  `json:"provider"`
+	Enabled     bool    `json:"enabled"`
+	APIKey      string  `json:"api_key"`
+	BaseURL     string  `json:"base_url"`
+	ChatModel   string  `json:"chat_model"`
+	EmbedModel  string  `json:"embed_model"`
+	Temperature float64 `json:"temperature"`
+	TimeoutSec  int     `json:"timeout_sec"`
+}
+
+type AssistantModelSettingResponse struct {
+	Provider          string  `json:"provider"`
+	Enabled           bool    `json:"enabled"`
+	APIKeyConfigured  bool    `json:"api_key_configured"`
+	BaseURL           string  `json:"base_url"`
+	ChatModel         string  `json:"chat_model"`
+	EmbedModel        string  `json:"embed_model"`
+	Temperature       float64 `json:"temperature"`
+	TimeoutSec        int     `json:"timeout_sec"`
+}
+
+func GetAssistantModelSetting() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		setting, err := loadAssistantModelSettingModel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load model settings"})
+			return
+		}
+		c.JSON(http.StatusOK, buildAssistantModelSettingResponse(setting))
+	}
+}
+
+func UpdateAssistantModelSetting() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req UpdateAssistantModelSettingRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid request: %v", err)})
+			return
+		}
+
+		current, err := loadAssistantModelSettingModel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load model settings"})
+			return
+		}
+		if current == nil {
+			current = &models.AssistantModelSetting{}
+		}
+
+		audit.SetOperationAuditBefore(c, buildAssistantModelSettingResponse(current))
+
+		current.Provider = strings.TrimSpace(req.Provider)
+		current.Enabled = req.Enabled
+		current.BaseURL = strings.TrimSpace(req.BaseURL)
+		current.ChatModel = strings.TrimSpace(req.ChatModel)
+		current.EmbedModel = strings.TrimSpace(req.EmbedModel)
+		current.Temperature = req.Temperature
+		current.TimeoutSec = req.TimeoutSec
+		current.UpdatedBy = currentAdminUsername(c)
+
+		if req.APIKey != "" {
+			encryptedKey, err := secureconfig.EncryptString(req.APIKey)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to encrypt api key"})
+				return
+			}
+			current.APIKey = encryptedKey
+		}
+
+		if err := database.DB.Save(current).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save model settings"})
+			return
+		}
+
+		audit.SetOperationAuditAfter(c, buildAssistantModelSettingResponse(current))
+		audit.SetOperationAuditSummary(c, fmt.Sprintf("Updated assistant model settings: provider=%s enabled=%t model=%s",
+			current.Provider, current.Enabled, current.ChatModel))
+
+		go tryReloadAssistantProvider(current)
+
+		c.JSON(http.StatusOK, gin.H{"message": "模型配置已保存，将在下一次请求生效"})
+	}
+}
+
+func loadAssistantModelSettingModel() (*models.AssistantModelSetting, error) {
+	var setting models.AssistantModelSetting
+	if err := database.DB.First(&setting).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &setting, nil
+}
+
+func ensureDefaultAssistantModelSetting() {
+	if database.DB == nil {
+		return
+	}
+	var setting models.AssistantModelSetting
+	if err := database.DB.First(&setting).Error; err == nil {
+		return
+	}
+	_ = database.DB.Create(&models.AssistantModelSetting{
+		Provider:    "ollama",
+		Enabled:     false,
+		Temperature: 0.2,
+		TimeoutSec:  20,
+		UpdatedBy:   "system",
+	}).Error
+}
+
+func buildAssistantModelSettingResponse(setting *models.AssistantModelSetting) AssistantModelSettingResponse {
+	if setting == nil {
+		return AssistantModelSettingResponse{
+			Provider:          "ollama",
+			Enabled:           false,
+			APIKeyConfigured:  false,
+			Temperature:       0.2,
+			TimeoutSec:        20,
+		}
+	}
+	return AssistantModelSettingResponse{
+		Provider:          setting.Provider,
+		Enabled:           setting.Enabled,
+		APIKeyConfigured:  setting.APIKey != "",
+		BaseURL:           setting.BaseURL,
+		ChatModel:         setting.ChatModel,
+		EmbedModel:        setting.EmbedModel,
+		Temperature:       setting.Temperature,
+		TimeoutSec:        setting.TimeoutSec,
+	}
+}
+
+func decryptAndGetSettingAPIKey(setting *models.AssistantModelSetting) string {
+	if setting == nil || setting.APIKey == "" {
+		return ""
+	}
+	decrypted, err := secureconfig.DecryptString(setting.APIKey)
+	if err != nil {
+		return ""
+	}
+	return decrypted
+}
+
+func tryReloadAssistantProvider(setting *models.AssistantModelSetting) {
+	if setting == nil || !setting.Enabled {
+		return
+	}
+	currentAssistantMu.Lock()
+	defer currentAssistantMu.Unlock()
+
+	apiKey := decryptAndGetSettingAPIKey(setting)
+	currentAssistantConfig = &assistantRuntimeConfig{
+		Provider:    setting.Provider,
+		Enabled:     setting.Enabled,
+		APIKey:      apiKey,
+		BaseURL:     setting.BaseURL,
+		ChatModel:   setting.ChatModel,
+		EmbedModel:  setting.EmbedModel,
+		Temperature: setting.Temperature,
+		TimeoutSec:  setting.TimeoutSec,
+		dirty:       true,
+	}
+}
+
+var (
+	currentAssistantMu     sync.Mutex
+	currentAssistantConfig *assistantRuntimeConfig
+)
+
+type assistantRuntimeConfig struct {
+	Provider    string
+	Enabled     bool
+	APIKey      string
+	BaseURL     string
+	ChatModel   string
+	EmbedModel  string
+	Temperature float64
+	TimeoutSec  int
+	dirty       bool
+}
+
+// AssistantRuntimeConfig is the exported view of the current assistant config.
+type AssistantRuntimeConfig struct {
+	Provider    string
+	Enabled     bool
+	APIKey      string
+	BaseURL     string
+	ChatModel   string
+	EmbedModel  string
+	Temperature float64
+	TimeoutSec  int
+}
+
+// FetchAssistantRuntimeConfig returns the runtime config if it has changed since last call.
+func FetchAssistantRuntimeConfig() *AssistantRuntimeConfig {
+	currentAssistantMu.Lock()
+	defer currentAssistantMu.Unlock()
+	if currentAssistantConfig == nil || !currentAssistantConfig.dirty {
+		return nil
+	}
+	currentAssistantConfig.dirty = false
+	return &AssistantRuntimeConfig{
+		Provider:    currentAssistantConfig.Provider,
+		Enabled:     currentAssistantConfig.Enabled,
+		APIKey:      currentAssistantConfig.APIKey,
+		BaseURL:     currentAssistantConfig.BaseURL,
+		ChatModel:   currentAssistantConfig.ChatModel,
+		EmbedModel:  currentAssistantConfig.EmbedModel,
+		Temperature: currentAssistantConfig.Temperature,
+		TimeoutSec:  currentAssistantConfig.TimeoutSec,
+	}
 }

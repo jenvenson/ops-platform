@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Divider, Form, Input, InputNumber, Select, Space, Switch, Tabs, Tag, Typography, message } from 'antd'
 import { SaveOutlined } from '@ant-design/icons'
-import { adminAPI, type AuditLogSetting, type FIMSSHSetting } from '../../api/admin'
+import { adminAPI, type AuditLogSetting, type FIMSSHSetting, type AssistantModelSetting } from '../../api/admin'
 import { canEdit } from '../../utils/menuAccess'
 
 const { Text } = Typography
@@ -16,6 +16,9 @@ export default function SettingsPage() {
   const [fimTestResult, setFIMTestResult] = useState<{ success: boolean; message: string; output?: string } | null>(null)
   const [auditForm] = Form.useForm()
   const [auditLoading, setAuditLoading] = useState(false)
+  const [modelForm] = Form.useForm()
+  const [modelLoading, setModelLoading] = useState(false)
+  const [modelSetting, setModelSetting] = useState<AssistantModelSetting | null>(null)
 
   const handleSubmit = () => {
     setLoading(true)
@@ -58,9 +61,32 @@ export default function SettingsPage() {
     }
   }
 
+  const loadModelSetting = async () => {
+    setModelLoading(true)
+    try {
+      const setting = await adminAPI.getAssistantModelSetting()
+      setModelSetting(setting)
+      modelForm.setFieldsValue({
+        provider: setting.provider || 'ollama',
+        enabled: setting.enabled,
+        api_key: '',
+        base_url: setting.base_url || '',
+        chat_model: setting.chat_model || '',
+        embed_model: setting.embed_model || '',
+        temperature: setting.temperature,
+        timeout_sec: setting.timeout_sec,
+      })
+    } catch {
+      message.error('加载 AI 模型配置失败')
+    } finally {
+      setModelLoading(false)
+    }
+  }
+
   useEffect(() => {
     void loadFIMSetting()
     void loadAuditSetting()
+    void loadModelSetting()
   }, [])
 
   const handleSaveAuditSetting = async () => {
@@ -131,6 +157,32 @@ export default function SettingsPage() {
       }
     } finally {
       setFIMTesting(false)
+    }
+  }
+
+  const handleSaveModelSetting = async () => {
+    try {
+      const values = await modelForm.validateFields()
+      setModelLoading(true)
+      const payload = {
+        provider: values.provider,
+        enabled: !!values.enabled,
+        api_key: values.api_key?.trim() || undefined,
+        base_url: values.base_url?.trim() || '',
+        chat_model: values.chat_model?.trim() || '',
+        embed_model: values.embed_model?.trim() || '',
+        temperature: values.temperature ?? 0.2,
+        timeout_sec: values.timeout_sec ?? 20,
+      }
+      await adminAPI.updateAssistantModelSetting(payload)
+      modelForm.setFieldsValue({ api_key: '' })
+      message.success('AI 模型配置已保存，将在下一次请求时生效')
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message || '保存 AI 模型配置失败')
+      }
+    } finally {
+      setModelLoading(false)
     }
   }
 
@@ -328,6 +380,127 @@ export default function SettingsPage() {
           <Form.Item>
             {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={fimLoading} onClick={() => void handleSaveFIMSetting()}>
               保存 FIM SSH 配置
+            </Button>}
+          </Form.Item>
+        </Form>
+      ),
+    },
+    {
+      key: 'ai-model',
+      label: 'AI 模型',
+      children: (
+        <Form
+          form={modelForm}
+          layout="vertical"
+          initialValues={{
+            provider: 'ollama',
+            enabled: false,
+            temperature: 0.2,
+            timeout_sec: 20,
+          }}
+        >
+          <Alert
+            type="info"
+            showIcon
+            style={{ marginBottom: 16 }}
+            message="配置 AI 运维小助手使用的模型提供商。支持本地 Ollama 和第三方云模型。修改后保存将在下一次对话请求中生效，无需重启服务。"
+          />
+          <Form.Item label="启用 AI 助手" name="enabled" valuePropName="checked">
+            <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+          </Form.Item>
+          <Form.Item
+            label="模型提供商"
+            name="provider"
+            rules={[{ required: true, message: '请选择模型提供商' }]}
+          >
+            <Select
+              showSearch
+              options={[
+                { label: 'Ollama (本地)', value: 'ollama' },
+                { label: 'OpenAI', value: 'openai' },
+                { label: 'DeepSeek', value: 'deepseek' },
+                { label: '通义千问 (Qwen)', value: 'qwen' },
+                { label: '智谱 GLM', value: 'zhipu' },
+                { label: 'Kimi / Moonshot', value: 'moonshot' },
+                { label: 'MiniMax', value: 'minimax' },
+                { label: '豆包 (Doubao)', value: 'doubao' },
+                { label: '百川 (Baichuan)', value: 'baichuan' },
+                { label: '混元 (Hunyuan)', value: 'hunyuan' },
+                { label: '文心一言 (Ernie)', value: 'ernie' },
+                { label: '自定义中转', value: 'custom' },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, current) => prev.provider !== current.provider}
+          >
+            {({ getFieldValue }) => {
+              const provider = getFieldValue('provider')
+              if (provider && provider !== 'ollama') {
+                return (
+                  <Form.Item
+                    label="API Key"
+                    name="api_key"
+                    extra={modelSetting?.api_key_configured ? <Tag color="green">已保存 API Key，留空表示继续使用当前 Key</Tag> : undefined}
+                    rules={[
+                      {
+                        validator: async (_rule, value) => {
+                          if (value?.trim() || modelSetting?.api_key_configured) {
+                            return
+                          }
+                          throw new Error('请输入 API Key')
+                        },
+                      },
+                    ]}
+                  >
+                    <Input.Password placeholder="sk-..." />
+                  </Form.Item>
+                )
+              }
+              return null
+            }}
+          </Form.Item>
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, current) => prev.provider !== current.provider}
+          >
+            {({ getFieldValue }) => {
+              const provider = getFieldValue('provider')
+              if (!provider || provider === 'ollama') {
+                return null
+              }
+              return (
+                <Form.Item
+                  label="API 地址"
+                  name="base_url"
+                  extra="选填。使用第三方中转地址时在此填写完整 API Base URL，例如 https://your-relay.example.com/v1"
+                >
+                  <Input placeholder="留空使用提供商默认地址" />
+                </Form.Item>
+              )
+            }}
+          </Form.Item>
+          <Form.Item label="聊天模型" name="chat_model" extra="选填。留空使用该提供商的默认模型">
+            <Input placeholder="例如 deepseek-chat 或 gpt-4o" />
+          </Form.Item>
+          <Form.Item label="嵌入模型" name="embed_model" extra="选填。用于知识库语义搜索，留空则降级为词法搜索">
+            <Input placeholder="例如 text-embedding-3-small" />
+          </Form.Item>
+          <Form.Item label="温度" name="temperature" extra="控制回答的随机性，0-2 之间，越低越确定">
+            <InputNumber min={0} max={2} step={0.1} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item label="请求超时（秒）" name="timeout_sec" rules={[{ required: true, message: '请输入超时秒数' }]}>
+            <InputNumber min={5} max={300} style={{ width: '100%' }} />
+          </Form.Item>
+          <Space size={12} style={{ marginBottom: 16 }}>
+            <Tag color={modelSetting?.enabled ? 'green' : 'default'}>状态: {modelSetting?.enabled ? '已启用' : '已禁用'}</Tag>
+            <Tag color={modelSetting?.api_key_configured ? 'green' : 'default'}>API Key: {modelSetting?.api_key_configured ? '已配置' : '未配置'}</Tag>
+            <Tag>{modelSetting?.provider || 'ollama'}</Tag>
+          </Space>
+          <Form.Item>
+            {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={modelLoading} onClick={() => void handleSaveModelSetting()}>
+              保存 AI 模型配置
             </Button>}
           </Form.Item>
         </Form>

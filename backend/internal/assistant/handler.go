@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/edy/ops-platform/internal/audit"
+	"github.com/edy/ops-platform/internal/auth"
 	"github.com/edy/ops-platform/internal/database"
 	"github.com/edy/ops-platform/internal/models"
 	"github.com/edy/ops-platform/internal/platformevent"
@@ -482,6 +483,11 @@ func (h *Handler) SendMessage(c *gin.Context) {
 	if !h.limiter.Allow(user.ID) {
 		c.JSON(http.StatusTooManyRequests, gin.H{"error": "assistant rate limit exceeded"})
 		return
+	}
+
+	if rtCfg := auth.FetchAssistantRuntimeConfig(); rtCfg != nil {
+		h.service.ReloadFromRuntimeConfig(rtCfg.Provider, rtCfg.Enabled, rtCfg.APIKey,
+			rtCfg.BaseURL, rtCfg.ChatModel, rtCfg.EmbedModel, rtCfg.Temperature, rtCfg.TimeoutSec)
 	}
 
 	var session models.AssistantSession

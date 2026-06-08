@@ -126,6 +126,28 @@ export interface AuditLogSetting {
   login_log_enabled: boolean
 }
 
+export interface AssistantModelSetting {
+  provider: string
+  enabled: boolean
+  api_key_configured: boolean
+  base_url: string
+  chat_model: string
+  embed_model: string
+  temperature: number
+  timeout_sec: number
+}
+
+export interface UpdateAssistantModelSettingRequest {
+  provider: string
+  enabled: boolean
+  api_key?: string
+  base_url?: string
+  chat_model?: string
+  embed_model?: string
+  temperature?: number
+  timeout_sec?: number
+}
+
 export const adminAPI = {
   // 用户管理
   getUsers: (): Promise<User[]> =>
@@ -201,4 +223,10 @@ export const adminAPI = {
 
   testFIMSSHConnection: (data: TestFIMSSHConnectionRequest): Promise<TestFIMSSHConnectionResponse> =>
     apiClient.post<TestFIMSSHConnectionResponse>('/admin/settings/fim-ssh/test', data),
+
+  getAssistantModelSetting: (): Promise<AssistantModelSetting> =>
+    apiClient.get<AssistantModelSetting>('/admin/settings/assistant-model'),
+
+  updateAssistantModelSetting: (data: UpdateAssistantModelSettingRequest): Promise<{ message: string }> =>
+    apiClient.put<{ message: string }>('/admin/settings/assistant-model', data),
 }
