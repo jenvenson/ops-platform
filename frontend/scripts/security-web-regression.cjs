@@ -1,7 +1,7 @@
 const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:8080';
 const USERNAME = process.env.SMOKE_USERNAME || 'admin';
-const PASSWORD = process.env.SMOKE_PASSWORD || 'admin123';
-const WEB_SCAN_TARGET = process.env.WEB_SCAN_TARGET || 'http://10.99.99.185/web_01/';
+const PASSWORD = process.env.SMOKE_PASSWORD || '';
+const WEB_SCAN_TARGET = process.env.WEB_SCAN_TARGET || 'http://test-app.example.com/';
 const WEB_SCAN_LOGIN_URL = process.env.WEB_SCAN_LOGIN_URL || WEB_SCAN_TARGET;
 const WEB_SCAN_APP_USERNAME = process.env.WEB_SCAN_APP_USERNAME || 'web_01';
 const WEB_SCAN_APP_PASSWORD = process.env.WEB_SCAN_APP_PASSWORD || 'Web_01';

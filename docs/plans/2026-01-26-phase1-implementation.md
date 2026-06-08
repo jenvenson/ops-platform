@@ -562,7 +562,7 @@ services:
     image: mysql:8.0
     container_name: ops-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root123}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-change_me_in_production}
       MYSQL_DATABASE: ops_platform
     ports:
       - "3306:3306"
@@ -590,7 +590,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_PASSWORD=${DB_PASSWORD:-root123}
+      - DB_PASSWORD=${DB_PASSWORD:-change_me_in_production}
       - REDIS_PASSWORD=
       - JWT_SECRET=${JWT_SECRET:-secret123}
     depends_on:
@@ -711,7 +711,7 @@ CMD ["nginx", "-g", "daemon off;"]
 **Step 1: 创建 .env 文件**
 
 ```bash
-DB_PASSWORD=root123
+DB_PASSWORD=change_me_in_production
 JWT_SECRET=your-secret-key-change-in-production
 ```
 

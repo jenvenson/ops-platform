@@ -16,8 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     KEY idx_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
--- 插入默认管理员用户 (密码: admin123)
--- bcrypt hash for "admin123": $2a$10$csSTUM5UQrtt8E/rQ5dZlOk.MQvjEqFRUPxNkTarOLxalC3pBfZny
+-- 插入默认管理员用户（首次登录后请立即修改密码）
 INSERT INTO users (username, password, real_name, email, role)
 VALUES ('admin', '$2a$10$csSTUM5UQrtt8E/rQ5dZlOk.MQvjEqFRUPxNkTarOLxalC3pBfZny', '管理员', 'admin@example.com', 'admin')
 ON DUPLICATE KEY UPDATE username=username;

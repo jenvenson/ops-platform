@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 const UI_BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:8890';
 const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:8080';
 const USERNAME = process.env.SMOKE_USERNAME || 'admin';
-const PASSWORD = process.env.SMOKE_PASSWORD || 'admin123';
+const PASSWORD = process.env.SMOKE_PASSWORD || '';
 const EXPECTED_CONFLICT_MESSAGE = '当前策略与主机已有执行任务进行中，请稍后重试';
 
 async function loginAndGetToken() {

@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:8890';
 const USERNAME = process.env.SMOKE_USERNAME || 'admin';
-const PASSWORD = process.env.SMOKE_PASSWORD || 'admin123';
+const PASSWORD = process.env.SMOKE_PASSWORD || '';
 const HEADLESS = process.env.HEADLESS !== 'false';
 const SMOKE_BROWSER = process.env.SMOKE_BROWSER || (process.platform === 'darwin' ? 'chrome' : 'auto');
 const SMOKE_CHROME_EXECUTABLE = process.env.SMOKE_CHROME_EXECUTABLE || '';

@@ -200,7 +200,7 @@ PY" 2>&1) || {
     }
 
     echo "${env_check_result}"
-    warn_if_remote_env_matches "DB_PASSWORD" "root123" "DB_PASSWORD 仍为默认风格值 root123，建议尽快轮换"
+    warn_if_remote_env_matches "DB_PASSWORD" "change_me_in_production" "DB_PASSWORD 仍为占位值，建议尽快更换"
     warn_if_remote_env_matches "REDIS_PASSWORD" "redis_secure_password_change_in_production" "REDIS_PASSWORD 仍为占位风格值，建议尽快轮换"
     echo ""
 }

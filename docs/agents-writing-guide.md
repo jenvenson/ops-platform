@@ -36,7 +36,7 @@
 
 ```md
 ## Repo Facts
-- 当前主仓库根目录是 `phase1-framework/`，不是外层容器目录。
+- 当前主仓库根目录是项目根目录，不是外层容器目录。
 - 主工程目录：`backend/`、`frontend/`、`deploy/`、`docs/`
 - `_archive/` 不参与主运行链路。
 - 后端主入口：`backend/cmd/server/main.go`
@@ -143,7 +143,7 @@
 
 强表达：
 
-- 当前主仓库根目录是 `phase1-framework/`
+- 当前主仓库根目录即项目根目录
 - 线上 `.env` 位于 `/opt/ops-platform/deploy/.env`
 - 环境变量变更后需要 `docker-compose up -d --no-deps --force-recreate`
 
@@ -222,7 +222,7 @@
 - 修改后必须验证；无法验证时明确说明缺口。
 
 ## Repo Facts
-- 当前主仓库根目录是 `phase1-framework/`。
+- 当前主仓库根目录即项目根目录。
 - 主工程目录：`backend/`、`frontend/`、`deploy/`、`docs/`
 - `_archive/` 不参与主运行链路。
 

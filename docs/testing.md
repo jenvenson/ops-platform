@@ -85,11 +85,11 @@
 - [x] 验证Consul功能未受影响
 
 ### 2. Web 扫描回归入口
-- [x] 后端代码变更后执行 `cd .worktrees/phase1-framework && bash deploy/dev.sh backend`
-- [x] 前端需要刷新开发容器时执行 `cd .worktrees/phase1-framework && bash deploy/dev.sh frontend`
-- [x] 安全扫描后端单测：`cd .worktrees/phase1-framework/backend && GOCACHE=$(pwd)/.gocache go test ./internal/security/...`
-- [x] 前端构建：`cd .worktrees/phase1-framework/frontend && npm run build`
-- [x] 登录后 Web 扫描回归：`cd .worktrees/phase1-framework/frontend && npm run acceptance:smoke:security-web`
+- [x] 后端代码变更后执行 `bash deploy/dev.sh backend`
+- [x] 前端需要刷新开发容器时执行 `bash deploy/dev.sh frontend`
+- [x] 安全扫描后端单测：`cd backend && GOCACHE=$(pwd)/.gocache go test ./internal/security/...`
+- [x] 前端构建：`cd frontend && npm run build`
+- [x] 登录后 Web 扫描回归：`cd frontend && npm run acceptance:smoke:security-web`
 - [x] 回归脚本验证口径：创建真实任务并校验 `latest_run`、`targets`、`evidences`、`occurrences`、`vulnerabilities`
 
 ## 测试结果总结
