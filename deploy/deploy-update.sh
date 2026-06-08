@@ -24,7 +24,7 @@
 set -euo pipefail
 
 # ======================== 配置区 ========================
-REMOTE_HOST="${REMOTE_HOST:-10.99.99.150}"
+REMOTE_HOST="${REMOTE_HOST:-}"
 REMOTE_USER="${REMOTE_USER:-root}"
 REMOTE_DEPLOY_DIR="${REMOTE_DEPLOY_DIR:-/opt/ops-platform/deploy}"
 REMOTE_PROJECT_DIR="${REMOTE_PROJECT_DIR:-$(dirname "${REMOTE_DEPLOY_DIR}")}"
@@ -86,8 +86,8 @@ print_help() {
 示例:
   ./deploy-update.sh
   ./deploy-update.sh backend
-  REMOTE_HOST=10.0.0.8 REMOTE_USER=deploy ./deploy-update.sh frontend
-  REMOTE_HOST=10.0.0.8 REMOTE_USER=deploy ./deploy-update.sh migrate
+  REMOTE_HOST=<your-server-ip> REMOTE_USER=deploy ./deploy-update.sh frontend
+  REMOTE_HOST=<your-server-ip> REMOTE_USER=deploy ./deploy-update.sh migrate
 EOF
 }
 
