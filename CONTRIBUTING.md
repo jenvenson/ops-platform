@@ -7,7 +7,7 @@ Thank you for your interest in contributing!
 ### Prerequisites
 
 - Docker 20.10+ and Docker Compose 2.0+
-- Go 1.21+ (for backend development outside Docker)
+- Go 1.25+ (for backend development outside Docker)
 - Node.js 20+ (for frontend development outside Docker)
 - pnpm (preferred) or npm
 

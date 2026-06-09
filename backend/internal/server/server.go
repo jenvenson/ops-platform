@@ -26,6 +26,7 @@ import (
 	"github.com/jenvenson/ops-platform/internal/tasks" // 添加tasks导入
 	"github.com/jenvenson/ops-platform/pkg/config"
 	"github.com/jenvenson/ops-platform/pkg/jenkins" // 添加jenkins导入
+	"github.com/jenvenson/ops-platform/pkg/license"
 	"github.com/jenvenson/ops-platform/pkg/logger"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -49,6 +50,16 @@ func Run() error {
 			log.Sync()
 		}
 	}()
+
+	// 验证 License Key
+	lic := license.Validate(cfg.LicenseKey)
+	if lic.Valid {
+		log.Info(fmt.Sprintf("License valid: customer=%s expires=%s", lic.Customer, lic.ExpiresAt.Format("2006-01-02")))
+	} else if lic.ValidError == license.ErrMissingKey.Error() {
+		log.Info("License key not configured, enterprise features disabled")
+	} else {
+		log.Warn("License invalid: " + lic.ValidError)
+	}
 
 	// 初始化数据库
 	if err := database.Init(cfg, log); err != nil {

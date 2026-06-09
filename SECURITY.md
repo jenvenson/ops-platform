@@ -10,7 +10,7 @@
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, please report them via email to the project maintainers.
+Instead, please report them via [GitHub Security Advisories](https://github.com/jenvenson/ops-platform/security/advisories/new).
 
 We will respond to your report within 7 days and will keep you informed of our
 progress toward a fix and public disclosure. We may ask for additional

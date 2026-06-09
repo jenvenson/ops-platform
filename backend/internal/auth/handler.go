@@ -94,6 +94,8 @@ func RegisterRoutes(r *gin.Engine, cfg *config.Config) {
 		admin.GET("/settings/general", GetSystemGeneralSetting())
 		admin.PUT("/settings/general", UpdateSystemGeneralSetting())
 
+		admin.GET("/settings/license", GetLicenseStatus(cfg))
+
 		// 平台审计
 		admin.GET("/audit/access-logs", GetPlatformAccessLogs())
 		admin.DELETE("/audit/access-logs/:id", DeletePlatformAccessLog())
