@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.git/
+.worktrees/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.*
+
+# Test artifacts
+frontend/artifacts/
+
+# Build outputs
+dist/
+build/
+
+# Compiled binaries
+backend/bin/
+deploy/server
