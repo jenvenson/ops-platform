@@ -422,4 +422,4 @@ sudo ufw enable
 
 ## 十三、联系信息
 
-部署遇到问题请联系运维人员。
+如遇到部署问题，请在 [GitHub Issues](https://github.com/jenvenson/ops-platform/issues) 提交反馈。

@@ -446,7 +446,7 @@ type ChatRequest struct {
 ### 11.1 首批知识源
 
 - [docs/deploy.md](docs/deploy.md)
-- [docs/design.md](docs/design.md)
+- [docs/aggregate-package-design.md](docs/aggregate-package-design.md)
 - [docs/testing.md](docs/testing.md)
 - [docs/user_manual.md](docs/user_manual.md)
 - [docs/project-structure.md](docs/project-structure.md)

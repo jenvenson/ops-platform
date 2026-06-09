@@ -25,9 +25,23 @@
 | **告警中心** | 规则管理、联系人、渠道、模板、Webhook |
 | **监控大屏** | Grafana 仪表盘代理、健康检查、Prometheus 集成 |
 | **安全扫描** | 主机扫描、Web 扫描、漏洞管理、FIM 文件完整性监控 |
-| **运维小助手** | AI 对话助手，支持 Ollama 本地模型 |
+| **运维小助手** | AI 对话助手，支持 Ollama 本地模型及主流第三方模型 |
 | **权限管理** | JWT 认证、RBAC 角色权限、菜单控制 |
 | **审计日志** | 操作审计、平台事件流 |
+
+## 界面预览
+
+| 工作台 | CMDB 项目管理 |
+|--------|---------------|
+| ![工作台](docs/screenshots/dashboard.png) | ![CMDB](docs/screenshots/cmdb-projects.png) |
+
+| 监控大屏 | 安全扫描 |
+|----------|----------|
+| ![监控](docs/screenshots/monitor-bigscreen.png) | ![安全](docs/screenshots/security-tasks.png) |
+
+| 部署发布 | 告警规则 | 运维小助手 |
+|----------|----------|------------|
+| ![部署](docs/screenshots/deploy-release.png) | ![告警](docs/screenshots/alert-rules.png) | ![AI助手](docs/screenshots/ai-chatbot.png) |
 
 ## 技术栈
 
@@ -61,10 +75,11 @@ docker compose -f docker-compose.dev.yml up -d
 访问地址：
 - 前端入口: http://localhost:8890
 - 后端 API: http://localhost:8080
+- 默认账号: `admin` / `admin123`
 
 ### 生产环境
 
-详见 [`deploy/DEPLOY.md`](deploy/DEPLOY.md)
+详见 [部署指南](deploy/DEPLOY.md)
 
 ## 项目结构
 
@@ -89,7 +104,7 @@ docker compose -f docker-compose.dev.yml up -d
 │   ├── nginx.prod.conf.template  # Nginx 模板
 │   ├── deploy-init.sh            # 首次部署
 │   └── deploy-update.sh          # 迭代更新
-├── docs/                   # 文档
+├── docs/                   # 文档与截图
 └── migrations/             # 历史补充迁移
 ```
 
@@ -114,13 +129,17 @@ auth → cmdb / security / alert / consul / cicd / assistant
 
 ## 运维小助手
 
-内置 AI 对话助手，支持通过 Ollama 运行本地模型：
+内置 AI 对话助手，支持通过 Ollama 运行本地模型，也可接入第三方模型 API：
 
 ```bash
-# 设置环境变量
+# 本地 Ollama
 ASSISTANT_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_CHAT_MODEL=qwen3:8b
+
+# 第三方模型 (DeepSeek / 通义千问 / GLM / Kimi / MiniMax / 豆包 等)
+ASSISTANT_PROVIDER=deepseek
+ASSISTANT_API_KEY=sk-your-api-key
 ```
 
 支持的工具调用：CMDB 查询、告警管理、部署操作、安全扫描。
@@ -129,8 +148,13 @@ OLLAMA_CHAT_MODEL=qwen3:8b
 
 - [部署指南](deploy/DEPLOY.md)
 - [用户手册](docs/user_manual.md)
-- [设计文档](docs/design.md)
 - [测试说明](docs/testing.md)
+- [贡献指南](CONTRIBUTING.md)
+
+## 社区
+
+- [提交 Issue](https://github.com/jenvenson/ops-platform/issues)
+- [安全漏洞报告](SECURITY.md)
 
 ## License
 

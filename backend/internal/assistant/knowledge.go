@@ -1399,7 +1399,7 @@ func documentPriority(path string) int {
 		return 4
 	case "docs/user_manual.md":
 		return 2
-	case "docs/deploy.md", "docs/design.md", "docs/testing.md", "docs/project-structure.md":
+	case "docs/deploy.md", "docs/aggregate-package-design.md", "docs/testing.md", "docs/project-structure.md":
 		return 1
 	default:
 		return 0
