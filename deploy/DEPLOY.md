@@ -419,7 +419,3 @@ sudo ufw enable
 | 重启后端 | `docker compose restart backend` |
 | 停止服务 | `docker compose down` |
 | 启动服务 | `docker compose up -d` |
-
-## 十三、联系信息
-
-如遇到部署问题，请在 [GitHub Issues](https://github.com/jenvenson/ops-platform/issues) 提交反馈。
