@@ -20,7 +20,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/grafana-proxy": {
-        target: "http://grafana.internal:3000",
+        target: "http://localhost:3000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/grafana-proxy/, ''),
         headers: {

@@ -67,13 +67,13 @@ JWT_SECRET=你的密钥至少32个字符
 **建议同时确认 Grafana 代理配置：**
 
 ```bash
-GRAFANA_URL=http://grafana.internal:3000
+GRAFANA_URL=http://your-grafana-host:3000
 GRAFANA_USERNAME=admin
 GRAFANA_PASSWORD=你的密码
-GRAFANA_UPSTREAM=http://grafana.internal:3000/
-GRAFANA_HOST_HEADER=grafana.internal:3000
+GRAFANA_UPSTREAM=http://your-grafana-host:3000/
+GRAFANA_HOST_HEADER=your-grafana-host:3000
 GRAFANA_BASIC_AUTH=base64后的admin:password
-GRAFANA_APP_URL=http://grafana.internal:3000/
+GRAFANA_APP_URL=http://your-grafana-host:3000/
 ```
 
 如果 Grafana 不需要 Basic Auth，可将 `GRAFANA_BASIC_AUTH` 留空。
