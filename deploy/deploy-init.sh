@@ -133,14 +133,82 @@ echo ""
 # -----------------------------------------------------------------------------
 echo -e "${YELLOW}[1/6] 检查配置...${NC}"
 
+generate_secret() {
+    local length="${1:-32}"
+    openssl rand -hex "${length}" 2>/dev/null || {
+        # fallback if openssl not available
+        cat /dev/urandom | tr -dc 'a-f0-9' | head -c "${length}"
+    }
+}
+
+prompt_or_default() {
+    local prompt="$1"
+    local default="$2"
+    local input
+    printf "%s [%s]: " "${prompt}" "${default}"
+    read -r input
+    echo "${input:-${default}}"
+}
+
 CURRENT_STEP="检查配置"
 
 if [ ! -f "${ENV_FILE}" ]; then
-    echo -e "${YELLOW}未找到 .env 文件，正在创建...${NC}"
-    cp "${SCRIPT_DIR}/.env.example" "${ENV_FILE}"
-    echo -e "${RED}请先编辑 .env 文件配置密码和密钥！${NC}"
-    echo "执行: vim ${ENV_FILE}"
-    exit 1
+    echo -e "${YELLOW}未找到 .env 文件${NC}"
+    echo ""
+    echo -e "${CYAN}是否希望自动生成 .env 配置文件？${NC}"
+    echo "  这将以交互方式生成安全的随机密码和密钥"
+    echo "  你也可以稍后手动执行: cp .env.example .env && vim .env"
+    echo ""
+    read -rp "自动生成 .env ? [Y/n]: " GEN_ENV
+    if [ "${GEN_ENV:-Y}" = "n" ] || [ "${GEN_ENV}" = "N" ]; then
+        echo -e "${YELLOW}正在复制模板...${NC}"
+        cp "${SCRIPT_DIR}/.env.example" "${ENV_FILE}"
+        echo -e "${RED}请先编辑 .env 文件配置密码和密钥！${NC}"
+        echo "执行: vim ${ENV_FILE}"
+        exit 1
+    fi
+
+    echo ""
+    echo -e "${CYAN}=== 交互式 .env 配置 ===${NC}"
+    echo -e "回车使用自动生成的安全随机值，或输入自定义值"
+    echo ""
+
+    AUTO_DB_PW="$(generate_secret 16)"
+    AUTO_REDIS_PW="$(generate_secret 16)"
+    AUTO_JWT="$(generate_secret 32)"
+
+    ENV_DB_PW="$(prompt_or_default "MySQL root 密码" "${AUTO_DB_PW}")"
+    ENV_REDIS_PW="$(prompt_or_default "Redis 密码" "${AUTO_REDIS_PW}")"
+    ENV_JWT="$(prompt_or_default "JWT 签名密钥" "${AUTO_JWT}")"
+
+    echo ""
+    echo "数据库主机 [mysql]:"
+    read -r ENV_DB_HOST; ENV_DB_HOST="${ENV_DB_HOST:-mysql}"
+    echo "数据库端口 [3306]:"
+    read -r ENV_DB_PORT; ENV_DB_PORT="${ENV_DB_PORT:-3306}"
+    echo "Redis 主机 [redis]:"
+    read -r ENV_REDIS_HOST; ENV_REDIS_HOST="${ENV_REDIS_HOST:-redis}"
+    echo "Redis 端口 [6379]:"
+    read -r ENV_REDIS_PORT; ENV_REDIS_PORT="${ENV_REDIS_PORT:-6379}"
+
+    cat > "${ENV_FILE}" <<ENVEOF
+# OPS Platform 环境变量 - 自动生成于 $(date '+%Y-%m-%d %H:%M:%S')
+DB_PASSWORD=${ENV_DB_PW}
+DB_HOST=${ENV_DB_HOST}
+DB_PORT=${ENV_DB_PORT}
+DB_USER=root
+DB_NAME=ops_platform
+
+REDIS_PASSWORD=${ENV_REDIS_PW}
+REDIS_HOST=${ENV_REDIS_HOST}
+REDIS_PORT=${ENV_REDIS_PORT}
+
+JWT_SECRET=${ENV_JWT}
+ENVEOF
+
+    echo ""
+    echo -e "${GREEN}.env 文件已生成: ${ENV_FILE}${NC}"
+    echo ""
 fi
 
 # 读取配置

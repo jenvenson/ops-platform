@@ -501,6 +501,7 @@ func ensureDefaultAssistantModelSetting() {
 	}
 	var setting models.AssistantModelSetting
 	if err := database.DB.First(&setting).Error; err == nil {
+		tryReloadAssistantProvider(&setting)
 		return
 	}
 	_ = database.DB.Create(&models.AssistantModelSetting{
@@ -612,5 +613,100 @@ func FetchAssistantRuntimeConfig() *AssistantRuntimeConfig {
 		EmbedModel:  currentAssistantConfig.EmbedModel,
 		Temperature: currentAssistantConfig.Temperature,
 		TimeoutSec:  currentAssistantConfig.TimeoutSec,
+	}
+}
+
+// ---- 系统通用配置 ----
+
+type SystemGeneralSettingResponse struct {
+	SiteName string `json:"site_name"`
+	Timezone string `json:"timezone"`
+	Language string `json:"language"`
+}
+
+type UpdateSystemGeneralSettingRequest struct {
+	SiteName string `json:"site_name"`
+	Timezone string `json:"timezone"`
+	Language string `json:"language"`
+}
+
+func ensureDefaultSystemGeneralSetting() {
+	if database.DB == nil {
+		return
+	}
+	var setting models.SystemGeneralSetting
+	if err := database.DB.Order("id ASC").Limit(1).Find(&setting).Error; err != nil || setting.ID != 0 {
+		return
+	}
+	_ = database.DB.Create(&models.SystemGeneralSetting{
+		SiteName:  "运维管理平台",
+		Timezone:  "Asia/Shanghai",
+		Language:  "zh-CN",
+		UpdatedBy: "system",
+	}).Error
+}
+
+func GetSystemGeneralSetting() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var setting models.SystemGeneralSetting
+		if err := database.DB.Order("id ASC").Limit(1).Find(&setting).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "读取系统配置失败"})
+			return
+		}
+		c.JSON(http.StatusOK, SystemGeneralSettingResponse{
+			SiteName: setting.SiteName,
+			Timezone: setting.Timezone,
+			Language: setting.Language,
+		})
+	}
+}
+
+func UpdateSystemGeneralSetting() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req UpdateSystemGeneralSettingRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+			return
+		}
+
+		var setting models.SystemGeneralSetting
+		if err := database.DB.Order("id ASC").Limit(1).Find(&setting).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "读取系统配置失败"})
+			return
+		}
+
+		if req.SiteName != "" {
+			setting.SiteName = req.SiteName
+		}
+		if req.Timezone != "" {
+			setting.Timezone = req.Timezone
+		}
+		if req.Language != "" {
+			setting.Language = req.Language
+		}
+		setting.UpdatedBy = c.GetString("username")
+		setting.UpdatedAt = time.Now()
+
+		if err := database.DB.Save(&setting).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "保存系统配置失败"})
+			return
+		}
+		c.JSON(http.StatusOK, SystemGeneralSettingResponse{
+			SiteName: setting.SiteName,
+			Timezone: setting.Timezone,
+			Language: setting.Language,
+		})
+	}
+}
+
+// GetPublicSiteName 无需认证，供前端页面标题等公共场景使用。
+func GetPublicSiteName() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var setting models.SystemGeneralSetting
+		if err := database.DB.Order("id ASC").Limit(1).Find(&setting).Error; err != nil || setting.SiteName == "" {
+			c.JSON(http.StatusOK, gin.H{"site_name": "运维管理平台"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"site_name": setting.SiteName})
 	}
 }

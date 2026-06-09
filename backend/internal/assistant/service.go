@@ -240,10 +240,27 @@ func (s *Service) generateModelAnswer(ctx context.Context, intent, message strin
 		Content: buildUserPrompt(intent, message, citations, actions, toolResult, pageContext),
 	})
 
-	return s.chatProvider.Chat(ctx, systemPrompt, promptHistory)
+	return s.chatProvider.Chat(ctx, s.buildSystemPrompt(), promptHistory)
 }
 
-const systemPrompt = "你是 OPS Platform 的运维小助手。你的职责是帮助用户理解平台功能、定位页面入口、总结查询结果。你只能根据给定上下文回答，不要编造不存在的页面、状态或操作结果。请使用中文，回答简洁、明确、可执行。"
+func (s *Service) buildSystemPrompt() string {
+	model := "未知模型"
+	baseURL := ""
+	if s.chatProvider != nil {
+		model = s.chatProvider.ModelName()
+	}
+	if s.cfg != nil && s.cfg.Assistant.BaseURL != "" {
+		baseURL = s.cfg.Assistant.BaseURL
+	}
+	return fmt.Sprintf(
+		"你是 OPS Platform 的运维小助手。你正在使用 %s 模型，API 地址为 %s。"+
+			"当用户询问你使用什么模型时，你必须严格按照上述模型名和地址回答，不要编造其他名称。"+
+			"你的职责是帮助用户理解平台功能、定位页面入口、总结查询结果。"+
+			"你只能根据给定上下文回答，不要编造不存在的页面、状态或操作结果。"+
+			"请使用中文，回答简洁、明确、可执行。",
+		model, baseURL,
+	)
+}
 
 func buildUserPrompt(intent, message string, citations []Citation, actions []Action, toolResult *toolContext, pageContext *AssistantPageContext) string {
 	var builder strings.Builder

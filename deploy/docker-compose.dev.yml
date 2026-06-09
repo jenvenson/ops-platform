@@ -40,7 +40,7 @@ services:
       - ops-network
 
   backend:
-    image: golang:1.24-alpine
+    image: golang:1.25-alpine
     container_name: ops-backend-dev
     ports:
       - "8080:8080"
@@ -120,10 +120,14 @@ services:
       browser-helper:
         condition: service_started
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     networks:
       - ops-network
-
-  browser-helper:
     image: mcr.microsoft.com/playwright:v1.58.1-jammy
     container_name: ops-browser-helper-dev
     working_dir: /app

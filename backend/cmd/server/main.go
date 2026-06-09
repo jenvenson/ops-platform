@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 OPS Platform Contributors
 
+// @title           OPS Platform API
+// @version         1.0
+// @description     运维管理平台 API 文档
+// @contact.name   OPS Platform
+// @contact.url    https://github.com/jenvenson/ops-platform
+// @license.name  MIT
+// @license.url   https://github.com/jenvenson/ops-platform/blob/main/LICENSE
+// @host           localhost:8080
+// @BasePath       /api
+// @schemes        http https
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 package main
 
 import (
@@ -8,15 +22,19 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/jenvenson/ops-platform/docs"
 	"github.com/jenvenson/ops-platform/internal/server"
 )
 
 func init() {
-	// 设置时区为 CST (中国标准时间 UTC+8)
-	loc, err := time.LoadLocation("Asia/Shanghai")
+	// 设置时区，默认 Asia/Shanghai，可通过 TZ 环境变量覆盖
+	tz := os.Getenv("TZ")
+	if tz == "" {
+		tz = "Asia/Shanghai"
+	}
+	loc, err := time.LoadLocation(tz)
 	if err == nil {
 		time.Local = loc
-		os.Setenv("TZ", "Asia/Shanghai")
 	}
 }
 

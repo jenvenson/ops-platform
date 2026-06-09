@@ -148,6 +148,12 @@ export interface UpdateAssistantModelSettingRequest {
   timeout_sec?: number
 }
 
+export interface SystemGeneralSetting {
+  site_name: string
+  timezone: string
+  language: string
+}
+
 export const adminAPI = {
   // 用户管理
   getUsers: (): Promise<User[]> =>
@@ -229,4 +235,11 @@ export const adminAPI = {
 
   updateAssistantModelSetting: (data: UpdateAssistantModelSettingRequest): Promise<{ message: string }> =>
     apiClient.put<{ message: string }>('/admin/settings/assistant-model', data),
+
+  // 系统通用配置
+  getSystemGeneralSetting: (): Promise<SystemGeneralSetting> =>
+    apiClient.get<SystemGeneralSetting>('/admin/settings/general'),
+
+  updateSystemGeneralSetting: (data: SystemGeneralSetting): Promise<SystemGeneralSetting> =>
+    apiClient.put<SystemGeneralSetting>('/admin/settings/general', data),
 }

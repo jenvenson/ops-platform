@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/jenvenson/ops-platform/internal/audit"
 	"github.com/jenvenson/ops-platform/internal/database"
@@ -11,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"crypto/rand"
+	"encoding/hex"
 )
 
 type LoginRequest struct {
@@ -34,11 +37,15 @@ type MenuConfig struct {
 
 func RegisterRoutes(r *gin.Engine, cfg *config.Config) {
 	ensureDefaultAuditLogSetting()
-		ensureDefaultAssistantModelSetting()
+	ensureDefaultAssistantModelSetting()
+	ensureDefaultSystemGeneralSetting()
 
 	auth := r.Group("/api/auth")
+	auth.Use(RateLimitAuth())
 	{
 		auth.POST("/login", Login(cfg))
+		auth.POST("/forgot-password", ForgotPassword())
+		auth.POST("/reset-password", ResetPassword())
 	}
 
 	protected := r.Group("/api")
@@ -84,6 +91,8 @@ func RegisterRoutes(r *gin.Engine, cfg *config.Config) {
 		admin.POST("/settings/fim-ssh/test", TestFIMSSHConnection())
 			admin.GET("/settings/assistant-model", GetAssistantModelSetting())
 			admin.PUT("/settings/assistant-model", UpdateAssistantModelSetting())
+		admin.GET("/settings/general", GetSystemGeneralSetting())
+		admin.PUT("/settings/general", UpdateSystemGeneralSetting())
 
 		// 平台审计
 		admin.GET("/audit/access-logs", GetPlatformAccessLogs())
@@ -102,6 +111,17 @@ func RegisterRoutes(r *gin.Engine, cfg *config.Config) {
 	}
 }
 
+// Login godoc
+// @Summary      用户登录
+// @Description  使用用户名密码登录，返回JWT令牌和菜单权限。首次登录(must_change_password=true)需强制修改密码。
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body LoginRequest true "登录请求"
+// @Success      200  {object}  LoginResponse
+// @Failure      401  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Router       /auth/login [post]
 func Login(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req LoginRequest
@@ -142,6 +162,15 @@ func Login(cfg *config.Config) gin.HandlerFunc {
 	}
 }
 
+// GetCurrentUser godoc
+// @Summary      获取当前用户信息
+// @Description  根据JWT令牌返回当前登录用户的详细信息
+// @Tags         user
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200  {object}  models.User
+// @Failure      404  {object}  map[string]string
+// @Router       /user/me [get]
 func GetCurrentUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.GetUint("user_id")
@@ -172,12 +201,24 @@ func GetCurrentUserMenus() gin.HandlerFunc {
 	}
 }
 
-// ChangePassword 修改当前用户密码（需要验证旧密码）
+// ChangePassword 修改当前用户密码（首次登录强制修改时无需旧密码）
 type ChangePasswordRequest struct {
-	OldPassword string `json:"old_password" binding:"required"`
+	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password" binding:"required,min=6"`
 }
 
+// ChangePassword godoc
+// @Summary      修改密码
+// @Description  修改当前用户密码。首次登录强制修改时无需提供旧密码
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        request body ChangePasswordRequest true "修改密码请求"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /user/password [put]
 func ChangePassword() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.GetUint("user_id")
@@ -194,10 +235,16 @@ func ChangePassword() gin.HandlerFunc {
 			return
 		}
 
-		// 验证旧密码
-		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword)); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "旧密码不正确"})
-			return
+		// 首次登录强制修改时跳过旧密码验证
+		if !user.MustChangePassword {
+			if req.OldPassword == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "请输入旧密码"})
+				return
+			}
+			if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword)); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "旧密码不正确"})
+				return
+			}
 		}
 
 		// 加密新密码
@@ -208,6 +255,7 @@ func ChangePassword() gin.HandlerFunc {
 		}
 
 		user.Password = string(hashedPassword)
+		user.MustChangePassword = false
 		if err := database.DB.Save(&user).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "密码修改失败"})
 			return
@@ -256,6 +304,15 @@ func UpdateProfile() gin.HandlerFunc {
 }
 
 // User CRUD handlers
+// GetUsers godoc
+// @Summary      获取所有用户
+// @Description  管理员接口，返回所有用户列表
+// @Tags         admin
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200  {array}   models.User
+// @Failure      500  {object}  map[string]string
+// @Router       /admin/users [get]
 func GetUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var users []models.User
@@ -299,6 +356,18 @@ func buildAuditUserRecord(user models.User) auditUserRecord {
 	}
 }
 
+// CreateUser godoc
+// @Summary      创建用户
+// @Description  管理员接口，创建新用户。新用户首次登录时需强制修改密码
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        request body CreateUserRequest true "创建用户请求"
+// @Success      200  {object}  models.User
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /admin/users [post]
 func CreateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreateUserRequest
@@ -1433,3 +1502,116 @@ var allDefaultMenus = []MenuConfig{
 		},
 	},
 }
+// ForgotPassword generates a reset token for the given username.
+// In self-hosted deployments without email, the token is returned directly.
+type ForgotPasswordRequest struct {
+    Username string `json:"username" binding:"required"`
+}
+
+// ForgotPassword godoc
+// @Summary      忘记密码
+// @Description  输入用户名获取一次性密码重置令牌，令牌有效期1小时
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body ForgotPasswordRequest true "忘记密码请求"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Router       /auth/forgot-password [post]
+func ForgotPassword() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        var req ForgotPasswordRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "请输入用户名"})
+            return
+        }
+
+        var user models.User
+        if err := database.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
+            // 不暴露用户是否存在，统一返回成功
+            c.JSON(http.StatusOK, gin.H{"message": "如果用户存在，重置令牌已生成"})
+            return
+        }
+
+        // 清理该用户旧的未使用令牌
+        database.DB.Where("user_id = ? AND used = 0", user.ID).Delete(&models.PasswordResetToken{})
+
+        // 生成新令牌
+        tokenBytes := make([]byte, 32)
+        if _, err := rand.Read(tokenBytes); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "生成令牌失败"})
+            return
+        }
+        token := hex.EncodeToString(tokenBytes)
+        expiresAt := time.Now().Add(1 * time.Hour)
+
+        resetToken := models.PasswordResetToken{
+            UserID:    user.ID,
+            Token:     token,
+            ExpiresAt: expiresAt,
+        }
+        if err := database.DB.Create(&resetToken).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "保存令牌失败"})
+            return
+        }
+
+        c.JSON(http.StatusOK, gin.H{
+            "message":    "重置令牌已生成，有效期1小时",
+            "token":      token,
+            "expires_at": expiresAt.Format(time.RFC3339),
+        })
+    }
+}
+
+// ResetPassword validates a reset token and updates the user's password.
+type ResetPasswordRequest struct {
+    Token       string `json:"token" binding:"required"`
+    NewPassword string `json:"new_password" binding:"required,min=6"`
+}
+
+// ResetPassword godoc
+// @Summary      重置密码
+// @Description  使用忘记密码获取的一次性令牌重置密码
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body ResetPasswordRequest true "重置密码请求"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Router       /auth/reset-password [post]
+func ResetPassword() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        var req ResetPasswordRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效，新密码长度至少6位"})
+            return
+        }
+
+        var resetToken models.PasswordResetToken
+        if err := database.DB.Where("token = ? AND used = 0 AND expires_at > ?", req.Token, time.Now()).First(&resetToken).Error; err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "令牌无效或已过期"})
+            return
+        }
+
+        // 更新密码
+        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "密码加密失败"})
+            return
+        }
+
+        if err := database.DB.Model(&models.User{}).Where("id = ?", resetToken.UserID).Updates(map[string]interface{}{
+            "password":            string(hashedPassword),
+            "must_change_password": false,
+        }).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "密码更新失败"})
+            return
+        }
+
+        // 标记令牌已使用
+        database.DB.Model(&resetToken).Update("used", 1)
+
+        c.JSON(http.StatusOK, gin.H{"message": "密码重置成功，请使用新密码登录"})
+    }
+}
+

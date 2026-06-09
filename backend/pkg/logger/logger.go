@@ -7,6 +7,11 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// Logger 包装 zap.Logger，提供结构化日志能力。
+// 嵌入的 *zap.Logger 可直接使用 zap 的全部方法：
+//   log.Info("msg", zap.String("key", "val"))
+//   log.Infow("msg", "key", "val")
+//   log.Error("msg", zap.Error(err))
 type Logger struct {
 	*zap.Logger
 }
@@ -53,18 +58,6 @@ func New(level string) (*Logger, error) {
 	}
 
 	return &Logger{logger}, nil
-}
-
-func (l *Logger) Info(msg string) {
-	l.Logger.Info(msg)
-}
-
-func (l *Logger) Error(msg string) {
-	l.Logger.Error(msg)
-}
-
-func (l *Logger) Fatal(msg string) {
-	l.Logger.Fatal(msg)
 }
 
 func (l *Logger) Sync() error {

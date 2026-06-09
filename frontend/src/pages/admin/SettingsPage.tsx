@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Divider, Form, Input, InputNumber, Select, Space, Switch, Tabs, Tag, Typography, message } from 'antd'
 import { SaveOutlined } from '@ant-design/icons'
-import { adminAPI, type AuditLogSetting, type FIMSSHSetting, type AssistantModelSetting } from '../../api/admin'
+import { adminAPI, type AuditLogSetting, type FIMSSHSetting, type AssistantModelSetting, type SystemGeneralSetting } from '../../api/admin'
 import { canEdit } from '../../utils/menuAccess'
 
 const { Text } = Typography
@@ -19,6 +19,54 @@ export default function SettingsPage() {
   const [modelForm] = Form.useForm()
   const [modelLoading, setModelLoading] = useState(false)
   const [modelSetting, setModelSetting] = useState<AssistantModelSetting | null>(null)
+  const [generalLoading, setGeneralLoading] = useState(false)
+
+  const loadGeneralSetting = async () => {
+    setGeneralLoading(true)
+    try {
+      const setting = await adminAPI.getSystemGeneralSetting()
+      form.setFieldsValue({
+        siteName: setting.site_name,
+        timezone: setting.timezone,
+        language: setting.language,
+      })
+      localStorage.setItem('app_language', setting.language)
+    } catch {
+      message.error('加载通用配置失败')
+    } finally {
+      setGeneralLoading(false)
+    }
+  }
+
+  const handleSaveGeneralSetting = async () => {
+    try {
+      const values = await form.validateFields()
+      setGeneralLoading(true)
+      const payload: SystemGeneralSetting = {
+        site_name: values.siteName,
+        timezone: values.timezone,
+        language: values.language,
+      }
+      const result = await adminAPI.updateSystemGeneralSetting(payload)
+      form.setFieldsValue({
+        siteName: result.site_name,
+        timezone: result.timezone,
+        language: result.language,
+      })
+      document.title = result.site_name || '运维管理平台'
+      localStorage.setItem('app_language', result.language)
+      window.dispatchEvent(new CustomEvent('languageChanged'))
+      message.success('通用设置已保存')
+    } catch (error: unknown) {
+      const msg =
+        (error as { message?: string }).message ||
+        (error as { errorFields?: Array<{ errors: string[] }> }).errorFields?.[0]?.errors?.[0] ||
+        '保存通用配置失败'
+      message.error(msg)
+    } finally {
+      setGeneralLoading(false)
+    }
+  }
 
   const handleSubmit = () => {
     setLoading(true)
@@ -84,6 +132,7 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
+    void loadGeneralSetting()
     void loadFIMSetting()
     void loadAuditSetting()
     void loadModelSetting()
@@ -212,7 +261,7 @@ export default function SettingsPage() {
             />
           </Form.Item>
           <Form.Item>
-            {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={loading} onClick={handleSubmit}>
+            {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={generalLoading} onClick={() => void handleSaveGeneralSetting()}>
               保存设置
             </Button>}
           </Form.Item>
@@ -544,7 +593,7 @@ export default function SettingsPage() {
   return (
     <div>
       <Card>
-        <Tabs items={tabItems} />
+        <Tabs destroyInactiveTabPane={false} items={tabItems} />
       </Card>
     </div>
   )

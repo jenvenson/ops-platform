@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Form, Input, Button, message, Typography, Card } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Form, Input, Button, message, Typography, Card, Modal } from 'antd'
+import { useNavigate, Link } from 'react-router-dom'
 import { UserOutlined, LockOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import apiClient from '../api/client'
 import { notifyMenusChanged } from '../utils/menuAccess'
@@ -21,38 +21,71 @@ interface MenuItem {
   children?: MenuItem[]
 }
 
+interface UserInfo {
+  id: number
+  username: string
+  real_name?: string
+  email: string
+  role: string
+  must_change_password?: boolean
+}
+
 interface LoginResponse {
   token: string
-  user: {
-    id: number
-    username: string
-    real_name?: string
-    email: string
-    role: string
-  }
+  user: UserInfo
   menus: MenuItem[]
 }
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
+  const [forceChangeVisible, setForceChangeVisible] = useState(false)
+  const [changeLoading, setChangeLoading] = useState(false)
+  const [pendingUser, setPendingUser] = useState<UserInfo | null>(null)
+  const [pendingToken, setPendingToken] = useState('')
+  const [pendingMenus, setPendingMenus] = useState<MenuItem[]>([])
+  const [changeForm] = Form.useForm()
+  const [siteName, setSiteName] = useState('运维管理平台')
   const navigate = useNavigate()
+
+  useEffect(() => {
+    apiClient.get<{ site_name: string }>('/site-name').then(res => {
+      if (res.site_name) {
+        setSiteName(res.site_name)
+        document.title = res.site_name
+      }
+    }).catch(() => {})
+  }, [])
+
+  const saveLoginState = (token: string, user: UserInfo, menus: MenuItem[]) => {
+    localStorage.setItem('token', token)
+    if (menus.length > 0) {
+      localStorage.setItem('user_menus', JSON.stringify(menus))
+      notifyMenusChanged()
+    }
+    localStorage.setItem('user_info', JSON.stringify({
+      username: user.username,
+      real_name: user.real_name,
+      role: user.role,
+      must_change_password: user.must_change_password || false,
+    }))
+  }
 
   const onFinish = async (values: LoginValues) => {
     setLoading(true)
     try {
       const result = await apiClient.post<LoginResponse>('/auth/login', values)
-      localStorage.setItem('token', result.token)
-      if (result.menus) {
-        localStorage.setItem('user_menus', JSON.stringify(result.menus))
-        notifyMenusChanged()
+      if (result.user.must_change_password) {
+        // 首次登录，显示强制改密对话框
+        setPendingUser(result.user)
+        setPendingToken(result.token)
+        setPendingMenus(result.menus || [])
+        setForceChangeVisible(true)
+        changeForm.resetFields()
+      } else {
+        saveLoginState(result.token, result.user, result.menus || [])
+        message.success('登录成功')
+        navigate('/')
       }
-      localStorage.setItem('user_info', JSON.stringify({
-        username: result.user.username,
-        real_name: result.user.real_name,
-        role: result.user.role,
-      }))
-      message.success('登录成功')
-      navigate('/')
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { error?: string; message?: string } } }).response?.data?.error ||
@@ -61,6 +94,34 @@ export default function LoginPage() {
       message.error(errorMessage)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleForceChange = async (values: { new_password: string; confirm_password: string }) => {
+    if (values.new_password !== values.confirm_password) {
+      message.error('两次输入的密码不一致')
+      return
+    }
+    setChangeLoading(true)
+    try {
+      // 临时存储 token 以便 API 拦截器自动附加
+      localStorage.setItem('token', pendingToken)
+      await apiClient.put('/user/password', { new_password: values.new_password })
+      localStorage.removeItem('token')
+      message.success('密码修改成功，正在进入系统...')
+      setForceChangeVisible(false)
+      if (pendingUser) {
+        saveLoginState(pendingToken, pendingUser, pendingMenus)
+      }
+      navigate('/')
+    } catch (error: unknown) {
+      localStorage.removeItem('token')
+      const errorMessage =
+        (error as { response?: { data?: { error?: string } } }).response?.data?.error ||
+        '密码修改失败，请重试'
+      message.error(errorMessage)
+    } finally {
+      setChangeLoading(false)
     }
   }
 
@@ -81,7 +142,7 @@ export default function LoginPage() {
           <div style={styles.logo}>
             <span style={styles.logoText}>OPS</span>
           </div>
-          <Title level={2} style={styles.title}>运维管理平台</Title>
+          <Title level={2} style={styles.title}>{siteName}</Title>
           <Text style={styles.subtitle}>Operations Management Platform</Text>
         </div>
 
@@ -124,8 +185,67 @@ export default function LoginPage() {
               登 录 <ArrowRightOutlined />
             </Button>
           </Form.Item>
+          <Form.Item style={{ marginBottom: 0, textAlign: 'center' }}>
+            <Link to="/forgot-password" style={{ color: '#8c8c8c', fontSize: 13 }}>
+              忘记密码？
+            </Link>
+          </Form.Item>
         </Form>
       </Card>
+
+      {/* 首次登录强制修改密码对话框 */}
+      <Modal
+        title="首次登录，请修改密码"
+        open={forceChangeVisible}
+        closable={false}
+        maskClosable={false}
+        footer={null}
+        destroyOnClose
+      >
+        <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
+          您正在使用初始密码登录，为保证账号安全，请设置新密码。
+        </Text>
+        <Form form={changeForm} onFinish={handleForceChange} layout="vertical">
+          <Form.Item
+            name="new_password"
+            label="新密码"
+            rules={[
+              { required: true, message: '请输入新密码' },
+              { min: 6, message: '密码长度至少 6 位' },
+            ]}
+          >
+            <Input.Password placeholder="请输入新密码" size="large" />
+          </Form.Item>
+          <Form.Item
+            name="confirm_password"
+            label="确认密码"
+            rules={[
+              { required: true, message: '请再次输入新密码' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('new_password') === value) {
+                    return Promise.resolve()
+                  }
+                  return Promise.reject(new Error('两次输入的密码不一致'))
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="请再次输入新密码" size="large" />
+          </Form.Item>
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={changeLoading}
+              size="large"
+              block
+            >
+              确认修改并登录
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
 }

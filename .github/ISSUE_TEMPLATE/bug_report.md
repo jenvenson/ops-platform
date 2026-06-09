@@ -1,35 +1,32 @@
 ---
-name: Bug 报告
-about: 报告一个 bug
-title: "[Bug] "
+name: Bug Report
+about: Report a bug to help us improve
+title: '[Bug] '
 labels: bug
-assignees: ""
+assignees: ''
 ---
 
-## 描述
+## Describe the Bug
 
-<!-- 清晰描述 bug 现象 -->
+A clear and concise description of what the bug is.
 
-## 复现步骤
+## Steps to Reproduce
 
-1.
-2.
-3.
+1. Go to '...'
+2. Click on '...'
+3. See error
 
-## 预期行为
+## Expected Behavior
 
-<!-- 你期望发生什么 -->
+What you expected to happen.
 
-## 实际行为
+## Screenshots / Logs
 
-<!-- 实际发生了什么 -->
+If applicable, add screenshots or log output.
 
-## 环境
+## Environment
 
-- OS:
-- Docker 版本:
-- 浏览器:
-
-## 日志
-
-<!-- 如有相关日志，请附上 -->
+- OPS Platform version: [e.g. commit hash or release tag]
+- Deployment: [docker-compose / kubernetes / local]
+- Browser: [e.g. Chrome 125]
+- OS: [e.g. Ubuntu 22.04]

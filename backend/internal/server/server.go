@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -26,8 +27,11 @@ import (
 	"github.com/jenvenson/ops-platform/pkg/config"
 	"github.com/jenvenson/ops-platform/pkg/jenkins" // 添加jenkins导入
 	"github.com/jenvenson/ops-platform/pkg/logger"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func Run() error {
@@ -88,6 +92,19 @@ func Run() error {
 
 	r := gin.Default()
 
+	// CORS 配置 — 允许前端跨域访问
+	r.Use(cors.New(cors.Config{
+		AllowOriginFunc: func(origin string) bool {
+			return strings.HasPrefix(origin, "http://localhost") ||
+				strings.HasPrefix(origin, "http://127.0.0.1")
+		},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	// 设置全局中间件以确保正确的字符编码
 	r.Use(func(c *gin.Context) {
 		c.Header("Content-Type", "application/json; charset=utf-8")
@@ -95,15 +112,57 @@ func Run() error {
 	})
 	r.Use(audit.Middleware())
 
+	// 通用 API 限流 (跳过 health/metrics/swagger)
+	r.Use(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if path == "/health" || path == "/api/health" || path == "/metrics" ||
+			(len(path) >= 9 && path[:9] == "/swagger/") {
+			c.Next()
+			return
+		}
+		auth.RateLimitGeneral()(c)
+	})
+
 	// Health check
 	healthHandler := func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+		status := "ok"
+		checks := map[string]string{}
+
+		// DB check
+		if database.DB != nil {
+			if sqlDB, err := database.DB.DB(); err == nil {
+				if err := sqlDB.Ping(); err == nil {
+					checks["database"] = "ok"
+				} else {
+					checks["database"] = "error: " + err.Error()
+					status = "degraded"
+				}
+			} else {
+				checks["database"] = "error: " + err.Error()
+				status = "degraded"
+			}
+		} else {
+			checks["database"] = "not_initialized"
+			status = "degraded"
+		}
+
+		if status == "ok" {
+			c.JSON(http.StatusOK, gin.H{"status": status, "checks": checks})
+		} else {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": status, "checks": checks})
+		}
 	}
 	r.GET("/health", healthHandler)
 	r.GET("/api/health", healthHandler)
 
 	// Prometheus metrics endpoint
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
+	// Swagger docs
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// 公开接口 — 系统名称（供前端登录页等使用）
+	r.GET("/api/site-name", auth.GetPublicSiteName())
 
 	// 注册认证路由
 	auth.RegisterRoutes(r, cfg)
@@ -169,11 +228,12 @@ func Run() error {
 
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	srvr := &http.Server{
-		Addr:         addr,
-		Handler:      r,
-		IdleTimeout:  3600 * time.Second,  // 1小时空闲超时
-		ReadTimeout:  3600 * time.Second,  // 1小时读取超时
-		WriteTimeout: 10800 * time.Second, // 3小时写入超时（为长时间任务留更多空间）
+		Addr:              addr,
+		Handler:           r,
+		ReadHeaderTimeout: 10 * time.Second,  // 防止 Slowloris 攻击
+		IdleTimeout:       3600 * time.Second, // 1小时空闲超时
+		ReadTimeout:       3600 * time.Second, // 1小时读取超时
+		WriteTimeout:      10800 * time.Second, // 3小时写入超时（为长时间任务留更多空间）
 	}
 
 	log.Info("Starting server on " + addr)

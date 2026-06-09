@@ -1,0 +1,334 @@
+basePath: /api
+definitions:
+  github_com_jenvenson_ops-platform_internal_models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      must_change_password:
+        type: boolean
+      real_name:
+        description: 姓名
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_auth.ChangePasswordRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    type: object
+  internal_auth.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      real_name:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  internal_auth.ForgotPasswordRequest:
+    properties:
+      username:
+        type: string
+    required:
+    - username
+    type: object
+  internal_auth.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  internal_auth.LoginResponse:
+    properties:
+      menus:
+        items:
+          $ref: '#/definitions/internal_auth.MenuConfig'
+        type: array
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_jenvenson_ops-platform_internal_models.User'
+    type: object
+  internal_auth.MenuConfig:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/internal_auth.MenuConfig'
+        type: array
+      icon:
+        type: string
+      key:
+        type: string
+      path:
+        type: string
+      title:
+        type: string
+    type: object
+  internal_auth.ResetPasswordRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: OPS Platform
+    url: https://github.com/jenvenson/ops-platform
+  description: 运维管理平台 API 文档
+  license:
+    name: MIT
+    url: https://github.com/jenvenson/ops-platform/blob/main/LICENSE
+  title: OPS Platform API
+  version: "1.0"
+paths:
+  /admin/users:
+    get:
+      description: 管理员接口，返回所有用户列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_jenvenson_ops-platform_internal_models.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有用户
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      description: 管理员接口，创建新用户。新用户首次登录时需强制修改密码
+      parameters:
+      - description: 创建用户请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jenvenson_ops-platform_internal_models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建用户
+      tags:
+      - admin
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: 输入用户名获取一次性密码重置令牌，令牌有效期1小时
+      parameters:
+      - description: 忘记密码请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 忘记密码
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用用户名密码登录，返回JWT令牌和菜单权限。首次登录(must_change_password=true)需强制修改密码。
+      parameters:
+      - description: 登录请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_auth.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 用户登录
+      tags:
+      - auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: 使用忘记密码获取的一次性令牌重置密码
+      parameters:
+      - description: 重置密码请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 重置密码
+      tags:
+      - auth
+  /user/me:
+    get:
+      description: 根据JWT令牌返回当前登录用户的详细信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jenvenson_ops-platform_internal_models.User'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取当前用户信息
+      tags:
+      - user
+  /user/password:
+    put:
+      consumes:
+      - application/json
+      description: 修改当前用户密码。首次登录强制修改时无需提供旧密码
+      parameters:
+      - description: 修改密码请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 修改密码
+      tags:
+      - user
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,19 +1,23 @@
 ---
-name: 功能建议
-about: 建议一个新功能
-title: "[Feature] "
+name: Feature Request
+about: Suggest a new feature or enhancement
+title: '[Feature] '
 labels: enhancement
-assignees: ""
+assignees: ''
 ---
 
-## 使用场景
+## Problem Statement
 
-<!-- 描述这个功能解决什么问题 -->
+A clear description of the problem this feature would solve.
 
-## 建议方案
+## Proposed Solution
 
-<!-- 描述你期望的实现方式 -->
+A description of what you'd like to see implemented.
 
-## 替代方案
+## Alternatives Considered
 
-<!-- 是否有其他方案可以考虑 -->
+Any alternative solutions or workarounds you've considered.
+
+## Use Case
+
+Who would use this and how?

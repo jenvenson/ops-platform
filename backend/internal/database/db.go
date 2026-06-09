@@ -45,6 +45,8 @@ func Init(cfg *config.Config, log *logger.Logger) error {
 		&models.AuditLogSetting{},
 		&models.FIMSSHSetting{},
 		&models.AssistantModelSetting{},
+		&models.SystemGeneralSetting{},
+			&models.PasswordResetToken{},
 		&models.PlatformAccessLog{},
 		&models.PlatformAccessLogArchive{},
 		&models.PlatformAuditLog{},

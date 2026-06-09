@@ -72,6 +72,12 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - ops-network
 
@@ -92,6 +98,11 @@ services:
       - /bin/sh
       - -c
       - envsubst '$$GRAFANA_UPSTREAM $$GRAFANA_HOST_HEADER $$GRAFANA_BASIC_AUTH $$GRAFANA_APP_URL' < /etc/nginx/templates/nginx.prod.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     depends_on:
       - backend
     restart: unless-stopped
