@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/edy/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/pkg/config"
 )
 
 // GrafanaProxy Grafana API 代理

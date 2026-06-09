@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/edy/ops-platform/internal/audit"
-	"github.com/edy/ops-platform/internal/auth"
-	"github.com/edy/ops-platform/internal/database"
-	"github.com/edy/ops-platform/internal/models"
-	"github.com/edy/ops-platform/internal/platformevent"
-	"github.com/edy/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/internal/audit"
+	"github.com/jenvenson/ops-platform/internal/auth"
+	"github.com/jenvenson/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/platformevent"
+	"github.com/jenvenson/ops-platform/pkg/config"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/edy/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/models"
 	"gorm.io/gorm"
 )
 

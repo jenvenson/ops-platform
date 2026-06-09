@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/edy/ops-platform/internal/cmdb"
-	"github.com/edy/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/cmdb"
+	"github.com/jenvenson/ops-platform/internal/database"
 )
 
 // CheckConfig 健康检查配置

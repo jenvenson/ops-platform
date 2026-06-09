@@ -3,11 +3,11 @@ package monitor
 import (
 	"net/http"
 
-	"github.com/edy/ops-platform/internal/auth"
+	"github.com/jenvenson/ops-platform/internal/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/edy/ops-platform/internal/cmdb"
-	"github.com/edy/ops-platform/internal/database"
-	"github.com/edy/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/internal/cmdb"
+	"github.com/jenvenson/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/pkg/config"
 )
 
 // RegisterRoutes 注册监控路由

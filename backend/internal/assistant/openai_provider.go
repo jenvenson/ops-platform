@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/edy/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/pkg/config"
 )
 
 type openaiClient struct {

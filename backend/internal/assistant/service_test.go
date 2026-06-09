@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/edy/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/pkg/config"
 )
 
 func TestNewServiceKeepsModelDisabledByDefault(t *testing.T) {

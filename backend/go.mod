@@ -1,4 +1,4 @@
-module github.com/edy/ops-platform
+module github.com/jenvenson/ops-platform
 
 go 1.24.0
 

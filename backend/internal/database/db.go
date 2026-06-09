@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/edy/ops-platform/internal/models"
-	"github.com/edy/ops-platform/pkg/config"
-	"github.com/edy/ops-platform/pkg/logger"
+	"github.com/jenvenson/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/pkg/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

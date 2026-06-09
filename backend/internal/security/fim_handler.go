@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/edy/ops-platform/internal/audit"
-	"github.com/edy/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/audit"
+	"github.com/jenvenson/ops-platform/internal/database"
 	"github.com/gin-gonic/gin"
 )
 

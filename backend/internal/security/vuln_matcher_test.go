@@ -3,7 +3,7 @@ package security
 import (
 	"testing"
 
-	"github.com/edy/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/models"
 )
 
 func TestClassifyMatchExact(t *testing.T) {

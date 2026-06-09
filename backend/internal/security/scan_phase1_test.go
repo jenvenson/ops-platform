@@ -5,7 +5,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/edy/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/models"
 )
 
 func TestBuildTaskUpdatesStripsRunOnlyFields(t *testing.T) {

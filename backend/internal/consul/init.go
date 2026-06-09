@@ -1,7 +1,7 @@
 package consul
 
 import (
-	"github.com/edy/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/database"
 )
 
 // Init 初始化 Consul 模块数据库表

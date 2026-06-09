@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/edy/ops-platform/internal/auth"
-	"github.com/edy/ops-platform/internal/database"
-	"github.com/edy/ops-platform/internal/models"
-	"github.com/edy/ops-platform/internal/platformevent"
-	"github.com/edy/ops-platform/internal/tasks" // 新增导入
-	"github.com/edy/ops-platform/pkg/config"
-	"github.com/edy/ops-platform/pkg/jenkins"
+	"github.com/jenvenson/ops-platform/internal/auth"
+	"github.com/jenvenson/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/platformevent"
+	"github.com/jenvenson/ops-platform/internal/tasks" // 新增导入
+	"github.com/jenvenson/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/pkg/jenkins"
 	"github.com/gin-gonic/gin"
 )
 

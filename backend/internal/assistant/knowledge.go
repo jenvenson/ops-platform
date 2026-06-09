@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/edy/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/pkg/config"
 )
 
 type documentEntry struct {

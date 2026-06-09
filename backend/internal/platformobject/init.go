@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/edy/ops-platform/internal/cmdb"
-	"github.com/edy/ops-platform/internal/database"
-	"github.com/edy/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/cmdb"
+	"github.com/jenvenson/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/models"
 	"gorm.io/gorm"
 )
 

@@ -22,8 +22,8 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/edy/ops-platform/internal/database"
-	"github.com/edy/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/models"
 )
 
 // stripANSI 移除 ANSI 转义码和非打印字符

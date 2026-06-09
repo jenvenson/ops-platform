@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/edy/ops-platform/pkg/jenkins"
+	"github.com/jenvenson/ops-platform/pkg/jenkins"
 )
 
 func TestArchiveBuildNumberFromRecentBuildsMatchesParameters(t *testing.T) {

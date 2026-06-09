@@ -1,8 +1,8 @@
 package assistant
 
 import (
-	"github.com/edy/ops-platform/internal/auth"
-	"github.com/edy/ops-platform/pkg/config"
+	"github.com/jenvenson/ops-platform/internal/auth"
+	"github.com/jenvenson/ops-platform/pkg/config"
 	"github.com/gin-gonic/gin"
 )
 

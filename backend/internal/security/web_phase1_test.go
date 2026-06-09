@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/edy/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/models"
 )
 
 func TestPhase1WebFindingKeyIncludesURL(t *testing.T) {

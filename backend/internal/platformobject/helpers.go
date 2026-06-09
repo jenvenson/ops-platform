@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/edy/ops-platform/internal/cmdb"
+	"github.com/jenvenson/ops-platform/internal/cmdb"
 )
 
 func objectUID(objectType, sourceModule string, id uint) string {

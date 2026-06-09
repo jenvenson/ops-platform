@@ -3,7 +3,7 @@ package alert
 import (
 	"log"
 
-	"github.com/edy/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/database"
 )
 
 // Init 初始化告警模块数据库表

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 OPS Platform Contributors
+
 package main
 
 import (
@@ -5,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/edy/ops-platform/internal/server"
+	"github.com/jenvenson/ops-platform/internal/server"
 )
 
 func init() {

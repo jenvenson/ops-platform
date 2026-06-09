@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/edy/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/internal/models"
 	"github.com/gin-gonic/gin"
 )
 

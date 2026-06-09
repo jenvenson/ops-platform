@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/edy/ops-platform/internal/alert"
-	"github.com/edy/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/alert"
+	"github.com/jenvenson/ops-platform/internal/database"
 )
 
 type alertQueryOptions struct {

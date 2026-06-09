@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/edy/ops-platform/pkg/jenkins"
+	"github.com/jenvenson/ops-platform/pkg/jenkins"
 )
 
 func main() {

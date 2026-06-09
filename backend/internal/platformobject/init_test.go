@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/edy/ops-platform/internal/cmdb"
+	"github.com/jenvenson/ops-platform/internal/cmdb"
 )
 
 func TestObjectUID(t *testing.T) {

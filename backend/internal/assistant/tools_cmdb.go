@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/edy/ops-platform/internal/cmdb"
-	"github.com/edy/ops-platform/internal/database"
+	"github.com/jenvenson/ops-platform/internal/cmdb"
+	"github.com/jenvenson/ops-platform/internal/database"
 )
 
 type applicationCountStat struct {

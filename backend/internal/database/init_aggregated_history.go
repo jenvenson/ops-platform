@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/edy/ops-platform/internal/models"
-	"github.com/edy/ops-platform/pkg/logger"
+	"github.com/jenvenson/ops-platform/internal/models"
+	"github.com/jenvenson/ops-platform/pkg/logger"
 	"gorm.io/gorm"
 )
 
