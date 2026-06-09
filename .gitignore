@@ -58,8 +58,7 @@ deploy/server
 .codex/
 
 # AI tool personal files
-.claude/fix.md
-.claude/settings.local.json
+.claude/
 
 # Temp
 tmp/
