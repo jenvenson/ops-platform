@@ -29,7 +29,7 @@ type AggregatePackageTask struct {
 // AggregatePackageResult 存储每个应用的打包结果
 type AggregatePackageResult struct {
 	ID               uint      `gorm:"primaryKey" json:"id"`
-	TaskID           uint      `gorm:"index;not null" json:"task_id" foreignKey:AggregatePackageTask.ID"`
+	TaskID           uint      `gorm:"index;not null" json:"task_id"`
 	AppName          string    `gorm:"type:varchar(255);not null" json:"app_name"`
 	JenkinsBuildNum  *int      `json:"jenkins_build_num,omitempty"`
 	JenkinsQueueID   *int64    `json:"jenkins_queue_id,omitempty"`

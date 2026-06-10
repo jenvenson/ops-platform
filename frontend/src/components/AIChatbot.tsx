@@ -333,7 +333,7 @@ const AIChatbot = () => {
         body: JSON.stringify({
           scene: 'web',
           userAgent: navigator.userAgent,
-          ipAddress: '127.0.0.1',
+          ipAddress: '',
           forceNew
         })
       });
