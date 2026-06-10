@@ -53,6 +53,18 @@ func extractAppNameFromJobWithPrefix(viewName, jobName, explicitPrefix string) s
 			return trimExplicitAppPrefix(trimmed, explicitPrefix)
 		}
 	}
+	// Fallback: shared env pattern between view and job
+	// e.g., view "mscs_dev-185" / job "myapp_dev-180-app-awd" → "app-awd"
+	base := extractJobPrefix(viewName)
+	base = strings.TrimSuffix(base, "-")
+	if envSeg := extractEnvSegment(base); envSeg != "" {
+		re := regexp.MustCompile(regexp.QuoteMeta(envSeg) + `-\d+`)
+		if loc := re.FindStringIndex(jobName); loc != nil {
+			prefix := jobName[:loc[1]] + "-"
+			trimmed := trimDerivedJobPrefix(strings.TrimPrefix(jobName, prefix))
+			return trimExplicitAppPrefix(trimmed, explicitPrefix)
+		}
+	}
 	return jobName
 }
 
@@ -69,6 +81,13 @@ func trimDerivedJobPrefix(jobName string) string {
 		return re.ReplaceAllString(jobName, "")
 	}
 	return jobName
+}
+
+func extractEnvSegment(viewBase string) string {
+	if idx := strings.LastIndex(viewBase, "_"); idx >= 0 {
+		return viewBase[idx:]
+	}
+	return ""
 }
 
 func candidateJobPrefixes(viewName string) []string {
