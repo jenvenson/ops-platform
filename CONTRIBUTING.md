@@ -15,22 +15,31 @@ Thank you for your interest in contributing!
 
 ```bash
 git clone git@github.com:jenvenson/ops-platform.git
-cd ops-platform/deploy
-cp .env.example .env
-# Edit .env: set DB_PASSWORD, REDIS_PASSWORD, JWT_SECRET
-docker compose -f docker-compose.dev.yml up -d
+cd ops-platform
+
+cp deploy/.env.example deploy/.env
+# Edit deploy/.env: set DB_PASSWORD, REDIS_PASSWORD, JWT_SECRET
+
+docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d
 ```
 
-- **Frontend**: http://localhost:8890
-- **Backend API**: http://localhost:8080
-- **Default login**: admin / admin123 (change on first login)
+- **Frontend**: http://localhost:18890
+- **Backend API**: http://localhost:28080
+- **MySQL**: localhost:23306
+- **Redis**: localhost:16379
+- **Default login**: admin / admin123
 
 ### Local Development (without Docker for frontend/backend)
 
 ```bash
+# Start only infrastructure
+docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d mysql redis
+
 # Backend
 cd backend
-go run ./cmd/server/main.go
+DB_HOST=localhost DB_PORT=23306 DB_PASSWORD=your_mysql_password \
+REDIS_HOST=localhost REDIS_PORT=16379 REDIS_PASSWORD=your_redis_password \
+JWT_SECRET=your_jwt_secret go run ./cmd/server/main.go
 
 # Frontend (separate terminal)
 cd frontend
@@ -38,6 +47,7 @@ pnpm install && pnpm dev
 ```
 
 The frontend dev server proxies `/api` and `/auth` to the backend. See `vite.config.ts` for proxy settings.
+Environment variables `DB_PASSWORD`, `REDIS_PASSWORD`, and `JWT_SECRET` must be exported or passed inline so the backend can connect to the database and sign tokens.
 
 ## Project Architecture
 

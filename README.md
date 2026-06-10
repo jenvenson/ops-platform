@@ -5,7 +5,8 @@
 **运维管理平台 — CMDB、CI/CD、安全扫描、告警监控一体化**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Go](https://img.shields.io/badge/Go-1.24-00ADD8?logo=go)](https://go.dev/)
+[![CI](https://github.com/jenvenson/ops-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/jenvenson/ops-platform/actions/workflows/ci.yml)
+[![Go](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go)](https://go.dev/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Docker](https://img.shields.io/badge/Docker-20.10+-2496ED?logo=docker)](https://www.docker.com/)
@@ -53,33 +54,118 @@
 
 ## 快速开始
 
-### 前置条件
-
-- Docker 20.10+ & Docker Compose 2.0+
-- 至少 4GB 可用内存
-
-### 开发环境
+### 1. 克隆项目
 
 ```bash
 git clone git@github.com:jenvenson/ops-platform.git
-cd ops-platform/deploy
-
-# 复制并编辑环境变量
-cp .env.example .env
-# 至少修改 DB_PASSWORD、REDIS_PASSWORD、JWT_SECRET
-
-# 启动开发环境
-docker compose -f docker-compose.dev.yml up -d
+cd ops-platform
 ```
 
-访问地址：
-- 前端入口: http://localhost:8890
-- 后端 API: http://localhost:8080
-- 默认账号: `admin` / `admin123`
+### 2. 配置环境变量
 
-### 生产环境
+```bash
+cp deploy/.env.example deploy/.env
+```
 
-详见 [部署指南](deploy/DEPLOY.md)
+编辑 `deploy/.env`，**至少修改以下三项**：
+
+```ini
+DB_PASSWORD=your_secure_mysql_password
+REDIS_PASSWORD=your_secure_redis_password
+JWT_SECRET=your_jwt_secret_key_change_in_production
+```
+
+### 3. 启动服务
+
+```bash
+docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d
+```
+
+首次启动拉取镜像并安装依赖，约需 3-5 分钟。
+
+### 4. 验证
+
+```bash
+curl http://localhost:28080/health
+# {"status":"ok","checks":{"database":"ok"}}
+```
+
+浏览器打开 **http://localhost:18890**，使用默认账号登录。
+
+### 访问地址
+
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| 前端入口 | http://localhost:18890 | Web 管理界面 |
+| 后端 API | http://localhost:28080 | REST API |
+| MySQL | localhost:23306 | 数据库直连 |
+| Redis | localhost:16379 | 缓存直连 |
+
+### 默认账号
+
+| 字段 | 值 |
+|------|------|
+| 用户名 | `admin` |
+| 密码 | `admin123` |
+
+> 首次登录后请在「个人中心」修改密码。
+
+### 本地开发（前后端本地运行，Docker 跑 MySQL/Redis）
+
+```bash
+# 1. 只启动基础设施
+docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d mysql redis
+
+# 2. 后端 (终端 1)
+cd backend
+DB_HOST=localhost DB_PORT=23306 DB_PASSWORD=your_secure_mysql_password \
+REDIS_HOST=localhost REDIS_PORT=16379 REDIS_PASSWORD=your_secure_redis_password \
+JWT_SECRET=your_jwt_secret go run ./cmd/server/main.go
+
+# 3. 前端 (终端 2)
+cd frontend
+pnpm install && pnpm dev
+# Vite dev server 运行在 http://localhost:5173，自动代理 /api 到后端
+```
+
+### 常见问题
+
+<details>
+<summary><b>MySQL 连接失败 / Authentication plugin 错误</b></summary>
+
+部分客户端不支持 MySQL 8.0 的 `caching_sha2_password`：
+
+```bash
+docker exec ops-mysql mysql -uroot -p -e \
+  "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'your_password'; FLUSH PRIVILEGES;"
+```
+</details>
+
+<details>
+<summary><b>前端无法连接后端</b></summary>
+
+确认 `deploy/.env` 中 `JWT_SECRET` 已设置，且后端容器 `ops-backend-dev` 已启动：
+
+```bash
+docker logs ops-backend-dev --tail 20
+```
+</details>
+
+<details>
+<summary><b>端口冲突</b></summary>
+
+修改 `deploy/.env` 中的端口变量或直接编辑 `deploy/docker-compose.dev.yml` 的 `ports` 映射。
+</details>
+
+<details>
+<summary><b>国内网络慢 / 依赖下载失败</b></summary>
+
+在 `deploy/.env` 中设置 Go 模块代理：
+
+```ini
+GOPROXY=https://goproxy.cn,direct
+```
+</details>
 
 ## 项目结构
 
@@ -101,7 +187,9 @@ docker compose -f docker-compose.dev.yml up -d
 │   ├── docker-compose.yml        # 生产环境
 │   ├── docker-compose.dev.yml    # 开发环境
 │   ├── Dockerfile.backend        # 后端镜像
-│   ├── nginx.prod.conf.template  # Nginx 模板
+│   ├── Dockerfile.frontend       # 前端镜像
+│   ├── nginx.conf.template       # Nginx 模板
+│   ├── .env.example              # 环境变量示例
 │   ├── deploy-init.sh            # 首次部署
 │   └── deploy-update.sh          # 迭代更新
 ├── docs/                   # 文档与截图
@@ -159,5 +247,3 @@ ASSISTANT_API_KEY=sk-your-api-key
 ## License
 
 本项目采用 [MIT License](LICENSE)，可自由使用、修改和分发。
-
-如需商业授权或合作，请通过 [GitHub Issues](https://github.com/jenvenson/ops-platform/issues) 联系我们。
