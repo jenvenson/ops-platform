@@ -33,7 +33,10 @@ export default function SettingsPage() {
         timezone: setting.timezone,
         language: setting.language,
       })
-      localStorage.setItem('app_language', setting.language)
+      if (setting.language) {
+        localStorage.setItem('app_language', setting.language)
+        window.dispatchEvent(new CustomEvent('languageChanged'))
+      }
     } catch {
       message.error('加载通用配置失败')
     } finally {
@@ -57,8 +60,10 @@ export default function SettingsPage() {
         language: result.language,
       })
       document.title = result.site_name || '运维管理平台'
-      localStorage.setItem('app_language', result.language)
-      window.dispatchEvent(new CustomEvent('languageChanged'))
+      if (result.language) {
+        localStorage.setItem('app_language', result.language)
+        window.dispatchEvent(new CustomEvent('languageChanged'))
+      }
       message.success('通用设置已保存')
     } catch (error: unknown) {
       const msg =
