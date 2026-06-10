@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useState } from 'react'
 import { Modal, Card, Descriptions, Table, Tag, Space, Button, Progress, Typography, Tabs, message, Dropdown, Row, Col, Statistic, Drawer, Select, Alert, Empty, Input, Spin } from 'antd'
 import { ExportOutlined, ReloadOutlined, FileTextOutlined, FileOutlined, DownOutlined, SafetyOutlined, CloudServerOutlined, WarningOutlined, InfoCircleOutlined, TableOutlined, EyeOutlined } from '@ant-design/icons'

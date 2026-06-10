@@ -43,7 +43,8 @@ http {
 
         # Grafana 反向代理（解决 iframe 嵌入问题）
         location /grafana-proxy/ {
-            proxy_pass ${GRAFANA_UPSTREAM};
+            set $grafana_upstream "${GRAFANA_UPSTREAM}";
+            proxy_pass $grafana_upstream;
             proxy_set_header Host ${GRAFANA_HOST_HEADER};
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

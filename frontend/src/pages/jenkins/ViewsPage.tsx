@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState } from 'react';
 import {
   Card, Form, Input, Button, Space, message, Typography, Row, Col, Alert, Table, Modal, Tag, Divider

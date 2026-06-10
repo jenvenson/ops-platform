@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import apiClient from './client'
 
 export interface User {
@@ -154,14 +157,6 @@ export interface SystemGeneralSetting {
   language: string
 }
 
-export interface LicenseStatus {
-  customer: string
-  expires_at: string
-  features: string[]
-  valid: boolean
-  valid_error?: string
-}
-
 export const adminAPI = {
   // 用户管理
   getUsers: (): Promise<User[]> =>
@@ -250,8 +245,4 @@ export const adminAPI = {
 
   updateSystemGeneralSetting: (data: SystemGeneralSetting): Promise<SystemGeneralSetting> =>
     apiClient.put<SystemGeneralSetting>('/admin/settings/general', data),
-
-  // License
-  getLicenseStatus: (): Promise<LicenseStatus> =>
-    apiClient.get<LicenseStatus>('/admin/settings/license'),
 }

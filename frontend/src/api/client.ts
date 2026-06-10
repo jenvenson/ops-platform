@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 
 interface AxiosErrorData {

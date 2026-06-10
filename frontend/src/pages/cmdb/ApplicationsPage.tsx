@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState, useEffect, useMemo } from 'react'
 import { Table, Button, Modal, Form, Input, Select, Tag, message, Popconfirm, Space, Alert, Checkbox, Tooltip } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, CloudDownloadOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'

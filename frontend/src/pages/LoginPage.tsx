@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState, useEffect } from 'react'
 import { Form, Input, Button, message, Typography, Card, Modal } from 'antd'
 import { useNavigate, Link } from 'react-router-dom'

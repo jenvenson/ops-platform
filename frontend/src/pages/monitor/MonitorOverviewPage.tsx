@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState, useEffect, useCallback } from 'react'
 import { Card, Button, Table } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'

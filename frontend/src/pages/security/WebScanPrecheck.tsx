@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { Alert, Button, Card, Col, Form, Radio, Row, Space, Tag, Typography } from 'antd'
 import { RobotOutlined } from '@ant-design/icons'
 import type { FormInstance } from 'antd/es/form'

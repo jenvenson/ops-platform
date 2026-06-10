@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 package auth
 
 import (
@@ -93,8 +96,6 @@ func RegisterRoutes(r *gin.Engine, cfg *config.Config) {
 			admin.PUT("/settings/assistant-model", UpdateAssistantModelSetting())
 		admin.GET("/settings/general", GetSystemGeneralSetting())
 		admin.PUT("/settings/general", UpdateSystemGeneralSetting())
-
-		admin.GET("/settings/license", GetLicenseStatus(cfg))
 
 		// 平台审计
 		admin.GET("/audit/access-logs", GetPlatformAccessLogs())
@@ -1616,4 +1617,3 @@ func ResetPassword() gin.HandlerFunc {
         c.JSON(http.StatusOK, gin.H{"message": "密码重置成功，请使用新密码登录"})
     }
 }
-

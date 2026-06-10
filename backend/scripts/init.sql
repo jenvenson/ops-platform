@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 -- 插入默认管理员用户（首次登录后请立即修改密码）
-INSERT INTO users (username, password, real_name, email, role, must_change_password)
-VALUES ('admin', '$2a$10$csSTUM5UQrtt8E/rQ5dZlOk.MQvjEqFRUPxNkTarOLxalC3pBfZny', '管理员', 'admin@example.com', 'admin', 1)
+INSERT INTO users (username, password, real_name, email, role)
+VALUES ('admin', '$2a$10$csSTUM5UQrtt8E/rQ5dZlOk.MQvjEqFRUPxNkTarOLxalC3pBfZny', '管理员', 'admin@example.com', 'admin')
 ON DUPLICATE KEY UPDATE username=username;
 
 -- 角色表

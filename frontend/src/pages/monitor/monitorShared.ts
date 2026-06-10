@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { monitorAPI } from '../../api/monitor.js'
 
 // 从 Prometheus 获取的服务器状态（与 Grafana 服务器资源总览表一致）

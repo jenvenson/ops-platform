@@ -1,7 +1,10 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Divider, Form, Input, InputNumber, Select, Space, Switch, Tabs, Tag, Typography, message } from 'antd'
 import { SaveOutlined } from '@ant-design/icons'
-import { adminAPI, type AuditLogSetting, type FIMSSHSetting, type AssistantModelSetting, type SystemGeneralSetting, type LicenseStatus } from '../../api/admin'
+import { adminAPI, type AuditLogSetting, type FIMSSHSetting, type AssistantModelSetting, type SystemGeneralSetting } from '../../api/admin'
 import { canEdit } from '../../utils/menuAccess'
 
 const { Text } = Typography
@@ -20,8 +23,6 @@ export default function SettingsPage() {
   const [modelLoading, setModelLoading] = useState(false)
   const [modelSetting, setModelSetting] = useState<AssistantModelSetting | null>(null)
   const [generalLoading, setGeneralLoading] = useState(false)
-  const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | null>(null)
-  const [licenseLoading, setLicenseLoading] = useState(false)
 
   const loadGeneralSetting = async () => {
     setGeneralLoading(true)
@@ -133,24 +134,11 @@ export default function SettingsPage() {
     }
   }
 
-  const loadLicenseStatus = async () => {
-    setLicenseLoading(true)
-    try {
-      const status = await adminAPI.getLicenseStatus()
-      setLicenseStatus(status)
-    } catch {
-      message.error('加载 License 状态失败')
-    } finally {
-      setLicenseLoading(false)
-    }
-  }
-
   useEffect(() => {
     void loadGeneralSetting()
     void loadFIMSetting()
     void loadAuditSetting()
     void loadModelSetting()
-    void loadLicenseStatus()
   }, [])
 
   const handleSaveAuditSetting = async () => {
@@ -568,50 +556,6 @@ export default function SettingsPage() {
             </Button>}
           </Form.Item>
         </Form>
-      ),
-    },
-    {
-      key: 'license',
-      label: 'License',
-      children: (
-        <Card loading={licenseLoading}>
-          {licenseStatus ? (
-            <div>
-              <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                <Tag color={licenseStatus.valid ? 'green' : 'red'} style={{ fontSize: 14, padding: '4px 12px' }}>
-                  {licenseStatus.valid ? '已激活' : '未激活'}
-                </Tag>
-                {licenseStatus.customer && (
-                  <div>
-                    <Text strong>授权客户：</Text>
-                    <Text>{licenseStatus.customer}</Text>
-                  </div>
-                )}
-                {licenseStatus.expires_at && (
-                  <div>
-                    <Text strong>到期时间：</Text>
-                    <Text>{new Date(licenseStatus.expires_at).toLocaleDateString('zh-CN')}</Text>
-                  </div>
-                )}
-                {licenseStatus.features && licenseStatus.features.length > 0 && (
-                  <div>
-                    <Text strong>功能范围：</Text>
-                    <Space size={4}>
-                      {licenseStatus.features.map((f: string) => (
-                        <Tag key={f}>{f}</Tag>
-                      ))}
-                    </Space>
-                  </div>
-                )}
-                {licenseStatus.valid_error && (
-                  <Alert type="warning" showIcon message={licenseStatus.valid_error} />
-                )}
-              </Space>
-            </div>
-          ) : (
-            <Text type="secondary">正在加载 License 状态...</Text>
-          )}
-        </Card>
       ),
     },
     {

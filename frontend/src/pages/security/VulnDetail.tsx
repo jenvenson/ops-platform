@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 // @ts-nocheck
 import { Card, Row, Col, Tag, Typography, Divider, Alert, Button, Space, Descriptions, Spin } from 'antd'
 import {

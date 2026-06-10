@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, Card, Col, Descriptions, Drawer, Input, Popconfirm, Row, Select, Space, Statistic, Table, Tag, Typography, message } from 'antd'

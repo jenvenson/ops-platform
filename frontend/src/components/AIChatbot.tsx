@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import './AIChatbot.css';

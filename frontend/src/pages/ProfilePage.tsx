@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState, useEffect } from 'react'
 import { Card, Descriptions, Button, Modal, Form, Input, message, Tag, Divider, Space } from 'antd'
 import { KeyOutlined, UserOutlined, MailOutlined, SafetyOutlined, CalendarOutlined, IdcardOutlined } from '@ant-design/icons'

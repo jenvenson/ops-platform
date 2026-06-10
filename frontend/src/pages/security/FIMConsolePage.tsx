@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { Tabs } from 'antd'
 import FIMPoliciesPage from './FIMPoliciesPage'
 import FIMEventsPage from './FIMEventsPage'

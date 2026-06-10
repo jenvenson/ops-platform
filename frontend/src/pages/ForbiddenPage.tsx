@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { Button, Card, Result, Space, Typography } from 'antd'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 

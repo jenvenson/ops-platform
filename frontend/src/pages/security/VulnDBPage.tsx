@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 // @ts-nocheck
 import { useEffect, useState } from 'react'
 import { Card, Table, Input, Button, Select, Tag, Modal, Typography, Row, Col, Statistic, Alert, Upload, message, Space } from 'antd'

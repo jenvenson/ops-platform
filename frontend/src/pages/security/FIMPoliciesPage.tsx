@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {

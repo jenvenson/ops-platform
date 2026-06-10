@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 /**
  * SVG 图标映射
  * 将菜单图标名称映射为对应的 SVG 组件

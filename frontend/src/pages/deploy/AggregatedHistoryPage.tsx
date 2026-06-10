@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState, useEffect } from 'react';
 import { Card, Table, Tag, Space, Button, Select, DatePicker, message, Modal, Input, List, Typography, Progress, Popconfirm } from 'antd';
 import { SearchOutlined, DownloadOutlined, FileZipOutlined, LinkOutlined, SyncOutlined, FileTextOutlined, DeleteOutlined } from '@ant-design/icons';

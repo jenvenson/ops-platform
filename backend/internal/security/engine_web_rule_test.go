@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 package security
 
 import "testing"
@@ -25,4 +28,3 @@ func TestWebRuleEnabledRespectsCustomCategories(t *testing.T) {
 		t.Fatal("expected unrelated option to exclude information-disclosure web-rule")
 	}
 }
-

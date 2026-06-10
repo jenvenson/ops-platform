@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 package security
 
 import (
@@ -27,4 +30,3 @@ func TestSanitizeVulnerabilityTextFieldTruncatesByBytesAndKeepsUTF8(t *testing.T
 		t.Fatal("expected long text to be truncated")
 	}
 }
-

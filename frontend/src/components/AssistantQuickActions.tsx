@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { Button, Card, Space } from 'antd'
 import { RobotOutlined } from '@ant-design/icons'
 

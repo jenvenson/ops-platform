@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 package auth
 
 import (
@@ -12,8 +15,6 @@ import (
 	"github.com/jenvenson/ops-platform/internal/database"
 	"github.com/jenvenson/ops-platform/internal/models"
 	"github.com/jenvenson/ops-platform/internal/secureconfig"
-	"github.com/jenvenson/ops-platform/pkg/config"
-	"github.com/jenvenson/ops-platform/pkg/license"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
@@ -710,13 +711,5 @@ func GetPublicSiteName() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"site_name": setting.SiteName})
-	}
-}
-
-// GetLicenseStatus 返回当前 License 状态
-func GetLicenseStatus(cfg *config.Config) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		lic := license.Validate(cfg.LicenseKey)
-		c.JSON(http.StatusOK, lic)
 	}
 }

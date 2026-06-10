@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState } from 'react'
 import { Form, Input, Button, message, Typography, Card, Result } from 'antd'
 import { Link } from 'react-router-dom'

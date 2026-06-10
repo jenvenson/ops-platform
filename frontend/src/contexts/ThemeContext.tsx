@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { ThemeConfig } from 'antd'
 

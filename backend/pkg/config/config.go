@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 package config
 
 import (
@@ -64,7 +67,6 @@ type Config struct {
 	Jenkins     JenkinsConfig   `mapstructure:"jenkins"`
 	Grafana     GrafanaConfig   `mapstructure:"grafana"`
 	Assistant   AssistantConfig `mapstructure:"assistant"`
-	LicenseKey  string          `mapstructure:"license_key"`
 }
 
 func Load() (*Config, error) {
@@ -190,9 +192,6 @@ func Load() (*Config, error) {
 	}
 	if embedModel := os.Getenv("ASSISTANT_EMBED_MODEL"); embedModel != "" {
 		cfg.Assistant.EmbedModel = embedModel
-	}
-	if licenseKey := os.Getenv("LICENSE_KEY"); licenseKey != "" {
-		cfg.LicenseKey = licenseKey
 	}
 
 	// 验证配置

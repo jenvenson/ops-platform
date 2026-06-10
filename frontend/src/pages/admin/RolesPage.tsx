@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState, useEffect, useCallback } from 'react'
 import { Card, Table, Tag, Space, Button, Modal, Input, Form, Select, message, Popconfirm, Checkbox, Tree } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons'

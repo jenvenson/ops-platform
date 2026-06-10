@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 /**
  * Ant Design 主题配置
  * 基于 theme-variables.css 中的变量定义

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState } from 'react'
 import { Card, Steps, Form, Input, Button, Space, Typography, Radio, Alert, Tag, Row, Col, Checkbox } from 'antd'
 import {

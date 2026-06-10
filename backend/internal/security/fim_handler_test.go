@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 package security
 
 import (
@@ -41,4 +44,3 @@ func (e simpleError) Error() string { return string(e) }
 func assertError(message string) error {
 	return simpleError(message)
 }
-

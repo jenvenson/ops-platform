@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { Card, Col, Row, Space, Tag, Typography } from 'antd'
 import manualData from '../data/user_manual.json'
 

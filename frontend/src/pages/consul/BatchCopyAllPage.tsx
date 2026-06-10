@@ -1,3 +1,6 @@
+// Copyright (c) 2026 OPS Platform Contributors.
+// SPDX-License-Identifier: MIT
+
 import { useState, useEffect } from 'react'
 import {
   Card, Form, Input, Button, Select, Switch, Tag, Space, message,

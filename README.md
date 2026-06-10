@@ -158,11 +158,6 @@ ASSISTANT_API_KEY=sk-your-api-key
 
 ## License
 
-本项目采用 **开放核心（Open Core）** 授权模式：
-
-| 范围 | 许可 | 说明 |
-|------|------|------|
-| 核心功能（`backend/`、`frontend/`、`deploy/` 中除 `enterprise/` 外的代码） | [MIT](LICENSE) | 可自由使用、修改、分发 |
-| 高级功能（`enterprise/` 目录） | [商业授权](enterprise/LICENSE) | 需获得商业许可，请联系我们 |
+本项目采用 [MIT License](LICENSE)，可自由使用、修改和分发。
 
 如需商业授权或合作，请通过 [GitHub Issues](https://github.com/jenvenson/ops-platform/issues) 联系我们。
