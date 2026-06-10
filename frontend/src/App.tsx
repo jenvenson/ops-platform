@@ -1,26 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 OPS Platform Contributors
 
-import { Suspense, lazy, useState, useEffect } from 'react'
+import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ConfigProvider } from 'antd'
-import zhCN from 'antd/locale/zh_CN'
-import enUS from 'antd/locale/en_US'
 import MainLayout from './components/MainLayout'
 import { ThemeProvider, useTheme } from './contexts/ThemeContext'
-
-const LOCALE_MAP: Record<string, typeof zhCN> = {
-  'zh-CN': zhCN,
-  'en-US': enUS,
-}
-
-function getStoredLocale(): string {
-  try {
-    const lang = localStorage.getItem('app_language')
-    if (lang && lang in LOCALE_MAP) return lang
-  } catch { /* noop */ }
-  return 'zh-CN'
-}
+import { LocaleProvider, useLocale } from './contexts/LocaleContext'
 
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
@@ -80,18 +66,7 @@ function withPageLoader(element: JSX.Element) {
 
 function ThemedApp() {
   const { antdTheme } = useTheme()
-  const [locale, setLocale] = useState(() => LOCALE_MAP[getStoredLocale()] || zhCN)
-
-  useEffect(() => {
-    const handler = () => {
-      const lang = getStoredLocale()
-      if (LOCALE_MAP[lang]) {
-        setLocale(LOCALE_MAP[lang])
-      }
-    }
-    window.addEventListener('languageChanged', handler)
-    return () => window.removeEventListener('languageChanged', handler)
-  }, [])
+  const { locale } = useLocale()
 
   return (
     <ConfigProvider
@@ -171,7 +146,9 @@ function ThemedApp() {
 function App() {
   return (
     <ThemeProvider>
-      <ThemedApp />
+      <LocaleProvider>
+        <ThemedApp />
+      </LocaleProvider>
     </ThemeProvider>
   )
 }

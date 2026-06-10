@@ -6,6 +6,7 @@ import { Alert, Button, Card, Divider, Form, Input, InputNumber, Select, Space, 
 import { SaveOutlined } from '@ant-design/icons'
 import { adminAPI, type AuditLogSetting, type FIMSSHSetting, type AssistantModelSetting, type SystemGeneralSetting } from '../../api/admin'
 import { canEdit } from '../../utils/menuAccess'
+import { useLocale } from '../../contexts/LocaleContext'
 
 const { Text } = Typography
 
@@ -23,6 +24,7 @@ export default function SettingsPage() {
   const [modelLoading, setModelLoading] = useState(false)
   const [modelSetting, setModelSetting] = useState<AssistantModelSetting | null>(null)
   const [generalLoading, setGeneralLoading] = useState(false)
+  const { setLang } = useLocale()
 
   const loadGeneralSetting = async () => {
     setGeneralLoading(true)
@@ -34,8 +36,7 @@ export default function SettingsPage() {
         language: setting.language,
       })
       if (setting.language) {
-        localStorage.setItem('app_language', setting.language)
-        window.dispatchEvent(new CustomEvent('languageChanged'))
+        setLang(setting.language)
       }
     } catch {
       message.error('加载通用配置失败')
@@ -61,8 +62,7 @@ export default function SettingsPage() {
       })
       document.title = result.site_name || '运维管理平台'
       if (result.language) {
-        localStorage.setItem('app_language', result.language)
-        window.dispatchEvent(new CustomEvent('languageChanged'))
+        setLang(result.language)
       }
       message.success('通用设置已保存')
     } catch (error: unknown) {
