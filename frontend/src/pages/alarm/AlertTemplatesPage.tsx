@@ -42,6 +42,23 @@ export default function AlertTemplatesPage() {
     resolved: { label: t('alertRecovered', '告警恢复'), color: 'green' },
   }
 
+  // 内置默认模板的名称/描述按界面语言显示，自定义模板保持原文
+  const defaultTplText: Record<string, string> = {
+    '钉钉-告警触发': t('defaultTplDingtalkFiring', '钉钉-告警触发'),
+    '钉钉-告警恢复': t('defaultTplDingtalkResolved', '钉钉-告警恢复'),
+    '企微-告警触发': t('defaultTplWechatFiring', '企微-告警触发'),
+    '企微-告警恢复': t('defaultTplWechatResolved', '企微-告警恢复'),
+    '邮件-告警触发': t('defaultTplEmailFiring', '邮件-告警触发'),
+    '邮件-告警恢复': t('defaultTplEmailResolved', '邮件-告警恢复'),
+    '钉钉机器人默认告警触发模板': t('defaultTplDingtalkFiringDesc', '钉钉机器人默认告警触发模板'),
+    '钉钉机器人默认告警恢复模板': t('defaultTplDingtalkResolvedDesc', '钉钉机器人默认告警恢复模板'),
+    '企业微信默认告警触发模板': t('defaultTplWechatFiringDesc', '企业微信默认告警触发模板'),
+    '企业微信默认告警恢复模板': t('defaultTplWechatResolvedDesc', '企业微信默认告警恢复模板'),
+    '邮件默认告警触发模板': t('defaultTplEmailFiringDesc', '邮件默认告警触发模板'),
+    '邮件默认告警恢复模板': t('defaultTplEmailResolvedDesc', '邮件默认告警恢复模板'),
+  }
+  const displayTpl = (s?: string) => (s && defaultTplText[s]) || s
+
   const fetchTemplates = useCallback(async () => {
     setLoading(true)
     try {
@@ -185,11 +202,14 @@ export default function AlertTemplatesPage() {
       render: (v: string, r: AlertTemplate) => (
         <Space>
           {r.is_default && <StarFilled style={{ color: '#faad14' }} />}
-          {v}
+          {displayTpl(v)}
         </Space>
       ),
     },
-    { title: t('descriptionLabel', '描述'), dataIndex: 'description', key: 'description', ellipsis: true },
+    {
+      title: t('descriptionLabel', '描述'), dataIndex: 'description', key: 'description', ellipsis: true,
+      render: (v: string) => displayTpl(v),
+    },
     {
       title: t('default', '默认'), dataIndex: 'is_default', key: 'is_default', width: 70,
       render: (v: boolean) => v ? <Tag color="gold">{t('default', '默认')}</Tag> : <Tag>{tc('no', '否')}</Tag>,

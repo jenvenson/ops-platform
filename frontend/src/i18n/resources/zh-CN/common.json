@@ -58,5 +58,6 @@
     "failed": "登录失败，请稍后重试",
     "tokenGenerated": "重置令牌已生成",
     "passwordChanged": "密码修改成功，正在进入系统..."
-  }
+  },
+  "adminDefaultName": "管理员"
 }

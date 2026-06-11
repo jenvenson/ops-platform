@@ -200,5 +200,17 @@
   "varCategoryLabel": "分类(中文)",
   "varTime": "触发/恢复时间",
   "varEmoji": "级别Emoji",
-  "contentTplPlaceholder": "### {{.Emoji}} 【告警】{{.RuleName}}\n\n> **规则名称**：{{.RuleName}}\n\n> **告警内容**：{{.Content}}\n\n> **来源**：{{.Source}}\n\n> **级别**：{{.SeverityLabel}}\n\n> **状态**：{{.StatusLabel}}\n\n> **触发时间**：{{.Time}}"
+  "contentTplPlaceholder": "### {{.Emoji}} 【告警】{{.RuleName}}\n\n> **规则名称**：{{.RuleName}}\n\n> **告警内容**：{{.Content}}\n\n> **来源**：{{.Source}}\n\n> **级别**：{{.SeverityLabel}}\n\n> **状态**：{{.StatusLabel}}\n\n> **触发时间**：{{.Time}}",
+  "defaultTplDingtalkFiring": "钉钉-告警触发",
+  "defaultTplDingtalkResolved": "钉钉-告警恢复",
+  "defaultTplWechatFiring": "企微-告警触发",
+  "defaultTplWechatResolved": "企微-告警恢复",
+  "defaultTplEmailFiring": "邮件-告警触发",
+  "defaultTplEmailResolved": "邮件-告警恢复",
+  "defaultTplDingtalkFiringDesc": "钉钉机器人默认告警触发模板",
+  "defaultTplDingtalkResolvedDesc": "钉钉机器人默认告警恢复模板",
+  "defaultTplWechatFiringDesc": "企业微信默认告警触发模板",
+  "defaultTplWechatResolvedDesc": "企业微信默认告警恢复模板",
+  "defaultTplEmailFiringDesc": "邮件默认告警触发模板",
+  "defaultTplEmailResolvedDesc": "邮件默认告警恢复模板"
 }

@@ -1034,7 +1034,7 @@ export default function MainLayout() {
                   <Space style={{ cursor: 'pointer', color: '#333' }}>
                     <UserOutlined />
                     <span>
-                      {realName || username || t('user', '用户')}
+                      {realName === '管理员' ? tc('adminDefaultName', '管理员') : (realName || username || t('user', '用户'))}
                       {userRole && (
                         <span style={{ color: '#faad14', fontSize: 12, marginLeft: 4 }}>
                           ({getRoleDisplayName(userRole)})

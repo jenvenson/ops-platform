@@ -200,5 +200,17 @@
   "varCategoryLabel": "Category (localized)",
   "varTime": "Trigger/recovery time",
   "varEmoji": "Severity Emoji",
-  "contentTplPlaceholder": "### {{.Emoji}} [Alert] {{.RuleName}}\n\n> **Rule Name**: {{.RuleName}}\n\n> **Alert Content**: {{.Content}}\n\n> **Source**: {{.Source}}\n\n> **Severity**: {{.SeverityLabel}}\n\n> **Status**: {{.StatusLabel}}\n\n> **Trigger Time**: {{.Time}}"
+  "contentTplPlaceholder": "### {{.Emoji}} [Alert] {{.RuleName}}\n\n> **Rule Name**: {{.RuleName}}\n\n> **Alert Content**: {{.Content}}\n\n> **Source**: {{.Source}}\n\n> **Severity**: {{.SeverityLabel}}\n\n> **Status**: {{.StatusLabel}}\n\n> **Trigger Time**: {{.Time}}",
+  "defaultTplDingtalkFiring": "DingTalk - Alert Firing",
+  "defaultTplDingtalkResolved": "DingTalk - Alert Recovered",
+  "defaultTplWechatFiring": "WeCom - Alert Firing",
+  "defaultTplWechatResolved": "WeCom - Alert Recovered",
+  "defaultTplEmailFiring": "Email - Alert Firing",
+  "defaultTplEmailResolved": "Email - Alert Recovered",
+  "defaultTplDingtalkFiringDesc": "Default DingTalk bot alert firing template",
+  "defaultTplDingtalkResolvedDesc": "Default DingTalk bot alert recovery template",
+  "defaultTplWechatFiringDesc": "Default WeCom alert firing template",
+  "defaultTplWechatResolvedDesc": "Default WeCom alert recovery template",
+  "defaultTplEmailFiringDesc": "Default email alert firing template",
+  "defaultTplEmailResolvedDesc": "Default email alert recovery template"
 }

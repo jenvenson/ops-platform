@@ -58,5 +58,6 @@
     "failed": "Login failed, please try again later",
     "tokenGenerated": "Reset token generated",
     "passwordChanged": "Password changed, entering system..."
-  }
+  },
+  "adminDefaultName": "Administrator"
 }
