@@ -113,22 +113,18 @@ Open **http://localhost:18890** in your browser and log in with the default acco
 
 > Please change the password in "Profile" after the first login.
 
-### Local development (run backend/frontend locally, MySQL/Redis in Docker)
+### Development mode (all services run in Docker)
+
+`docker-compose.dev.yml` starts everything: MySQL, Redis, backend (`go run` inside a golang container), frontend (Vite inside a node container), and Nginx. Source directories are mounted into the containers, so no local Go / Node installation is needed:
 
 ```bash
-# 1. Start infrastructure only
-docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d mysql redis
+# Frontend: Vite hot-reload — code changes apply automatically
+# Backend: no hot-reload — restart the container after code changes
+docker restart ops-backend-dev
 
-# 2. Backend (terminal 1)
-cd backend
-DB_HOST=localhost DB_PORT=23306 DB_PASSWORD=your_secure_mysql_password \
-REDIS_HOST=localhost REDIS_PORT=16379 REDIS_PASSWORD=your_secure_redis_password \
-JWT_SECRET=your_jwt_secret go run ./cmd/server/main.go
-
-# 3. Frontend (terminal 2)
-cd frontend
-pnpm install && pnpm dev
-# Vite dev server runs at http://localhost:5173 and proxies /api to the backend
+# Tail logs
+docker logs -f ops-backend-dev
+docker logs -f ops-frontend-dev
 ```
 
 ### Troubleshooting
@@ -234,12 +230,6 @@ ASSISTANT_API_KEY=sk-your-api-key
 ```
 
 Supported tool calls: CMDB queries, alert management, deployment operations, security scanning.
-
-## Internationalization
-
-- One-click Chinese / English switching in the top bar; all pages, menus, and messages update instantly
-- Browser title and site name translate with the UI language; admin-customized site names stay verbatim
-- The AI Assistant automatically replies in the current UI language
 
 ## Documentation
 

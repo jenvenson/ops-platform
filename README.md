@@ -113,22 +113,18 @@ curl http://localhost:28080/health
 
 > 首次登录后请在「个人中心」修改密码。
 
-### 本地开发（前后端本地运行，Docker 跑 MySQL/Redis）
+### 开发模式说明（全部服务均在 Docker 中运行）
+
+`docker-compose.dev.yml` 会启动全部服务：MySQL、Redis、后端（golang 容器内 `go run`）、前端（node 容器内 Vite）、Nginx。源码目录挂载进容器，无需本地安装 Go / Node：
 
 ```bash
-# 1. 只启动基础设施
-docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d mysql redis
+# 前端：Vite 热更新，改完代码自动生效
+# 后端：无热重载，修改代码后重启容器
+docker restart ops-backend-dev
 
-# 2. 后端 (终端 1)
-cd backend
-DB_HOST=localhost DB_PORT=23306 DB_PASSWORD=your_secure_mysql_password \
-REDIS_HOST=localhost REDIS_PORT=16379 REDIS_PASSWORD=your_secure_redis_password \
-JWT_SECRET=your_jwt_secret go run ./cmd/server/main.go
-
-# 3. 前端 (终端 2)
-cd frontend
-pnpm install && pnpm dev
-# Vite dev server 运行在 http://localhost:5173，自动代理 /api 到后端
+# 查看日志
+docker logs -f ops-backend-dev
+docker logs -f ops-frontend-dev
 ```
 
 ### 常见问题
@@ -234,12 +230,6 @@ ASSISTANT_API_KEY=sk-your-api-key
 ```
 
 支持的工具调用：CMDB 查询、告警管理、部署操作、安全扫描。
-
-## 国际化
-
-- 顶栏一键切换中文 / English，全部页面、菜单、提示文案即时生效
-- 浏览器标题与系统名称随语言切换翻译；管理员自定义的站点名称保持原样
-- 运维小助手的回答语言自动跟随当前界面语言
 
 ## 文档
 
