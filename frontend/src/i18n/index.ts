@@ -78,6 +78,7 @@ i18next.use(initReactI18next).init({
   lng: getStoredLang(),
   fallbackLng: 'zh-CN',
   defaultNS: 'common',
+  fallbackNS: 'common',
   interpolation: { escapeValue: false },
   returnNull: false,
   returnEmptyString: false,
