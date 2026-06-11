@@ -7,6 +7,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { UserOutlined, LockOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
+import { isCustomSiteName, loadSiteName } from '../utils/siteName'
 import { notifyMenusChanged } from '../utils/menuAccess'
 
 const { Title, Text } = Typography
@@ -50,16 +51,12 @@ export default function LoginPage() {
   const [pendingToken, setPendingToken] = useState('')
   const [pendingMenus, setPendingMenus] = useState<MenuItem[]>([])
   const [changeForm] = Form.useForm()
-  const [siteName, setSiteName] = useState(t('title', '运维管理平台'))
+  const [rawSiteName, setRawSiteName] = useState('')
+  const siteName = isCustomSiteName(rawSiteName) ? rawSiteName : t('title', '运维管理平台')
   const navigate = useNavigate()
 
   useEffect(() => {
-    apiClient.get<{ site_name: string }>('/site-name').then(res => {
-      if (res.site_name) {
-        setSiteName(res.site_name)
-        document.title = res.site_name
-      }
-    }).catch(() => {})
+    void loadSiteName().then(setRawSiteName)
   }, [])
 
   const saveLoginState = (token: string, user: UserInfo, menus: MenuItem[]) => {

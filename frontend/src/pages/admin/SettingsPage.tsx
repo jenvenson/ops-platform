@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { adminAPI, type AuditLogSetting, type FIMSSHSetting, type AssistantModelSetting, type SystemGeneralSetting } from '../../api/admin'
 import { canEdit } from '../../utils/menuAccess'
 import { useLocale } from '../../contexts/LocaleContext'
+import { setRawSiteName } from '../../utils/siteName'
 
 const { Text } = Typography
 
@@ -63,7 +64,7 @@ export default function SettingsPage() {
         timezone: result.timezone,
         language: result.language,
       })
-      document.title = result.site_name || 'OPS Platform'
+      setRawSiteName(result.site_name || '')
       if (result.language) {
         setLang(result.language)
       }
