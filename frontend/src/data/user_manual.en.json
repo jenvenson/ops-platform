@@ -1,0 +1,164 @@
+{
+  "manual_contents": {
+    "getting_started": {
+      "title": "Getting Started",
+      "content": "The OPS Management Platform is a centralized management platform providing Asset Center, Change & Deploy, Monitor Center, Alert Center, Security Center, System Admin, and more. Users manage multiple projects and environments through a unified interface. When accessing the system for the first time, log in with your account credentials. The system uses multi-factor authentication to ensure security.",
+      "keywords": ["getting started", "overview", "introduction", "platform introduction", "login", "authentication"]
+    },
+    "platform_architecture": {
+      "title": "Platform Architecture",
+      "content": "The OPS Management Platform consists of several core modules: Asset Center (projects, environments, servers, application pipeline management), Change & Deploy (iterative deployment, deploy records, archive packaging, aggregate packaging, Consul configuration changes, Jenkins tasks), Monitor Center (monitoring big screen, overview, Grafana integration), Platform Events (unified cross-module view of deploy, archive, alert, and assistant events), Platform Audit (operation, access, and login log auditing), Alert Center (alert events, rules, contact management), Security Center (scan tasks, security assets, vulnerability management, file integrity monitoring), and System Admin (user, role, menu management).",
+      "keywords": ["architecture", "modules", "components", "system architecture", "platform architecture"]
+    },
+    "cmdb_projects": {
+      "title": "Asset Center - Projects",
+      "content": "A project is the top-level container for all other resources; every environment and server belongs to a project. The project management module lets administrators create, edit, and delete projects. Each project can define a name, description, owner, budget, and more. To create a project: 1. Navigate to /cmdb/projects, 2. Click 'New Project', 3. Enter the project name, description, owner, etc., 4. Set the budget and resource quota, 5. Click 'Save'. To edit a project: 1. Select the target project in the list, 2. Click 'Edit', 3. Modify the desired fields, 4. Click 'Save'.",
+      "keywords": ["project", "project management", "asset center", "configuration management", "CMDB", "create project", "edit project", "delete project"]
+    },
+    "cmdb_environments": {
+      "title": "Asset Center - Environments",
+      "content": "The environment management module lets you create different deployment environments such as development, testing, staging, and production. Each environment has its own resource configuration and access permissions. Four environment types are supported: development (daily development and testing), testing (QA functional verification), staging (final verification simulating production), and production (the live environment). To create an environment: 1. Navigate to /cmdb/environments, 2. Click 'New Environment', 3. Select the parent project, 4. Enter the environment name (e.g., dev, test, prod), 5. Configure environment parameters and access permissions, 6. Click 'Save'.",
+      "keywords": ["environment", "environment management", "asset center", "configuration management", "CMDB", "development", "testing", "production", "staging"]
+    },
+    "cmdb_servers": {
+      "title": "Asset Center - Servers",
+      "content": "The server management module manages all infrastructure resources such as physical machines, virtual machines, and containers. You can add server information, configure connection parameters, and tag server roles. To add a server: 1. Navigate to /cmdb/servers, 2. Click 'Add Server', 3. Select the server type (physical, virtual machine, container), 4. Enter basic information (hostname, IP address, operating system, etc.), 5. Configure connection parameters and access credentials, 6. Tag the server role and purpose, 7. Click 'Save'. Server attributes include hostname, IP address, OS type and version, CPU and memory configuration, disk space, and the owning environment and project.",
+      "keywords": ["server", "host", "server management", "host management", "asset center", "configuration management", "CMDB", "physical machine", "virtual machine", "container"]
+    },
+    "cmdb_applications": {
+      "title": "Asset Center - Application Pipelines",
+      "content": "The application pipeline page maintains the association between applications and Jenkins pipelines, supporting subsequent iterative deployment, archiving, and batch import. To add an application pipeline: 1. Navigate to /cmdb/applications, 2. Click 'New Application Pipeline', 3. Enter the application name, 4. Select the project, 5. Select the project environment, 6. Optionally fill in the Jenkins release pipeline, Jenkins archive pipeline, and description, 7. Click 'Save'. When importing pipelines from Jenkins, enter a view name to preview its jobs; if job names carry environment numbers, version numbers, or custom prefixes, enter the prefixes to strip in 'App Name Prefix Cleanup Rules', e.g., 190-, V2.5.1-. Application names in the preview are cleaned in real time with the same rules, and imports are stored with the same rules applied.",
+      "keywords": ["application management", "application pipeline management", "pipeline", "new application pipeline", "new pipeline", "create pipeline", "application", "Jenkins release pipeline", "Jenkins archive pipeline", "import pipelines from Jenkins", "app name prefix cleanup rules", "190-", "V2.5.1-"]
+    },
+    "deploy_release": {
+      "title": "Change & Deploy - App Release",
+      "content": "The app release feature triggers releases by project and application, with selectable deployment types. Preparation includes: 1. Ensure the target environment is available, 2. Check that deployment resources are sufficient, 3. Prepare the deployment package and configuration files. To deploy: 1. Navigate to /deploy/release, 2. Select the project and applications to deploy, 3. Select the target environment, 4. Choose the deployment type (full: frontend + backend, frontend only, backend only), 5. Confirm the release details, 6. Click 'Start Deployment'. Three deployment types are supported: full (frontend + backend), frontend only, and backend only.",
+      "keywords": ["release", "deploy", "app release", "application release", "change & deploy", "automated deployment", "deployment type", "frontend deployment", "backend deployment", "frontend + backend"]
+    },
+    "deploy_archive": {
+      "title": "Change & Deploy - Archive Packaging",
+      "content": "The application archive feature triggers archive tasks for applications within a project. To archive: 1. Navigate to /deploy/archive, 2. Select the project to archive, 3. Select the applications (up to 3 concurrent archive tasks), 4. Confirm the archive type (full, frontend, or backend), 5. Click start and review the result, 6. To review history, open /deploy/archived. Archive policies include: automatically keeping the 10 most recent versions, manually archiving important milestone versions, and configuring expiration policies to clean up old versions.",
+      "keywords": ["archive", "archive packaging", "archive management", "application archive", "deploy", "version", "archive type", "frontend archive", "backend archive", "archive history"]
+    },
+    "deploy_archived": {
+      "title": "Change & Deploy - Archive History",
+      "content": "The archive history page shows historical archive records, results, and version information. To view archive history: 1. Navigate to /deploy/archived, 2. Browse the archive history list, 3. Filter by application name or archive result, 4. Open details and version information as needed. To download archive artifacts: 1. Navigate to /deploy/archived, 2. Locate the download address of the target record, 3. Click 'View Files' to open the archive file list, 4. Click download in the file list, or copy the link and open it in a new window.",
+      "keywords": ["archive history", "historical archives", "view archive history", "archive records", "archive results", "version information", "archive artifacts", "download artifacts", "download address", "view files", "copy link", "new window"]
+    },
+    "deploy_history": {
+      "title": "Change & Deploy - Deploy Records",
+      "content": "The deploy records page shows recent deployment results, statuses, and trigger times. To view deploy records: 1. Navigate to /deploy/history, 2. Browse the deploy record list, 3. Locate target records by application name, status, and time, 4. Refresh the list as needed for the latest results.",
+      "keywords": ["deploy records", "deployment history", "release history", "view deploy records", "deployment results", "deployment status"]
+    },
+    "deploy_aggregate_package": {
+      "title": "Change & Deploy - Aggregate Packaging",
+      "content": "The aggregate packaging feature packages multiple applications at once, fetching configuration from Consul and triggering Jenkins jobs. To run an aggregate package: 1. Navigate to /deploy/aggregate-package, 2. Enter the project name, 3. Enter the application names to package (one per line), 4. Click 'Start Aggregate Packaging', 5. The system fetches each application's tag configuration from Consul and triggers the Jenkins job. Parameters include: project name, application name list (one per line), Jenkins job (the system uses the http://your-jenkins-server/view/auto-archive-deploy/job/aggregation/ job), and Consul path (tags are read from the plugin/aggregation/ path).",
+      "keywords": ["aggregate packaging", "batch packaging", "change & deploy", "automated deployment", "Consul", "Jenkins", "application packaging", "aggregation"]
+    },
+    "deploy_aggregated_history": {
+      "title": "Change & Deploy - Aggregate History",
+      "content": "The aggregate history page shows execution results, statuses, and download addresses of aggregate packaging tasks. To view aggregate history: 1. Navigate to /deploy/aggregated-history, 2. Browse the aggregate history list, 3. Filter by project name, tag, status, or time, 4. View logs, progress, and download addresses as needed. To download an aggregate package: 1. Navigate to /deploy/aggregated-history, 2. Locate the download address of the target record, 3. Click the download link directly, 4. To inspect the current artifact list, click 'View Files' to open the file list, then download or copy the link.",
+      "keywords": ["aggregate history", "view aggregate history", "aggregate records", "aggregate status", "download address", "download aggregate package", "download link", "view files", "copy link"]
+    },
+    "consul_config": {
+      "title": "Change & Deploy - Consul Configuration",
+      "content": "The Consul configuration page maintains Consul instance connection details, supporting create, edit, delete, connection testing, and setting a default configuration. To add a configuration: 1. Navigate to /consul/config, 2. Click 'Add Configuration', 3. Enter the configuration name, Consul address, and datacenter, 4. Optionally fill in the token, username, and password, 5. Click 'Save'. Common operations include testing the connection and setting a default.",
+      "keywords": ["Consul configuration", "configuration management", "add configuration", "new configuration", "test connection", "set default", "Consul configuration changes"]
+    },
+    "consul_batch_all": {
+      "title": "Change & Deploy - Batch Configuration Distribution",
+      "content": "Batch configuration distribution copies or replaces Consul key contents in bulk by suffix. Steps: 1. Navigate to /consul/batch-all, 2. Select the Consul configuration, 3. Enter the source suffix and target suffix, 4. Optionally enable recursive copy or in-place suffix replacement, 5. Optionally restrict to selected projects (leave empty to process all projects), 6. Fill in tag, server, and branch replacement rules as needed, 7. Click 'Run Batch Distribution', 8. Review success and failure counts in the result area. Recursive copy is enabled by default and supports both copying sub-keys of a directory and copying single keys shaped like plugin/project/suffix. If the result shows 0 success and 0 failure, there are usually no matching keys under the selected projects or source suffix.",
+      "keywords": ["batch configuration distribution", "Consul", "source suffix", "target suffix", "in-place suffix replacement", "tag replacement", "server replacement", "configuration distribution", "project selection", "0 success 0 failure", "recursive copy", "single key"]
+    },
+    "jenkins_views": {
+      "title": "Change & Deploy - Jenkins Views",
+      "content": "Jenkins view management covers view copying, deletion, and credential management. View copy: 1. Navigate to /jenkins/views, 2. Enter the Jenkins server address (default http://your-jenkins-server), 3. Enter the source and target view names, 4. (Optional) configure job name replacements and pipeline tag value replacements, 5. Click 'Run View Copy'. Job name replacements are treated literally; if multiple rules share the same source pattern, the last one wins. Pipeline tag value replacement only applies within the tag parameter context and will not alter other defaultValue fields — e.g., replacing 15s_dev with prod166 keeps prod166 intact instead of truncating it to prod. The system attempts to auto-approve Jenkins pending scripts; if pending signatures or other approval items remain, handle them manually on the Script Approval page. View deletion: 1. Enter the view name in the deletion area, 2. Click 'Query Views', 3. Choose the action (delete selected, delete view only, or delete view with all jobs). Credential management: create SSH key credentials with credential ID (host IP), username, and private key content.",
+      "keywords": ["Jenkins", "view", "view management", "view copy", "view deletion", "credential management", "SSH", "private key", "aggregation", "tag replacement", "prod166", "script approval", "pending scripts", "Script Approval"]
+    },
+    "monitor_bigscreen": {
+      "title": "Monitor Center - Big Screen",
+      "content": "The monitoring big screen presents a real-time view of key business metrics and system health. It supports customizable dashboards with various charts and alert thresholds. To customize the big screen: 1. Navigate to /monitor/bigscreen, 2. Click 'Edit Layout', 3. Drag and drop chart components, 4. Configure data sources and display options, 5. Save the layout.",
+      "keywords": ["monitoring big screen", "big screen", "monitoring", "dashboard", "real-time monitoring", "customization", "charts"]
+    },
+    "monitor_overview": {
+      "title": "Monitor Center - Overview",
+      "content": "The overview page presents overall system health, including base metrics such as CPU, memory, disk, and network, plus application-level performance data. Metrics fall into three categories: system metrics (CPU usage, memory usage, disk IO, network traffic), application metrics (response time, throughput, error rate, concurrent connections), and business metrics (transaction success rate, key business flow latency).",
+      "keywords": ["monitoring overview", "overview", "system monitoring", "performance", "metrics", "system metrics", "application metrics", "business metrics"]
+    },
+    "monitor_dashboards": {
+      "title": "Monitor Center - Grafana Integration",
+      "content": "The platform integrates Grafana, letting users create professional monitoring charts and dashboards through the embedded Grafana UI. Multiple data sources and rich visualization options are supported. To create a dashboard: 1. Navigate to /monitor/dashboards, 2. Click 'New Dashboard', 3. Select a data source (Prometheus, MySQL, etc.), 4. Add panels and queries, 5. Configure styles and alert rules, 6. Save the dashboard.",
+      "keywords": ["Grafana", "monitoring charts", "dashboard", "integration", "visualization", "data source", "panel"]
+    },
+    "alarm_events": {
+      "title": "Alert Center - Alert Events",
+      "content": "The alert center aggregates all triggered alerts, including system and business alerts. Users can review alert details, handling status, and notification records. To view alerts: 1. Navigate to /alarm/events, 2. Browse the alert list and details, 3. Acknowledge or close alerts, 4. Record handling notes. Alerts have three severity levels: critical (system unavailable or key feature failure), warning (performance degradation or potential risk), and info (general notifications).",
+      "keywords": ["alert center", "alert events", "alarm", "alert", "event", "incident", "critical", "warning", "info"]
+    },
+    "alarm_rules": {
+      "title": "Alert Center - Alert Rules",
+      "content": "Alert rules let users define monitored metrics and alert conditions. Threshold alerts, anomaly detection, and other alert types are supported, with flexible notification channel configuration. To create an alert rule: 1. Navigate to /alarm/rules, 2. Click 'New Rule', 3. Select the monitored metric, 4. Set thresholds and trigger conditions, 5. Configure notification channels and contacts, 6. Enable the rule.",
+      "keywords": ["alert rules", "alarm rules", "rule configuration", "threshold", "notification", "monitored metrics", "trigger conditions"]
+    },
+    "alarm_contacts": {
+      "title": "Alert Center - Contact Management",
+      "content": "Contact management configures who receives alert notifications. Email, SMS, instant messaging, and other channels are supported, along with on-call rotation. To add a contact: 1. Navigate to /alarm/contacts, 2. Click 'New Contact', 3. Enter the name and contact details (email, phone), 4. Assign alert level permissions, 5. Set on-call hours, 6. Click 'Save'.",
+      "keywords": ["contacts", "notification", "alert notification", "on-call", "contact management", "contact details", "on-call hours"]
+    },
+    "security_tasks": {
+      "title": "Security Center - Scan Tasks",
+      "content": "The scan task page creates and tracks vulnerability scan tasks. The creation dialog currently offers two scan types: web vulnerabilities and host vulnerabilities. To create a web vulnerability scan: 1. Navigate to /security/tasks, 2. Click 'New Vulnerability Scan', 3. Choose 'Web Vulnerability', 4. Enter the target URL (http/https), 5. Optionally provide login session details, 6. Review the onboarding pre-check result, 7. Click 'Create and Start Scan'. To create a host vulnerability scan: 1. Navigate to /security/tasks, 2. Click 'New Vulnerability Scan', 3. Choose 'Host Vulnerability', 4. Enter one or more target IPs, 5. Click 'Create and Start Scan'. The web scan main path has converged to authenticated web scanning; anonymous web scanning is disabled. The onboarding pre-check yields one of three conclusions: ready to onboard, custom authentication flow required, or automatic scanning not recommended. If unsure how to onboard a site, click 'Not sure? Ask the Assistant'. The task list defaults to vulnerability scans and can switch between 'Vulnerability Scans', 'Asset Discovery', and 'All Tasks'. Asset discovery tasks are not created in this dialog — start them from the Security Assets page.",
+      "keywords": ["security scan", "scan tasks", "vulnerability scan", "web vulnerability", "host vulnerability", "new vulnerability scan", "security", "risk management", "security check", "task groups", "asset discovery", "onboarding pre-check", "ask the assistant", "authenticated web scan", "anonymous web scan disabled"]
+    },
+    "security_assets": {
+      "title": "Security Center - Security Assets",
+      "content": "The security assets page reviews and maintains hosts, ports, services, owners, and importance levels identified by the platform. Besides manual asset entry, the page provides a dedicated 'Start Asset Discovery' entry. Asset discovery steps: 1. Navigate to /security/assets, 2. Click 'Start Asset Discovery', 3. Enter a task name (optional) and one or more target IPs, 4. Click 'Create Task', 5. Track execution status in the 'Recent Asset Discovery Tasks' area at the top of the page, 6. Open task details to inspect port and service identification results. Asset discovery only performs open port probing and service identification — no vulnerability detection.",
+      "keywords": ["security assets", "asset center", "assets", "asset management", "asset discovery", "port probing", "service identification", "start asset discovery", "recent asset discovery tasks", "asset registration"]
+    },
+    "security_vulnerabilities": {
+      "title": "Security Center - Vulnerability Management",
+      "content": "The vulnerability management module centrally reviews and handles real vulnerabilities found by scans. The page shows actionable vulnerabilities by default and separates 'asset identification' results from real vulnerabilities, preventing service identification or version enumeration results from being mistaken for vulnerabilities. The typical workflow: 1. Review vulnerability details and evidence, 2. Filter by risk level, status, or risk category, 3. Decide whether a fix is needed, 4. Track remediation status, 5. Close or ignore the record after verification.",
+      "keywords": ["vulnerability management", "vulnerability", "security", "risk", "remediation", "vulnerability handling", "risk assessment", "fix verification", "asset identification", "risk category"]
+    },
+    "security_fim": {
+      "title": "Security Center - File Integrity Monitoring",
+      "content": "File Integrity Monitoring (FIM) watches critical file changes on servers to keep systems secure. FIM policy management: 1. Navigate to /security/fim/policies, 2. Click 'New Policy', 3. Enter the policy name and description, 4. Add target servers, 5. Configure monitored paths (files or directories), 6. Set alert rules and notification channels, 7. Click 'Save'. To run a baseline scan: 1. Locate the target policy in the list, 2. Click 'Baseline Scan', 3. Select target servers, 4. Click 'Start Scan'. FIM execution records: navigate to /security/fim/executions for scan execution history. FIM events: navigate to /security/fim/events for detected file change events. FIM alerts: navigate to /security/fim/alerts for FIM-triggered alert records. FIM known hosts: navigate to /security/fim/known-hosts to manage SSH host keys used by agentless FIM scanning.",
+      "keywords": ["file integrity monitoring", "FIM", "file monitoring", "security", "integrity", "baseline scan", "file changes", "alerts", "SSH host keys"]
+    },
+    "platform_audit": {
+      "title": "Platform Audit",
+      "content": "The platform audit module records and audits all user actions on the platform. Audit log types include: operation logs (all user actions on the platform), access logs (user access to platform APIs), and login logs (user login and logout activity). To view audit logs: 1. Navigate to /platform/audit, 2. Select an audit tab (overview, operations, access, login), 3. Search with filters, 4. Filter by username, module, action type, status, IP address, and time range, 5. Click a log entry for details. Log archiving and cleanup: the platform supports archiving and cleaning audit logs, with configurable retention policies covering retention days and cleanup method.",
+      "keywords": ["platform audit", "audit", "operation logs", "access logs", "login logs", "log auditing", "log archiving", "log cleanup"]
+    },
+    "admin_users": {
+      "title": "System Admin - User Management",
+      "content": "The user management module manages all platform user accounts, including user creation, role assignment, and permission settings. To add a user: 1. Navigate to /admin/users, 2. Click 'New User', 3. Enter basic information (username, name, email), 4. Assign roles and permissions, 5. Set the initial password, 6. Click 'Save'. There are four permission profiles: system administrator (full access), ops engineer (Asset Center, Change & Deploy, Monitor Center), developer (view access with limited deployment permissions), and security administrator (Security Center permissions).",
+      "keywords": ["user management", "user", "account", "user account", "user settings", "user creation", "role assignment", "permission settings"]
+    },
+    "admin_roles": {
+      "title": "System Admin - Role Management",
+      "content": "Role management defines user roles and their permissions, supporting fine-grained access control and role inheritance. To create a role: 1. Navigate to /admin/roles, 2. Click 'New Role', 3. Enter the role name and description, 4. Assign permissions (menus, actions, data scope), 5. Click 'Save'.",
+      "keywords": ["role management", "role", "permission", "permission management", "access control", "role creation", "permission assignment"]
+    },
+    "admin_menus": {
+      "title": "System Admin - Menu Management",
+      "content": "Menu management lets administrators customize the UI menu structure and control which menu items are visible to each role. To customize menus: 1. Navigate to /admin/menus, 2. Click 'Edit Menu', 3. Add, modify, or remove menu items, 4. Set menu visibility and access permissions, 5. Save the menu configuration.",
+      "keywords": ["menu management", "menu", "interface", "navigation", "UI customization", "menu customization", "visibility", "access permissions"]
+    },
+    "profile_password": {
+      "title": "My Profile - Change Password",
+      "content": "The currently logged-in user can change the login password on the profile page. Steps: 1. Click 'My Profile' in the top-right user dropdown or visit /profile, 2. Locate 'Login Password' in the security settings area, 3. Click 'Change Password', 4. Enter the current password, 5. Enter and confirm the new password, 6. Click OK to finish.",
+      "keywords": ["my profile", "change password", "login password", "update password", "personal profile", "user password", "profile"]
+    },
+    "ai_assistant": {
+      "title": "AI Assistant Guide",
+      "content": "The AI Assistant is available via the floating button at the bottom-right corner. Click it to open the chat panel and start asking questions. The assistant includes navigation links in its answers — click to jump straight to the relevant feature page. Common questions: 'How do I create a new project?' -> [NAVIGATE:/cmdb/projects], 'How do I deploy an application?' -> [NAVIGATE:/deploy/release], 'How do I view the monitoring big screen?' -> [NAVIGATE:/monitor/bigscreen], 'How do I configure alert rules?' -> [NAVIGATE:/alarm/rules], 'How do I add a new server?' -> [NAVIGATE:/cmdb/servers], 'How do I use aggregate packaging?' -> [NAVIGATE:/deploy/aggregate-package], 'How do I copy a Jenkins view?' -> [NAVIGATE:/jenkins/views], 'How do I change my password?' -> [NAVIGATE:/profile]. The assistant supports renaming, archiving, restoring, and deleting historical sessions. To delete a session: 1. Click the floating button to open the assistant, 2. Click the sessions button at the top-left to expand the session list, 3. Click 'Delete' next to the target session, 4. Confirm in the dialog to delete the session and all its messages, 5. The session is removed from the list after deletion.",
+      "keywords": ["AI assistant", "chat", "consultation", "intelligent assistant", "navigation", "floating button", "chat panel", "session management", "delete session", "session history", "delete chat history"]
+    },
+    "best_practices": {
+      "title": "Best Practices",
+      "content": "Project organization: create projects by business line or product line, define clear naming conventions per environment, and clean up unused resources regularly. Security practices: keep system and application patches up to date, enforce the principle of least privilege, and run regular security audits. Monitoring practices: set alerts for key business metrics, review alert rules regularly to avoid alert fatigue, and establish a clear incident response process. Jenkins management: use view copying judiciously to avoid duplicating jobs, clean up unused Jenkins views and jobs regularly, safeguard SSH credentials and rotate keys periodically, and use aggregate packaging to improve deployment efficiency.",
+      "keywords": ["best practices", "recommendations", "conventions", "project organization", "security practices", "monitoring practices", "least privilege", "security audit", "Jenkins management"]
+    }
+  }
+}

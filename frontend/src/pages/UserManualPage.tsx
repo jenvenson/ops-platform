@@ -3,7 +3,8 @@
 
 import { Card, Col, Row, Space, Tag, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
-import manualData from '../data/user_manual.json'
+import manualDataZh from '../data/user_manual.json'
+import manualDataEn from '../data/user_manual.en.json'
 
 const { Paragraph, Title } = Typography
 
@@ -17,11 +18,10 @@ type ManualData = {
   manual_contents: Record<string, ManualSection>
 }
 
-const data = manualData as ManualData
-const sections = Object.values(data.manual_contents)
-
 export default function UserManualPage() {
-  const { t } = useTranslation('admin')
+  const { t, i18n } = useTranslation('admin')
+  const data = (i18n.language.startsWith('en') ? manualDataEn : manualDataZh) as ManualData
+  const sections = Object.values(data.manual_contents)
 
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
