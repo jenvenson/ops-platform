@@ -167,8 +167,8 @@ export interface SecurityVulnerability {
   primary_cve_id?: string
   vuln_db_id?: number
   match_mode?: 'template' | 'rule' | 'version-range' | 'fuzzy-product' | 'inventory' | 'manual-review' | string
-  risk_category?: '资产识别' | 'CVE 风险' | '配置风险' | '通用风险'
-  display_group?: '网站漏洞' | '主机漏洞' | '资产识别' | '通用发现' | string
+  risk_category?: 'inventory' | 'cve_risk' | 'config_risk' | 'generic_risk'
+  display_group?: 'web_vuln' | 'host_vuln' | 'inventory' | 'generic_discovery' | string
   knowledge?: {
     id: number
     title: string

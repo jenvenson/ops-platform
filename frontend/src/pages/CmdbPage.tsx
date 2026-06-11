@@ -4,12 +4,15 @@
 import { Layout, Menu } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const { Header, Content, Sider } = Layout
 
 export default function CmdbPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { t } = useTranslation('cmdb')
+  const { t: tm } = useTranslation('menu')
 
   const getSelectedKey = () => {
     if (location.pathname === '/cmdb/projects') return 'projects'
@@ -33,7 +36,7 @@ export default function CmdbPage() {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider width={200} theme="light">
         <div style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 'bold', borderBottom: '1px solid #f0f0f0' }}>
-          运维管理平台
+          {t('sidebarTitle', '运维管理平台')}
         </div>
         <Menu
           mode="inline"
@@ -41,16 +44,16 @@ export default function CmdbPage() {
           onClick={handleMenuClick}
           theme="light"
           items={[
-            { key: 'projects', label: '项目管理' },
-            { key: 'clusters', label: '集群管理' },
-            { key: 'servers', label: '服务器管理' },
-            { key: 'applications', label: '应用流水线管理' },
+            { key: 'projects', label: tm('cmdb-projects', '项目管理') },
+            { key: 'clusters', label: t('clusters', '集群管理') },
+            { key: 'servers', label: tm('cmdb-servers', '主机管理') },
+            { key: 'applications', label: tm('cmdb-applications', '应用流水线管理') },
           ]}
         />
       </Sider>
       <Layout>
         <Header style={{ background: '#fff', padding: '0 24px', borderBottom: '1px solid #f0f0f0' }}>
-          <span style={{ fontSize: '18px', fontWeight: 'bold' }}>CMDB 资产管理</span>
+          <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{t('pageTitle', 'CMDB 资产管理')}</span>
         </Header>
         <Content style={{ padding: '24px', background: '#f0f2f5' }}>
           <div style={{ padding: '24px', background: '#fff', borderRadius: '8px', minHeight: '400px' }}>

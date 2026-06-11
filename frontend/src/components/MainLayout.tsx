@@ -10,6 +10,8 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import apiClient from '../api/client';
 import { MENU_UPDATED_EVENT, notifyMenusChanged, readStoredMenus, readAllowedPaths, hasMenuAccess, readStoredUserInfo } from '../utils/menuAccess';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from 'react-i18next'
+import i18next from '../i18n'
 
 import { UserOutlined, LogoutOutlined, DashboardOutlined, ProjectOutlined, CloudOutlined, SettingOutlined, RocketOutlined, MonitorOutlined, HistoryOutlined, InboxOutlined, AppstoreOutlined, DesktopOutlined, CloseOutlined, FullscreenOutlined, FullscreenExitOutlined, TeamOutlined, BellOutlined, SafetyOutlined, ToolOutlined, MenuOutlined, MenuFoldOutlined, MenuUnfoldOutlined, IdcardOutlined, SendOutlined, AlertOutlined, FundProjectionScreenOutlined, LineChartOutlined, ScanOutlined, BugOutlined, DatabaseOutlined, FileTextOutlined, ApiOutlined, CopyOutlined, ReadOutlined, SyncOutlined, KeyOutlined, SearchOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons'
 
@@ -19,50 +21,53 @@ const hiddenMenuItems = new Set(['security-tickets', 'cmdb-agent'])
 const hiddenMenuPaths = new Set(['/security/tickets', '/cmdb/agent'])
 
 // 静态页面配置映射
-const staticPageConfig: Record<string, { title: string; icon: React.ReactNode; path: string }> = {
-  dashboard: { title: '工作台', icon: <DashboardOutlined />, path: '/' },
-  'cmdb-projects': { title: '项目管理', icon: <ProjectOutlined />, path: '/cmdb/projects' },
-  'cmdb-environments': { title: '环境管理', icon: <CloudOutlined />, path: '/cmdb/environments' },
-  'cmdb-servers': { title: '主机管理', icon: <DesktopOutlined />, path: '/cmdb/servers' },
-  'cmdb-applications': { title: '应用流水线管理', icon: <AppstoreOutlined />, path: '/cmdb/applications' },
-  'deploy-release': { title: '迭代部署', icon: <RocketOutlined />, path: '/deploy/release' },
-  'deploy-history': { title: '部署记录', icon: <HistoryOutlined />, path: '/deploy/history' },
-  'deploy-archive': { title: '归档打包', icon: <InboxOutlined />, path: '/deploy/archive' },
-  'deploy-archived': { title: '归档历史', icon: <HistoryOutlined />, path: '/deploy/archived' },
-  'deploy-aggregate-package': { title: '聚合打包', icon: <InboxOutlined />, path: '/deploy/aggregate-package' },
-  'aggregated-history': { title: '聚合历史', icon: <HistoryOutlined />, path: '/deploy/aggregated-history' },
-  'monitor-bigscreen': { title: '监控大屏', icon: <MonitorOutlined />, path: '/monitor/bigscreen' },
-  'monitor-overview': { title: '监控概览', icon: <MonitorOutlined />, path: '/monitor/overview' },
-  'monitor-dashboards': { title: 'Grafana仪表盘', icon: <DashboardOutlined />, path: '/monitor/dashboards' },
-  'alarm-center': { title: '告警中心', icon: <BellOutlined />, path: '/alarm' },
-  'alarm-events': { title: '告警事件', icon: <BellOutlined />, path: '/alarm/events' },
-  'alarm-rules': { title: '告警规则', icon: <BellOutlined />, path: '/alarm/rules' },
-  'alarm-contacts': { title: '联系人管理', icon: <TeamOutlined />, path: '/alarm/contacts' },
-  'alarm-channels': { title: '通知渠道', icon: <SendOutlined />, path: '/alarm/channels' },
-  'alarm-templates': { title: '通知模板', icon: <AlertOutlined />, path: '/alarm/templates' },
-  'admin-users': { title: '用户管理', icon: <TeamOutlined />, path: '/admin/users' },
-  'admin-roles': { title: '角色管理', icon: <SafetyOutlined />, path: '/admin/roles' },
-  'admin-menus': { title: '菜单管理', icon: <MenuOutlined />, path: '/admin/menus' },
-  'admin-settings': { title: '系统设置', icon: <ToolOutlined />, path: '/admin/settings' },
-  'security-overview': { title: '安全概览', icon: <SafetyOutlined />, path: '/security/overview' },
-  'security-fim-policies': { title: '巡检策略', icon: <SafetyOutlined />, path: '/security/fim/policies' },
-  'security-fim-executions': { title: '执行记录', icon: <SyncOutlined />, path: '/security/fim/executions' },
-  'security-fim-events': { title: '文件变更事件', icon: <FileTextOutlined />, path: '/security/fim/events' },
-  'security-fim-alerts': { title: '完整性告警', icon: <AlertOutlined />, path: '/security/fim/alerts' },
-  'security-fim-known-hosts': { title: 'SSH主机密钥', icon: <KeyOutlined />, path: '/security/fim/known-hosts' },
-  'security-tasks': { title: '扫描任务', icon: <ScanOutlined />, path: '/security/tasks' },
-  'security-assets': { title: '安全资产', icon: <DatabaseOutlined />, path: '/security/assets' },
-  'security-vulnerabilities': { title: '漏洞管理', icon: <BugOutlined />, path: '/security/vulnerabilities' },
-  'security-vuln-db': { title: '漏洞知识库', icon: <FundProjectionScreenOutlined />, path: '/security/vuln-db' },
-  'consul-batch-all': { title: '批量配置下发', icon: <CopyOutlined />, path: '/consul/batch-all' },
-  'consul-config': { title: '配置管理', icon: <ApiOutlined />, path: '/consul/config' },
-  'consul-operations': { title: '配置操作记录', icon: <ApiOutlined />, path: '/consul/operations' },
-  'jenkins-views': { title: '视图管理', icon: <AppstoreOutlined />, path: '/jenkins/views' },
-  'platform-audit': { title: '平台审计', icon: <FileTextOutlined />, path: '/platform/audit' },
-  'platform-events': { title: '平台事件中心', icon: <BellOutlined />, path: '/platform/events' },
-  'user-manual': { title: '用户手册', icon: <ReadOutlined />, path: '/user-manual' },
-  'profile': { title: '我的资料', icon: <IdcardOutlined />, path: '/profile' },
-};
+function getStaticPageConfig(): Record<string, { title: string; icon: React.ReactNode; path: string }> {
+  const t = (key: string, fallback: string) => i18next.t(key, fallback)
+  return {
+    dashboard: { title: t('menu:dashboard', '工作台'), icon: <DashboardOutlined />, path: '/' },
+    'cmdb-projects': { title: t('menu:cmdb-projects', '项目管理'), icon: <ProjectOutlined />, path: '/cmdb/projects' },
+    'cmdb-environments': { title: t('menu:cmdb-environments', '环境管理'), icon: <CloudOutlined />, path: '/cmdb/environments' },
+    'cmdb-servers': { title: t('menu:cmdb-servers', '主机管理'), icon: <DesktopOutlined />, path: '/cmdb/servers' },
+    'cmdb-applications': { title: t('menu:cmdb-applications', '应用流水线管理'), icon: <AppstoreOutlined />, path: '/cmdb/applications' },
+    'deploy-release': { title: t('menu:deploy-release', '迭代部署'), icon: <RocketOutlined />, path: '/deploy/release' },
+    'deploy-history': { title: t('menu:deploy-history', '部署记录'), icon: <HistoryOutlined />, path: '/deploy/history' },
+    'deploy-archive': { title: t('menu:deploy-archive', '归档打包'), icon: <InboxOutlined />, path: '/deploy/archive' },
+    'deploy-archived': { title: t('menu:deploy-archived', '归档历史'), icon: <HistoryOutlined />, path: '/deploy/archived' },
+    'deploy-aggregate-package': { title: t('menu:deploy-aggregate-package', '聚合打包'), icon: <InboxOutlined />, path: '/deploy/aggregate-package' },
+    'aggregated-history': { title: t('menu:aggregated-history', '聚合历史'), icon: <HistoryOutlined />, path: '/deploy/aggregated-history' },
+    'monitor-bigscreen': { title: t('menu:monitor-bigscreen', '监控大屏'), icon: <MonitorOutlined />, path: '/monitor/bigscreen' },
+    'monitor-overview': { title: t('menu:monitor-overview', '监控概览'), icon: <MonitorOutlined />, path: '/monitor/overview' },
+    'monitor-dashboards': { title: t('menu:monitor-dashboards', 'Grafana仪表盘'), icon: <DashboardOutlined />, path: '/monitor/dashboards' },
+    'alarm-center': { title: t('menu:alarm', '告警中心'), icon: <BellOutlined />, path: '/alarm' },
+    'alarm-events': { title: t('menu:alarm-events', '告警事件'), icon: <BellOutlined />, path: '/alarm/events' },
+    'alarm-rules': { title: t('menu:alarm-rules', '告警规则'), icon: <BellOutlined />, path: '/alarm/rules' },
+    'alarm-contacts': { title: t('menu:alarm-contacts', '联系人管理'), icon: <TeamOutlined />, path: '/alarm/contacts' },
+    'alarm-channels': { title: t('menu:alarm-channels', '通知渠道'), icon: <SendOutlined />, path: '/alarm/channels' },
+    'alarm-templates': { title: t('menu:alarm-templates', '通知模板'), icon: <AlertOutlined />, path: '/alarm/templates' },
+    'admin-users': { title: t('menu:admin-users', '用户管理'), icon: <TeamOutlined />, path: '/admin/users' },
+    'admin-roles': { title: t('menu:admin-roles', '角色管理'), icon: <SafetyOutlined />, path: '/admin/roles' },
+    'admin-menus': { title: t('menu:admin-menus', '菜单管理'), icon: <MenuOutlined />, path: '/admin/menus' },
+    'admin-settings': { title: t('menu:admin-settings', '系统设置'), icon: <ToolOutlined />, path: '/admin/settings' },
+    'security-overview': { title: t('menu:security-overview', '安全概览'), icon: <SafetyOutlined />, path: '/security/overview' },
+    'security-fim-policies': { title: t('menu:security-fim-policies', '巡检策略'), icon: <SafetyOutlined />, path: '/security/fim/policies' },
+    'security-fim-executions': { title: t('menu:security-fim-executions', '执行记录'), icon: <SyncOutlined />, path: '/security/fim/executions' },
+    'security-fim-events': { title: t('menu:security-fim-events', '文件变更事件'), icon: <FileTextOutlined />, path: '/security/fim/events' },
+    'security-fim-alerts': { title: t('menu:security-fim-alerts', '完整性告警'), icon: <AlertOutlined />, path: '/security/fim/alerts' },
+    'security-fim-known-hosts': { title: t('menu:security-fim-known-hosts', 'SSH主机密钥'), icon: <KeyOutlined />, path: '/security/fim/known-hosts' },
+    'security-tasks': { title: t('menu:security-tasks', '扫描任务'), icon: <ScanOutlined />, path: '/security/tasks' },
+    'security-assets': { title: t('menu:security-assets', '安全资产'), icon: <DatabaseOutlined />, path: '/security/assets' },
+    'security-vulnerabilities': { title: t('menu:security-vulnerabilities', '漏洞管理'), icon: <BugOutlined />, path: '/security/vulnerabilities' },
+    'security-vuln-db': { title: t('menu:security-vuln-db', '漏洞知识库'), icon: <FundProjectionScreenOutlined />, path: '/security/vuln-db' },
+    'consul-batch-all': { title: t('menu:consul-batch-all', '批量配置下发'), icon: <CopyOutlined />, path: '/consul/batch-all' },
+    'consul-config': { title: t('menu:consul-config', '配置管理'), icon: <ApiOutlined />, path: '/consul/config' },
+    'consul-operations': { title: t('menu:consul-operations', '配置操作记录'), icon: <ApiOutlined />, path: '/consul/operations' },
+    'jenkins-views': { title: t('menu:jenkins-views', '视图管理'), icon: <AppstoreOutlined />, path: '/jenkins/views' },
+    'platform-audit': { title: t('menu:platform-audit', '平台审计'), icon: <FileTextOutlined />, path: '/platform/audit' },
+    'platform-events': { title: t('menu:platform-events', '平台事件中心'), icon: <BellOutlined />, path: '/platform/events' },
+    'user-manual': { title: t('menu:user-manual', '用户手册'), icon: <ReadOutlined />, path: '/user-manual' },
+    'profile': { title: t('menu:profile', '我的资料'), icon: <IdcardOutlined />, path: '/profile' },
+  }
+}
 
 // 页面配置映射 - 优先使用动态菜单数据，如果没有则使用静态配置
 const getPageConfig = (): Record<string, { title: string; icon: React.ReactNode; path: string }> => {
@@ -81,7 +86,7 @@ const getPageConfig = (): Record<string, { title: string; icon: React.ReactNode;
       const hasValidPath = menu.path && menu.path.trim() !== '' && menu.path !== '/' && !menu.path.startsWith('#');
       if (hasValidPath) {
         dynamicPageConfig[menu.key] = {
-          title: normalizeMenuTitle(menu),
+          title: i18next.t(`menu:${menu.key}`, menu.title),
           icon: getAntdIconByName(menu.icon),
           path: menu.path
         };
@@ -96,7 +101,7 @@ const getPageConfig = (): Record<string, { title: string; icon: React.ReactNode;
   buildPageConfig(dynamicMenus);
 
   // 合并静态配置和动态配置，优先使用动态配置
-  return { ...staticPageConfig, ...dynamicPageConfig };
+  return { ...getStaticPageConfig(), ...dynamicPageConfig };
 };
 
 // 辅助函数：根据图标名称获取对应的 Ant Design 图标组件
@@ -131,69 +136,70 @@ function getAntdIconByName(iconName: string): React.ReactNode {
     case 'ApiOutlined': return <ApiOutlined />;
     case 'CopyOutlined': return <CopyOutlined />;
     case 'ReadOutlined': return <ReadOutlined />;
-    default: return <SettingOutlined />; // 默认图标
+    default: return <SettingOutlined />;
   }
 }
 
 // 静态菜单（登录前或无权限时使用）
 function renderStaticMenuItems(): React.ReactNode {
+  const t = (key: string, fallback: string) => i18next.t(key, fallback)
   return (
     <>
-      <Menu.Item key="dashboard" icon={<DashboardOutlined />}>工作台</Menu.Item>
-      <Menu.SubMenu key="cmdb" icon={<DatabaseOutlined />} title="资产中心">
-        <Menu.Item key="cmdb-projects" icon={<ProjectOutlined />}>项目管理</Menu.Item>
-        <Menu.Item key="cmdb-environments" icon={<CloudOutlined />}>环境管理</Menu.Item>
-        <Menu.Item key="cmdb-servers" icon={<DesktopOutlined />}>主机管理</Menu.Item>
-        <Menu.Item key="cmdb-applications" icon={<AppstoreOutlined />}>应用流水线管理</Menu.Item>
+      <Menu.Item key="dashboard" icon={<DashboardOutlined />}>{t('menu:dashboard', '工作台')}</Menu.Item>
+      <Menu.SubMenu key="cmdb" icon={<DatabaseOutlined />} title={t('menu:cmdb', '资产中心')}>
+        <Menu.Item key="cmdb-projects" icon={<ProjectOutlined />}>{t('menu:cmdb-projects', '项目管理')}</Menu.Item>
+        <Menu.Item key="cmdb-environments" icon={<CloudOutlined />}>{t('menu:cmdb-environments', '环境管理')}</Menu.Item>
+        <Menu.Item key="cmdb-servers" icon={<DesktopOutlined />}>{t('menu:cmdb-servers', '主机管理')}</Menu.Item>
+        <Menu.Item key="cmdb-applications" icon={<AppstoreOutlined />}>{t('menu:cmdb-applications', '应用流水线管理')}</Menu.Item>
       </Menu.SubMenu>
-      <Menu.SubMenu key="deploy" icon={<RocketOutlined />} title="变更发布">
-        <Menu.Item key="deploy-release" icon={<RocketOutlined />}>迭代部署</Menu.Item>
-        <Menu.Item key="deploy-history" icon={<HistoryOutlined />}>部署记录</Menu.Item>
-        <Menu.Item key="deploy-archive" icon={<InboxOutlined />}>归档打包</Menu.Item>
-        <Menu.Item key="deploy-archived" icon={<HistoryOutlined />}>归档历史</Menu.Item>
-        <Menu.Item key="deploy-aggregate-package" icon={<InboxOutlined />}>聚合打包</Menu.Item>
-        <Menu.SubMenu key="consul" icon={<ApiOutlined />} title="Consul配置变更">
-          <Menu.Item key="consul-config" icon={<ApiOutlined />}>配置管理</Menu.Item>
-          <Menu.Item key="consul-batch-all" icon={<CopyOutlined />}>批量配置下发</Menu.Item>
-          <Menu.Item key="consul-operations" icon={<ApiOutlined />}>配置操作记录</Menu.Item>
+      <Menu.SubMenu key="deploy" icon={<RocketOutlined />} title={t('menu:deploy', '变更发布')}>
+        <Menu.Item key="deploy-release" icon={<RocketOutlined />}>{t('menu:deploy-release', '迭代部署')}</Menu.Item>
+        <Menu.Item key="deploy-history" icon={<HistoryOutlined />}>{t('menu:deploy-history', '部署记录')}</Menu.Item>
+        <Menu.Item key="deploy-archive" icon={<InboxOutlined />}>{t('menu:deploy-archive', '归档打包')}</Menu.Item>
+        <Menu.Item key="deploy-archived" icon={<HistoryOutlined />}>{t('menu:deploy-archived', '归档历史')}</Menu.Item>
+        <Menu.Item key="deploy-aggregate-package" icon={<InboxOutlined />}>{t('menu:deploy-aggregate-package', '聚合打包')}</Menu.Item>
+        <Menu.SubMenu key="consul" icon={<ApiOutlined />} title={t('menu:consul', 'Consul配置变更')}>
+          <Menu.Item key="consul-config" icon={<ApiOutlined />}>{t('menu:consul-config', '配置管理')}</Menu.Item>
+          <Menu.Item key="consul-batch-all" icon={<CopyOutlined />}>{t('menu:consul-batch-all', '批量配置下发')}</Menu.Item>
+          <Menu.Item key="consul-operations" icon={<ApiOutlined />}>{t('menu:consul-operations', '配置操作记录')}</Menu.Item>
         </Menu.SubMenu>
-        <Menu.SubMenu key="jenkins" icon={<AppstoreOutlined />} title="Jenkins任务">
-          <Menu.Item key="jenkins-views" icon={<AppstoreOutlined />}>视图管理</Menu.Item>
+        <Menu.SubMenu key="jenkins" icon={<AppstoreOutlined />} title={t('menu:jenkins', 'Jenkins任务')}>
+          <Menu.Item key="jenkins-views" icon={<AppstoreOutlined />}>{t('menu:jenkins-views', '视图管理')}</Menu.Item>
         </Menu.SubMenu>
       </Menu.SubMenu>
-      <Menu.SubMenu key="monitor" icon={<MonitorOutlined />} title="监控中心">
-        <Menu.Item key="monitor-bigscreen" icon={<FundProjectionScreenOutlined />}>监控大屏</Menu.Item>
-        <Menu.Item key="monitor-overview" icon={<LineChartOutlined />}>监控概览</Menu.Item>
-        <Menu.Item key="monitor-dashboards" icon={<DashboardOutlined />}>Grafana仪表盘</Menu.Item>
+      <Menu.SubMenu key="monitor" icon={<MonitorOutlined />} title={t('menu:monitor', '监控中心')}>
+        <Menu.Item key="monitor-bigscreen" icon={<FundProjectionScreenOutlined />}>{t('menu:monitor-bigscreen', '监控大屏')}</Menu.Item>
+        <Menu.Item key="monitor-overview" icon={<LineChartOutlined />}>{t('menu:monitor-overview', '监控概览')}</Menu.Item>
+        <Menu.Item key="monitor-dashboards" icon={<DashboardOutlined />}>{t('menu:monitor-dashboards', 'Grafana仪表盘')}</Menu.Item>
       </Menu.SubMenu>
-      <Menu.Item key="platform-events" icon={<BellOutlined />}>平台事件中心</Menu.Item>
-      <Menu.SubMenu key="alarm" icon={<BellOutlined />} title="告警中心">
-        <Menu.Item key="alarm-events" icon={<AlertOutlined />}>告警事件</Menu.Item>
-        <Menu.Item key="alarm-rules" icon={<BellOutlined />}>告警规则</Menu.Item>
-        <Menu.Item key="alarm-contacts" icon={<TeamOutlined />}>联系人管理</Menu.Item>
-        <Menu.Item key="alarm-channels" icon={<SendOutlined />}>通知渠道</Menu.Item>
-        <Menu.Item key="alarm-templates" icon={<AlertOutlined />}>通知模板</Menu.Item>
+      <Menu.Item key="platform-events" icon={<BellOutlined />}>{t('menu:platform-events', '平台事件中心')}</Menu.Item>
+      <Menu.SubMenu key="alarm" icon={<BellOutlined />} title={t('menu:alarm', '告警中心')}>
+        <Menu.Item key="alarm-events" icon={<AlertOutlined />}>{t('menu:alarm-events', '告警事件')}</Menu.Item>
+        <Menu.Item key="alarm-rules" icon={<BellOutlined />}>{t('menu:alarm-rules', '告警规则')}</Menu.Item>
+        <Menu.Item key="alarm-contacts" icon={<TeamOutlined />}>{t('menu:alarm-contacts', '联系人管理')}</Menu.Item>
+        <Menu.Item key="alarm-channels" icon={<SendOutlined />}>{t('menu:alarm-channels', '通知渠道')}</Menu.Item>
+        <Menu.Item key="alarm-templates" icon={<AlertOutlined />}>{t('menu:alarm-templates', '通知模板')}</Menu.Item>
       </Menu.SubMenu>
-      <Menu.SubMenu key="security" icon={<SafetyOutlined />} title="安全中心">
-        <Menu.Item key="security-overview" icon={<SafetyOutlined />}>安全概览</Menu.Item>
-        <Menu.SubMenu key="security-fim" icon={<SafetyOutlined />} title="文件完整性巡检">
-          <Menu.Item key="security-fim-policies" icon={<SafetyOutlined />}>巡检策略</Menu.Item>
-          <Menu.Item key="security-fim-executions" icon={<SyncOutlined />}>执行记录</Menu.Item>
-          <Menu.Item key="security-fim-events" icon={<FileTextOutlined />}>文件变更事件</Menu.Item>
-          <Menu.Item key="security-fim-alerts" icon={<AlertOutlined />}>完整性告警</Menu.Item>
-          <Menu.Item key="security-fim-known-hosts" icon={<KeyOutlined />}>SSH主机密钥</Menu.Item>
+      <Menu.SubMenu key="security" icon={<SafetyOutlined />} title={t('menu:security', '安全中心')}>
+        <Menu.Item key="security-overview" icon={<SafetyOutlined />}>{t('menu:security-overview', '安全概览')}</Menu.Item>
+        <Menu.SubMenu key="security-fim" icon={<SafetyOutlined />} title={t('menu:security-fim', '文件完整性巡检')}>
+          <Menu.Item key="security-fim-policies" icon={<SafetyOutlined />}>{t('menu:security-fim-policies', '巡检策略')}</Menu.Item>
+          <Menu.Item key="security-fim-executions" icon={<SyncOutlined />}>{t('menu:security-fim-executions', '执行记录')}</Menu.Item>
+          <Menu.Item key="security-fim-events" icon={<FileTextOutlined />}>{t('menu:security-fim-events', '文件变更事件')}</Menu.Item>
+          <Menu.Item key="security-fim-alerts" icon={<AlertOutlined />}>{t('menu:security-fim-alerts', '完整性告警')}</Menu.Item>
+          <Menu.Item key="security-fim-known-hosts" icon={<KeyOutlined />}>{t('menu:security-fim-known-hosts', 'SSH主机密钥')}</Menu.Item>
         </Menu.SubMenu>
-        <Menu.Item key="security-tasks" icon={<ScanOutlined />}>扫描任务</Menu.Item>
-        <Menu.Item key="security-assets" icon={<DatabaseOutlined />}>安全资产</Menu.Item>
-        <Menu.Item key="security-vulnerabilities" icon={<BugOutlined />}>漏洞管理</Menu.Item>
-        <Menu.Item key="security-vuln-db" icon={<FundProjectionScreenOutlined />}>漏洞知识库</Menu.Item>
+        <Menu.Item key="security-tasks" icon={<ScanOutlined />}>{t('menu:security-tasks', '扫描任务')}</Menu.Item>
+        <Menu.Item key="security-assets" icon={<DatabaseOutlined />}>{t('menu:security-assets', '安全资产')}</Menu.Item>
+        <Menu.Item key="security-vulnerabilities" icon={<BugOutlined />}>{t('menu:security-vulnerabilities', '漏洞管理')}</Menu.Item>
+        <Menu.Item key="security-vuln-db" icon={<FundProjectionScreenOutlined />}>{t('menu:security-vuln-db', '漏洞知识库')}</Menu.Item>
       </Menu.SubMenu>
-      <Menu.SubMenu key="admin" icon={<SettingOutlined />} title="系统管理">
-        <Menu.Item key="admin-users" icon={<TeamOutlined />}>用户管理</Menu.Item>
-        <Menu.Item key="admin-roles" icon={<SafetyOutlined />}>角色管理</Menu.Item>
-        <Menu.Item key="admin-menus" icon={<MenuOutlined />}>菜单管理</Menu.Item>
-        <Menu.Item key="platform-audit" icon={<FileTextOutlined />}>平台审计</Menu.Item>
-        <Menu.Item key="admin-settings" icon={<ToolOutlined />}>系统设置</Menu.Item>
+      <Menu.SubMenu key="admin" icon={<SettingOutlined />} title={t('menu:admin', '系统管理')}>
+        <Menu.Item key="admin-users" icon={<TeamOutlined />}>{t('menu:admin-users', '用户管理')}</Menu.Item>
+        <Menu.Item key="admin-roles" icon={<SafetyOutlined />}>{t('menu:admin-roles', '角色管理')}</Menu.Item>
+        <Menu.Item key="admin-menus" icon={<MenuOutlined />}>{t('menu:admin-menus', '菜单管理')}</Menu.Item>
+        <Menu.Item key="platform-audit" icon={<FileTextOutlined />}>{t('menu:platform-audit', '平台审计')}</Menu.Item>
+        <Menu.Item key="admin-settings" icon={<ToolOutlined />}>{t('menu:admin-settings', '系统设置')}</Menu.Item>
       </Menu.SubMenu>
     </>
   )
@@ -208,18 +214,10 @@ interface MenuConfig {
   children?: MenuConfig[];
 }
 
-function normalizeMenuTitle(menu: MenuConfig): string {
-  if (menu.key === 'deploy-archive') {
-    return '归档打包'
-  }
-  return menu.title
-}
-
 function renderDynamicMenuItems(menus: MenuConfig[]): React.ReactNode {
   return menus.filter((menu) => !hiddenMenuItems.has(menu.key) && !hiddenMenuPaths.has(menu.path)).map((menu) => {
-    const normalizedTitle = normalizeMenuTitle(menu)
+    const title = i18next.t(`menu:${menu.key}`, menu.title)
     if (menu.children && menu.children.length > 0) {
-      // 为每个图标名称创建对应的图标组件
       const getIconComponent = (iconName: string) => {
         switch (iconName) {
           case 'DashboardOutlined': return <DashboardOutlined />;
@@ -252,7 +250,7 @@ function renderDynamicMenuItems(menus: MenuConfig[]): React.ReactNode {
           case 'ApiOutlined': return <ApiOutlined />;
           case 'CopyOutlined': return <CopyOutlined />;
           case 'ReadOutlined': return <ReadOutlined />;
-          default: return <SettingOutlined />; // 默认图标
+          default: return <SettingOutlined />;
         }
       };
 
@@ -260,7 +258,7 @@ function renderDynamicMenuItems(menus: MenuConfig[]): React.ReactNode {
         <Menu.SubMenu
           key={menu.key}
           icon={getIconComponent(menu.icon)}
-          title={normalizedTitle}
+          title={title}
         >
           {renderDynamicMenuItems(menu.children)}
         </Menu.SubMenu>
@@ -298,7 +296,7 @@ function renderDynamicMenuItems(menus: MenuConfig[]): React.ReactNode {
           case 'ApiOutlined': return <ApiOutlined />;
           case 'CopyOutlined': return <CopyOutlined />;
           case 'ReadOutlined': return <ReadOutlined />;
-          default: return <SettingOutlined />; // 默认图标
+          default: return <SettingOutlined />;
         }
       };
 
@@ -307,7 +305,7 @@ function renderDynamicMenuItems(menus: MenuConfig[]): React.ReactNode {
           key={menu.key}
           icon={getIconComponent(menu.icon)}
         >
-          {normalizedTitle}
+          {title}
         </Menu.Item>
       );
     }
@@ -324,6 +322,8 @@ export default function MainLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { isDarkMode, toggleTheme } = useTheme()
+  const { t } = useTranslation('menu')
+  const { t: tc } = useTranslation('common')
 
   const [selectedKeys, setSelectedKeys] = useState<string[]>([])
   const [openKeys, setOpenKeys] = useState<string[]>([])
@@ -343,7 +343,6 @@ export default function MainLayout() {
 
   const refreshMenus = useCallback(async () => {
     try {
-      // 添加额外的headers确保字符编码正确
       const response = await fetch('/api/user/menus', {
         headers: {
           'Accept': 'application/json; charset=utf-8',
@@ -360,7 +359,6 @@ export default function MainLayout() {
 
       if (data.menus) {
         const enhancedMenus = data.menus as MenuConfig[]
-        // 确保数据以UTF-8正确编码，先验证数据
         console.log('获取到的菜单数据:', enhancedMenus);
         localStorage.setItem('user_menus', JSON.stringify(enhancedMenus));
         notifyMenusChanged();
@@ -368,7 +366,6 @@ export default function MainLayout() {
       }
     } catch (error) {
       console.error('获取菜单失败:', error);
-      // 获取失败时使用 localStorage 缓存
     }
   }, []);
 
@@ -383,11 +380,8 @@ export default function MainLayout() {
     loadUserInfo()
     refreshMenus()
 
-    // 监听 storage 事件（其他标签页修改 localStorage 时触发）
     const handleStorageChange = () => {
-      // 重新加载用户信息
       loadUserInfo();
-      // 强制组件重新渲染以获取最新菜单
       setTabItems(prev => [...prev]);
     };
 
@@ -414,7 +408,6 @@ export default function MainLayout() {
     if (pathname.startsWith('/cmdb/applications')) return 'cmdb-applications'
     if (pathname.startsWith('/deploy/release')) return 'deploy-release'
     if (pathname.startsWith('/deploy/history')) return 'deploy-history'
-    // 注意：/deploy/archived 必须在 /deploy/archive 之前检查
     if (pathname.startsWith('/deploy/archived')) return 'deploy-archived'
     if (pathname.startsWith('/deploy/aggregate-package')) return 'deploy-aggregate-package'
     if (pathname.startsWith('/deploy/aggregated-history')) return 'aggregated-history'
@@ -489,7 +482,7 @@ export default function MainLayout() {
 
     if (deniedPathRef.current !== canonicalPath) {
       deniedPathRef.current = canonicalPath
-      message.warning('当前账号没有该页面权限')
+      message.warning(t('noPermission', '当前账号没有该页面权限'))
     }
     navigate('/forbidden', { replace: true, state: { from: canonicalPath } })
   }, [location.pathname, navigate, menuVersion])
@@ -560,16 +553,10 @@ export default function MainLayout() {
 
   }, [location.pathname])
 
-  // 处理导航到路径
-  // const navigateToPath = (path: string) => {
-  //   navigate(path)
-  // }
-
   // 菜单点击处理
   const handleMenuClick: MenuProps['onClick'] = (info) => {
     const { key } = info
 
-    // 尝试从页面配置中获取路径
     const pageConfig = getPageConfig();
     const path = pageConfig[key]?.path;
 
@@ -649,7 +636,6 @@ export default function MainLayout() {
     } else if (key === 'fullscreen') {
       toggleFullscreen(rightClickTabKey)
     } else if (key === 'closeOthers') {
-      // 关闭其他标签
       const newTabs = tabItems.filter(tab => tab.key === 'dashboard' || tab.key === rightClickTabKey)
       setTabItems(newTabs)
       Object.keys(tabListRef.current).forEach(k => {
@@ -658,7 +644,6 @@ export default function MainLayout() {
         }
       })
     } else if (key === 'closeAll') {
-      // 关闭所有（保留首页）
       setTabItems([tabItems[0]])
       Object.keys(tabListRef.current).forEach(k => {
         if (k !== 'dashboard') {
@@ -672,11 +657,11 @@ export default function MainLayout() {
   }
 
   const contextMenuItems: MenuProps['items'] = [
-    { key: 'fullscreen', icon: <FullscreenOutlined />, label: '全屏显示' },
+    { key: 'fullscreen', icon: <FullscreenOutlined />, label: t('fullscreen', '全屏显示') },
     { type: 'divider' as const },
-    { key: 'close', icon: <CloseOutlined />, label: '关闭标签' },
-    { key: 'closeOthers', label: '关闭其他标签' },
-    { key: 'closeAll', label: '关闭所有标签' },
+    { key: 'close', icon: <CloseOutlined />, label: t('closeTab', '关闭标签') },
+    { key: 'closeOthers', label: t('closeOtherTabs', '关闭其他标签') },
+    { key: 'closeAll', label: t('closeAllTabs', '关闭所有标签') },
   ]
 
   // 点击其他地方关闭右键菜单
@@ -757,23 +742,16 @@ export default function MainLayout() {
   }
 
   const userMenuItems: MenuProps['items'] = [
-    { key: 'user-manual', icon: <ReadOutlined />, label: '用户手册', onClick: handleUserManual },
+    { key: 'user-manual', icon: <ReadOutlined />, label: t('user-manual', '用户手册'), onClick: handleUserManual },
     { type: 'divider' as const },
-    { key: 'profile', icon: <IdcardOutlined />, label: '我的资料', onClick: handleProfile },
+    { key: 'profile', icon: <IdcardOutlined />, label: t('profile', '我的资料'), onClick: handleProfile },
     { type: 'divider' as const },
-    { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: handleLogout },
+    { key: 'logout', icon: <LogoutOutlined />, label: t('logout', '退出登录'), onClick: handleLogout },
   ]
 
-  // 获取角色中文名称
+  // 获取角色显示名称
   const getRoleDisplayName = (roleCode: string): string => {
-    const roleNames: Record<string, string> = {
-      admin: '管理员',
-      ops: '运维',
-      dev: '开发',
-      qa: '测试',
-      user: '用户',
-    }
-    return roleNames[roleCode] || roleCode
+    return tc(`roleNames.${roleCode}`, roleCode)
   }
 
   // 渲染菜单项 - 动态获取后端菜单数据
@@ -792,7 +770,6 @@ export default function MainLayout() {
   // 获取所有菜单项用于搜索 - 只包含有效的子页面
   function getAllMenuItems(): Array<{ key: string; title: string; path: string; icon: React.ReactNode }> {
     const pageConfig = getPageConfig()
-    // 定义有效的路径模式（必须是具体的子页面路径，不是父级路径）
     const validPathPatterns = [
       '/cmdb/projects', '/cmdb/environments', '/cmdb/servers', '/cmdb/applications',
       '/deploy/release', '/deploy/history', '/deploy/archive', '/deploy/archived',
@@ -810,11 +787,8 @@ export default function MainLayout() {
     ]
     return Object.entries(pageConfig)
       .filter(([key, config]) => {
-        // 排除没有路径的菜单
         if (!config.path) return false
-        // 排除根路径 /
         if (config.path === '/') return false
-        // 检查路径是否在白名单中
         return validPathPatterns.includes(config.path)
       })
       .map(([key, config]) => ({
@@ -913,7 +887,7 @@ export default function MainLayout() {
               </div>
               {!collapsed && (
                 <span style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.02em' }}>
-                  运维管理平台
+                  {t('siteTitle', '运维管理平台')}
                 </span>
               )}
             </div>
@@ -939,7 +913,7 @@ export default function MainLayout() {
           </Sider>
         )}
 
-        {/* 侧边栏切换按钮 - 一半在菜单内一半在菜单外 */}
+        {/* 侧边栏切换按钮 */}
         {!isFullscreen && (
           <div
             className="sidebar-toggle"
@@ -1014,7 +988,7 @@ export default function MainLayout() {
                 }}
               >
                 <SearchOutlined style={{ color: 'var(--text-muted)', fontSize: 13 }} />
-                <span style={{ color: 'var(--text-muted)', fontSize: 13, flex: 1 }}>搜索菜单...</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 13, flex: 1 }}>{t('searchMenu', '搜索菜单...')}</span>
                 <span style={{
                   background: 'var(--card-bg)',
                   border: '1px solid var(--border-color)',
@@ -1045,7 +1019,7 @@ export default function MainLayout() {
                       background: 'var(--card-bg)',
                       transition: 'all 0.2s ease',
                     }}
-                    title={isDarkMode ? '切换到浅色模式' : '切换到深色模式'}
+                    title={isDarkMode ? t('switchToLight', '切换到浅色模式') : t('switchToDark', '切换到深色模式')}
                   >
                     {isDarkMode ? (
                       <SunOutlined style={{ fontSize: 16, color: '#faad14' }} />
@@ -1060,7 +1034,7 @@ export default function MainLayout() {
                   <Space style={{ cursor: 'pointer', color: '#333' }}>
                     <UserOutlined />
                     <span>
-                      {realName || username || '用户'}
+                      {realName || username || t('user', '用户')}
                       {userRole && (
                         <span style={{ color: '#faad14', fontSize: 12, marginLeft: 4 }}>
                           ({getRoleDisplayName(userRole)})
@@ -1123,7 +1097,7 @@ export default function MainLayout() {
                 }}
               >
                 <FullscreenExitOutlined />
-                <span>退出全屏</span>
+                <span>{t('exitFullscreen', '退出全屏')}</span>
               </button>
             </div>
           )}
@@ -1163,7 +1137,7 @@ export default function MainLayout() {
         <div style={{ padding: '12px 16px', borderBottom: '1px solid #F3F4F6' }}>
           <Input
             prefix={<SearchOutlined style={{ color: '#9CA3AF' }} />}
-            placeholder="搜索菜单..."
+            placeholder={t('searchMenu', '搜索菜单...')}
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             autoFocus
@@ -1198,7 +1172,7 @@ export default function MainLayout() {
             </div>
           ) : (
             <div style={{ padding: 24, textAlign: 'center', color: '#9CA3AF' }}>
-              未找到匹配菜单
+              {t('noMatchMenu', '未找到匹配菜单')}
             </div>
           )}
         </div>

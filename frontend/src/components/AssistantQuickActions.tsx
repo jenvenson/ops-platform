@@ -3,6 +3,7 @@
 
 import { Button, Card, Space } from 'antd'
 import { RobotOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 
 type AssistantQuickAction = {
   label: string
@@ -21,6 +22,7 @@ const triggerAssistantPrompt = (query: string) => {
 }
 
 export default function AssistantQuickActions({ description, actions }: AssistantQuickActionsProps) {
+  const { t } = useTranslation('common')
   return (
     <Card
       size="small"
@@ -28,7 +30,7 @@ export default function AssistantQuickActions({ description, actions }: Assistan
       title={(
         <Space size={8}>
           <RobotOutlined />
-          <span>智能分析</span>
+          <span>{t('smartAnalysis', '智能分析')}</span>
         </Space>
       )}
       extra={<span style={{ color: '#8c8c8c', fontSize: 12 }}>{description}</span>}

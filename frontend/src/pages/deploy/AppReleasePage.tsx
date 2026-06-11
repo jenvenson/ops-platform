@@ -5,12 +5,15 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, Steps, Select, Button, Table, Tag, message, Space, Empty, Result } from 'antd'
 import { RocketOutlined, HistoryOutlined, SyncOutlined, CheckCircleOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { cmdbAPI, Application, Project, deployAPI } from '../../api/cmdb'
 
 type DeployType = 'all' | 'frontend' | 'backend'
 
 export default function AppReleasePage() {
   const navigate = useNavigate()
+  const { t } = useTranslation('deploy')
+  const { t: tc } = useTranslation('common')
   const [currentStep, setCurrentStep] = useState(0)
   const [projects, setProjects] = useState<Project[]>([])
   const [applications, setApplications] = useState<Application[]>([])
@@ -23,10 +26,10 @@ export default function AppReleasePage() {
 
   const getDeployBlockReason = (app: Application) => {
     if (!app.env_id) {
-      return '未配置部署环境'
+      return t('notConfiguredDeployEnv', '未配置部署环境')
     }
     if (!app.jenkins_job) {
-      return '未配置 Jenkins 发布流水线'
+      return t('notConfiguredJenkinsPipeline', '未配置 Jenkins 发布流水线')
     }
     return ''
   }
@@ -61,7 +64,7 @@ export default function AppReleasePage() {
         setProjects(projectsResp.data)
         setApplications(appsResp.data)
       } catch (error) {
-        message.error('加载数据失败')
+        message.error(tc('loadFailed', '加载数据失败'))
       } finally {
         setLoading(false)
       }
@@ -79,15 +82,15 @@ export default function AppReleasePage() {
   // 下一步
   const handleNext = () => {
     if (currentStep === 0 && !selectedProjectId) {
-      message.warning('请选择项目')
+      message.warning(t('selectProjectPlaceholder', '请选择项目'))
       return
     }
     if (currentStep === 1 && selectedApps.length === 0) {
-      message.warning('请选择要部署的应用')
+      message.warning(t('selectProjectPlaceholder', '请选择要部署的应用'))
       return
     }
     if (currentStep === 1 && selectedApps.length > 3) {
-      message.warning('最多支持3个应用并发部署')
+      message.warning(t('maxConcurrentDeploy', '最多支持3个应用并发部署'))
       return
     }
     setCurrentStep(currentStep + 1)
@@ -125,7 +128,7 @@ export default function AppReleasePage() {
         results.push({
           app,
           triggered: resp.success,
-          message: resp.success ? '部署中' : (resp.message || '触发失败'),
+          message: resp.success ? t('deploying', '部署中') : (resp.message || t('triggerFailed', '触发失败')),
           deployRecordId: resp.deploy_id,
           deployType,
         })
@@ -134,7 +137,7 @@ export default function AppReleasePage() {
         results.push({
           app,
           triggered: false,
-          message: err.response?.data?.error || '触发失败',
+          message: err.response?.data?.error || t('triggerFailed', '触发失败'),
           deployType,
         })
       }
@@ -188,14 +191,14 @@ export default function AppReleasePage() {
             updatedResults[i] = {
               ...result,
               triggered: false,
-              message: '部署成功',
+              message: t('deploySuccess', '部署成功'),
             }
             hasUpdate = true
           } else if (resp.status === 'failed') {
             updatedResults[i] = {
               ...result,
               triggered: false,
-              message: '部署失败',
+              message: t('deployFailed', '部署失败'),
             }
             hasUpdate = true
           }
@@ -221,31 +224,31 @@ export default function AppReleasePage() {
   // 应用选择表格列（不含部署类型，用于步骤2和步骤3）
   const appColumns = [
     {
-      title: '应用名称',
+      title: t('colAppName', '应用名称'),
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: '项目环境',
+      title: t('colProjectEnv', '项目环境'),
       dataIndex: 'environment',
       key: 'environment',
       render: (env: Application['environment']) => env?.name ? <Tag color="blue">{env.name}</Tag> : '-',
     },
     {
-      title: 'Jenkins发布流水线',
+      title: t('colJenkinsPipeline', 'Jenkins发布流水线'),
       dataIndex: 'jenkins_job',
       key: 'jenkins_job',
       ellipsis: true,
-      render: (value: string) => value || <Tag color="error">未配置</Tag>,
+      render: (value: string) => value || <Tag color="error">{t('notConfigured', '未配置')}</Tag>,
     },
     {
-      title: '可部署状态',
+      title: t('colDeployReady', '可部署状态'),
       key: 'deploy_ready',
       width: 180,
       render: (_: unknown, record: Application) => {
         const reason = getDeployBlockReason(record)
         if (!reason) {
-          return <Tag color="success">可部署</Tag>
+          return <Tag color="success">{t('deployReady', '可部署')}</Tag>
         }
         return <Tag color="warning">{reason}</Tag>
       },
@@ -255,58 +258,58 @@ export default function AppReleasePage() {
   // 部署结果表格列（包含部署类型）
   const resultColumns = [
     {
-      title: '应用名称',
+      title: t('colAppName', '应用名称'),
       dataIndex: ['app', 'name'],
       key: 'name',
     },
     {
-      title: '项目环境',
+      title: t('colProjectEnv', '项目环境'),
       key: 'environment',
       render: (_: unknown, record: { app: Application }) =>
         record.app.environment?.name ? <Tag color="blue">{record.app.environment.name}</Tag> : '-',
     },
     {
-      title: '部署类型',
+      title: t('colDeployType', '部署类型'),
       key: 'deployType',
       width: 120,
       render: (_: unknown, record: { app: Application; triggered: boolean; message: string; deployRecordId?: number; deployType: string }) => {
         const typeMap: Record<string, { color: string; text: string }> = {
-          all: { color: 'purple', text: '全部' },
-          frontend: { color: 'cyan', text: '前端' },
-          backend: { color: 'blue', text: '后端' },
+          all: { color: 'purple', text: t('allDeploy', '全部') },
+          frontend: { color: 'cyan', text: t('frontendDeploy', '前端') },
+          backend: { color: 'blue', text: t('backendDeploy', '后端') },
         }
         const config = typeMap[record.deployType] || { color: 'default', text: record.deployType }
         return <Tag color={config.color}>{config.text}</Tag>
       },
     },
     {
-      title: '状态',
+      title: tc('status', '状态'),
       key: 'status',
       render: (_: unknown, record: { app: Application; triggered: boolean; message: string; deployRecordId?: number; deployType: string }) => {
         if (record.triggered) {
-          return <Tag icon={<SyncOutlined spin />} color="processing">部署中</Tag>
+          return <Tag icon={<SyncOutlined spin />} color="processing">{t('deploying', '部署中')}</Tag>
         }
-        if (record.message === '部署成功') {
-          return <Tag color="success">成功</Tag>
+        if (record.message === t('deploySuccess', '部署成功')) {
+          return <Tag color="success">{tc('success', '成功')}</Tag>
         }
-        if (record.message === '部署失败') {
-          return <Tag color="error">失败</Tag>
+        if (record.message === t('deployFailed', '部署失败')) {
+          return <Tag color="error">{tc('failed', '失败')}</Tag>
         }
         return <Tag color="error">{record.message}</Tag>
       },
     },
     {
-      title: '消息',
+      title: t('colMessage', '消息'),
       dataIndex: 'message',
       key: 'message',
     },
   ]
 
   const steps = [
-    { title: '选择项目', description: '选择要部署的项目' },
-    { title: '选择应用', description: '选择要部署的应用' },
-    { title: '确认部署', description: '确认并执行部署' },
-    { title: '完成', description: '部署结果' },
+    { title: t('stepSelectProject', '选择项目'), description: t('stepDescSelectDeployProject', '选择要部署的项目') },
+    { title: t('stepSelectApp', '选择应用'), description: t('stepDescSelectDeployApp', '选择要部署的应用') },
+    { title: t('stepConfirmDeploy', '确认部署'), description: t('stepDescConfirmDeploy', '确认并执行部署') },
+    { title: t('stepComplete', '完成'), description: t('stepDescDeployComplete', '部署结果') },
   ]
 
   return (
@@ -315,16 +318,16 @@ export default function AppReleasePage() {
         <Steps current={currentStep} items={steps} />
       </Card>
 
-      <Card title="迭代部署">
+      <Card title={t('iterativeDeploy', '迭代部署')}>
         {/* 步骤 1: 选择项目 */}
         {currentStep === 0 && (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
-            <h3 style={{ marginBottom: 8 }}>请选择要部署的项目</h3>
+            <h3 style={{ marginBottom: 8 }}>{t('selectDeployProjectHeading', '请选择要部署的项目')}</h3>
             <div style={{ marginBottom: 24, fontSize: '12px', color: '#999' }}>
-              选择项目后，将显示该项目的所有应用（应用管理中"所属项目"为该项目的应用）
+              {t('selectDeployProjectHint', '选择项目后，将显示该项目的所有应用（应用管理中"所属项目"为该项目的应用）')}
             </div>
             <Select
-              placeholder="选择项目"
+              placeholder={t('selectProjectPlaceholder', '选择项目')}
               value={selectedProjectId}
               onChange={handleProjectSelect}
               style={{ width: 400 }}
@@ -341,7 +344,7 @@ export default function AppReleasePage() {
             </Select>
             <div style={{ marginTop: 40 }}>
               <Button type="primary" size="large" onClick={handleNext} disabled={!selectedProjectId}>
-                下一步
+                {t('nextStep', '下一步')}
               </Button>
             </div>
           </div>
@@ -351,27 +354,27 @@ export default function AppReleasePage() {
         {currentStep === 1 && (
           <div>
             <div style={{ marginBottom: 16 }}>
-              <span style={{ marginRight: 16 }}>已选择项目: <Tag color="blue">{projects.find(p => p.id === selectedProjectId)?.name}</Tag></span>
+              <span style={{ marginRight: 16 }}>{t('selectedProject', '已选择项目:')} <Tag color="blue">{projects.find(p => p.id === selectedProjectId)?.name}</Tag></span>
             </div>
             <div style={{ marginBottom: 16, fontSize: '12px', color: '#666', padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-              提示：仅可选择已配置部署环境和 Jenkins 发布流水线的应用。
+              {t('deployHint', '提示：仅可选择已配置部署环境和 Jenkins 发布流水线的应用。')}
             </div>
             {projectApps.length === 0 ? (
-              <Empty 
+              <Empty
                 description={
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '16px', marginBottom: '8px' }}>该项目下没有关联的应用</div>
+                    <div style={{ fontSize: '16px', marginBottom: '8px' }}>{t('noAppsInProject', '该项目下没有关联的应用')}</div>
                     <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
-                      <div>说明：迭代部署根据"应用管理"中的"所属项目"字段来匹配应用</div>
-                      <div style={{ marginTop: '8px' }}>可能的原因：</div>
-                      <div style={{ marginTop: '4px' }}>1. 应用尚未在"应用管理"中设置"所属项目"</div>
-                      <div style={{ marginTop: '4px' }}>2. 应用的"所属项目"与当前选择的项目不匹配</div>
+                      <div>{t('noAppsExplanation', '说明：迭代部署根据"应用管理"中的"所属项目"字段来匹配应用')}</div>
+                      <div style={{ marginTop: '8px' }}>{t('possibleReasons', '可能的原因：')}</div>
+                      <div style={{ marginTop: '4px' }}>{t('reason1NoProject', '1. 应用尚未在"应用管理"中设置"所属项目"')}</div>
+                      <div style={{ marginTop: '4px' }}>{t('reason2MismatchProject', '2. 应用的"所属项目"与当前选择的项目不匹配')}</div>
                       <div style={{ marginTop: '12px', color: '#1890ff' }}>
-                        解决方法：请前往"应用管理"页面，编辑应用，设置"所属项目"为当前选择的项目
+                        {t('solutionGoToAppMgmt', '解决方法：请前往"应用管理"页面，编辑应用，设置"所属项目"为当前选择的项目')}
                       </div>
                     </div>
                   </div>
-                } 
+                }
               />
             ) : (
               <Table
@@ -383,7 +386,7 @@ export default function AppReleasePage() {
                   }),
                   onChange: (_, selectedRows) => {
                     if (selectedRows.length > 3) {
-                      message.warning('最多支持3个应用并发部署，已自动限制为前3个')
+                      message.warning(t('maxConcurrentDeployLimit', '最多支持3个应用并发部署，已自动限制为前3个'))
                       setSelectedApps(selectedRows.slice(0, 3) as Application[])
                     } else {
                       setSelectedApps(selectedRows)
@@ -398,17 +401,17 @@ export default function AppReleasePage() {
             )}
             {selectedApps.length > 0 && (
               <div style={{ marginTop: 16, padding: '8px 12px', background: selectedApps.length > 3 ? '#fff2f0' : '#f6ffed', borderRadius: 4 }}>
-                已选择 <strong>{selectedApps.length}</strong> 个应用
+                {t('selectedCount', '已选择')} <strong>{selectedApps.length}</strong> {t('appsUnit', '个应用')}
                 {selectedApps.length > 3 && (
-                  <span style={{ color: '#ff4d4f', marginLeft: 8 }}>（最多支持3个并发部署）</span>
+                  <span style={{ color: '#ff4d4f', marginLeft: 8 }}>{t('maxConcurrentWarning', '（最多支持3个并发部署）')}</span>
                 )}
               </div>
             )}
             <div style={{ marginTop: 24, textAlign: 'center' }}>
               <Space size="large">
-                <Button size="large" onClick={handlePrev}>上一步</Button>
+                <Button size="large" onClick={handlePrev}>{t('prevStep', '上一步')}</Button>
                 <Button type="primary" size="large" onClick={handleNext} disabled={selectedApps.length === 0 || selectedApps.length > 3}>
-                  下一步 ({selectedApps.length} 个应用)
+                  {t('nextStepCount', '下一步 ({{count}} 个应用)', { count: selectedApps.length })}
                 </Button>
               </Space>
             </div>
@@ -418,20 +421,20 @@ export default function AppReleasePage() {
         {/* 步骤 3: 确认部署 */}
         {currentStep === 2 && (
           <div style={{ padding: '20px 0' }}>
-            <h3 style={{ marginBottom: 16 }}>确认发布信息</h3>
+            <h3 style={{ marginBottom: 16 }}>{t('confirmDeployInfo', '确认发布信息')}</h3>
             <div style={{ marginBottom: 24 }}>
-              <p><strong>项目:</strong> {projects.find(p => p.id === selectedProjectId)?.name}</p>
-              <p><strong>应用数量:</strong> {selectedApps.length} 个</p>
+              <p><strong>{t('projectLabel', '项目:')}</strong> {projects.find(p => p.id === selectedProjectId)?.name}</p>
+              <p><strong>{t('appCountLabel', '应用数量:')}</strong> {selectedApps.length}{t('geUnit', '个')}</p>
               <p>
-                <strong>部署类型:</strong>
+                <strong>{t('deployTypeLabel', '部署类型:')}</strong>
                 <Select
                   value={deployType}
                   onChange={setDeployType}
                   style={{ width: 200, marginLeft: 8 }}
                 >
-                  <Select.Option value="all">全部部署（前端+后端）</Select.Option>
-                  <Select.Option value="frontend">前端部署</Select.Option>
-                  <Select.Option value="backend">后端部署</Select.Option>
+                  <Select.Option value="all">{t('allDeployOption', '全部部署（前端+后端）')}</Select.Option>
+                  <Select.Option value="frontend">{t('frontendDeployOption', '前端部署')}</Select.Option>
+                  <Select.Option value="backend">{t('backendDeployOption', '后端部署')}</Select.Option>
                 </Select>
               </p>
             </div>
@@ -444,7 +447,7 @@ export default function AppReleasePage() {
             />
             <div style={{ marginTop: 24, textAlign: 'center' }}>
               <Space size="large">
-                <Button size="large" onClick={handlePrev}>上一步</Button>
+                <Button size="large" onClick={handlePrev}>{t('prevStep', '上一步')}</Button>
                 <Button
                   type="primary"
                   size="large"
@@ -452,7 +455,7 @@ export default function AppReleasePage() {
                   onClick={handleDeploy}
                   loading={deploying}
                 >
-                  开始部署
+                  {t('startDeploy', '开始部署')}
                 </Button>
               </Space>
             </div>
@@ -464,31 +467,31 @@ export default function AppReleasePage() {
           <div style={{ padding: '20px 0' }}>
             <Result
               icon={
-                deployResults.every(r => r.message === '部署成功') ? (
+                deployResults.every(r => r.message === t('deploySuccess', '部署成功')) ? (
                   <CheckCircleOutlined style={{ color: '#52c41a' }} />
                 ) : (
                   <SyncOutlined spin style={{ color: '#1890ff' }} />
                 )
               }
               title={
-                deployResults.every(r => r.message === '部署成功') ? '部署完成' :
-                deployResults.every(r => !r.triggered) ? '部署结束' : '部署任务已提交'
+                deployResults.every(r => r.message === t('deploySuccess', '部署成功')) ? t('deployComplete', '部署完成') :
+                deployResults.every(r => !r.triggered) ? t('deployEnded', '部署结束') : t('deploySubmitted', '部署任务已提交')
               }
               subTitle={
                 (() => {
-                  const successCount = deployResults.filter(r => r.message === '部署成功').length
-                  const failedCount = deployResults.filter(r => r.message === '部署失败').length
+                  const successCount = deployResults.filter(r => r.message === t('deploySuccess', '部署成功')).length
+                  const failedCount = deployResults.filter(r => r.message === t('deployFailed', '部署失败')).length
                   const runningCount = deployResults.filter(r => r.triggered).length
                   if (runningCount > 0) {
-                    return `共 ${deployResults.length} 个应用，${runningCount} 个正在部署中`
+                    return t('deployResultSummary', '共 {{total}} 个应用，{{running}} 个正在部署中', { total: deployResults.length, running: runningCount })
                   }
-                  return `共 ${deployResults.length} 个应用，${successCount} 个成功，${failedCount} 个失败`
+                  return t('deployResultFinal', '共 {{total}} 个应用，{{success}} 个成功，{{failed}} 个失败', { total: deployResults.length, success: successCount, failed: failedCount })
                 })()
               }
               extra={
                 deployResults.every(r => !r.triggered) ? (
                   <Button type="primary" onClick={handleRestart}>
-                    关闭
+                    {tc('close', '关闭')}
                   </Button>
                 ) : (
                   <Button
@@ -496,7 +499,7 @@ export default function AppReleasePage() {
                     icon={<HistoryOutlined />}
                     onClick={handleViewHistory}
                   >
-                    查看部署记录
+                    {t('viewDeployRecords', '查看部署记录')}
                   </Button>
                 )
               }
@@ -512,10 +515,10 @@ export default function AppReleasePage() {
               <div style={{ marginTop: 24, textAlign: 'center' }}>
                 <Space size="large">
                   <Button size="large" onClick={handleRestart}>
-                    继续部署
+                    {t('continueDeploy', '继续部署')}
                   </Button>
                   <Button type="primary" size="large" icon={<HistoryOutlined />} onClick={handleViewHistory}>
-                    查看部署记录
+                    {t('viewDeployRecords', '查看部署记录')}
                   </Button>
                 </Space>
               </div>

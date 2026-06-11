@@ -5,8 +5,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, Table, Tag, Space, Button, Select, DatePicker, message, Modal, Input } from 'antd'
 import { SearchOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { cmdbAPI, Application } from '../../api/cmdb'
 import { deployAPI, DeployRecord } from '../../api/cmdb.js'
+import { formatDateTime } from '../../utils/dateFormat'
 import AssistantQuickActions from '../../components/AssistantQuickActions'
 import useAssistantPageContext from '../../components/useAssistantPageContext'
 
@@ -73,6 +75,8 @@ const setCachedData = (key: string, data: unknown) => {
 
 export default function DeployHistoryPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation('deploy')
+  const { t: tc } = useTranslation('common')
   const [deployments, setDeployments] = useState<DeployRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [refreshingId, setRefreshingId] = useState<number | null>(null)
@@ -202,18 +206,18 @@ export default function DeployHistoryPage() {
   // 删除部署记录
   const deleteRecord = async (id: number) => {
     Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除这条部署记录吗？',
-      okText: '确认',
-      cancelText: '取消',
+      title: tc('confirm', '确认删除'),
+      content: t('confirmDeleteDeploy', '确定要删除这条部署记录吗？'),
+      okText: tc('confirm', '确认'),
+      cancelText: tc('cancel', '取消'),
       onOk: async () => {
         try {
           await deployAPI.deleteDeployRecord(id)
-          message.success('删除成功')
+          message.success(tc('deleteSuccess', '删除成功'))
           fetchDeployments()
         } catch (error) {
           console.error('删除失败:', error)
-          message.error('删除失败')
+          message.error(tc('deleteFailed', '删除失败'))
         }
       },
     })
@@ -254,22 +258,22 @@ export default function DeployHistoryPage() {
   }, [])
 
   const statusMap: Record<string, { color: string; text: string }> = {
-    pending: { color: 'default', text: '待执行' },
-    queued: { color: 'processing', text: '排队中' },
-    running: { color: 'processing', text: '部署中' },
-    success: { color: 'success', text: '成功' },
-    failed: { color: 'error', text: '失败' },
+    pending: { color: 'default', text: t('statusPending', '待执行') },
+    queued: { color: 'processing', text: t('statusQueued', '排队中') },
+    running: { color: 'processing', text: t('statusDeploying', '部署中') },
+    success: { color: 'success', text: tc('success', '成功') },
+    failed: { color: 'error', text: tc('failed', '失败') },
   }
 
   const columns = [
     {
-      title: '应用',
+      title: t('colApp', '应用'),
       dataIndex: 'app_name',
       key: 'app_name',
       width: 250,
     },
     {
-      title: '环境',
+      title: t('colEnv', '环境'),
       dataIndex: 'env_name',
       key: 'env_name',
       width: 120,
@@ -280,21 +284,21 @@ export default function DeployHistoryPage() {
       ),
     },
     {
-      title: '部署类型',
+      title: t('colDeployType', '部署类型'),
       dataIndex: 'deploy_type',
       key: 'deploy_type',
       width: 100,
       render: (type: string) => {
         const typeMap: Record<string, string> = {
-          all: '全部',
-          frontend: '前端',
-          backend: '后端',
+          all: t('allDeploy', '全部'),
+          frontend: t('frontendDeploy', '前端'),
+          backend: t('backendDeploy', '后端'),
         }
         return typeMap[type] || type
       },
     },
     {
-      title: '状态',
+      title: tc('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
@@ -304,33 +308,33 @@ export default function DeployHistoryPage() {
       },
     },
     {
-      title: '触发时间',
+      title: t('colTriggerTime', '触发时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
-      render: (time: string) => time ? new Date(time).toLocaleString('zh-CN') : '-',
+      render: (time: string) => time ? formatDateTime(time) : '-',
     },
     {
-      title: '耗时',
+      title: t('colDuration', '耗时'),
       dataIndex: 'duration',
       key: 'duration',
       width: 100,
       render: (duration: number) => {
         if (!duration) return '-'
-        if (duration < 60) return `${duration}秒`
-        if (duration < 3600) return `${Math.floor(duration / 60)}分${duration % 60}秒`
-        return `${Math.floor(duration / 3600)}小时${Math.floor((duration % 3600) / 60)}分`
+        if (duration < 60) return `${duration}${t('seconds', '秒')}`
+        if (duration < 3600) return `${Math.floor(duration / 60)}${t('minutes', '分')}${duration % 60}${t('seconds', '秒')}`
+        return `${Math.floor(duration / 3600)}${t('hours', '小时')}${Math.floor((duration % 3600) / 60)}${t('minutes', '分')}`
       },
     },
     {
-      title: '控制台日志',
+      title: t('colConsoleLog', '控制台日志'),
       key: 'console_url',
       width: 100,
       render: (_: unknown, record: DeployRecord) => {
         if (record.jenkins_console_url) {
           return (
             <a href={record.jenkins_console_url} target="_blank" rel="noopener noreferrer">
-              查看日志
+              {t('viewLogs', '查看日志')}
             </a>
           )
         }
@@ -338,11 +342,11 @@ export default function DeployHistoryPage() {
       },
     },
     {
-      title: '操作人',
+      title: tc('operator', '操作人'),
       dataIndex: 'triggered_by_name',
       key: 'triggered_by_name',
       width: 100,
-      render: (name: string, record: DeployRecord) => name || record.triggered_by || '系统',
+      render: (name: string, record: DeployRecord) => name || record.triggered_by || t('systemLabel', '系统'),
     },
   ]
 
@@ -350,7 +354,7 @@ export default function DeployHistoryPage() {
   const canEdit = currentUserRole === 'admin' || currentUserRole === 'ops'
   if (canEdit) {
     columns.push({
-      title: '操作',
+      title: tc('action', '操作'),
       key: 'action',
       width: 150,
       render: (_: unknown, record: DeployRecord) => {
@@ -362,7 +366,7 @@ export default function DeployHistoryPage() {
               size="small"
               onClick={() => navigate(`/platform/events?object_type=deploy_record&object_id=deploy_record:deploy:${record.id}&timeline=1`)}
             >
-              事件流
+              {t('eventsFlow', '事件流')}
             </Button>
             {isActive && (
               <Button
@@ -371,7 +375,7 @@ export default function DeployHistoryPage() {
                 onClick={() => refreshRecordStatus(record.id)}
                 loading={refreshingId === record.id}
               >
-                刷新
+                {tc('refresh', '刷新')}
               </Button>
             )}
             <Button
@@ -381,7 +385,7 @@ export default function DeployHistoryPage() {
               icon={<DeleteOutlined />}
               onClick={() => deleteRecord(record.id)}
             >
-              删除
+              {tc('delete', '删除')}
             </Button>
           </Space>
         )
@@ -396,7 +400,7 @@ export default function DeployHistoryPage() {
         <div style={{ marginBottom: 8 }}>
           <Space wrap>
             <Input
-              placeholder="应用名称"
+              placeholder={t('appNamePlaceholder', '应用名称')}
               value={applications.find(a => a.id === filters.appId)?.name || ''}
               onChange={e => {
                 const name = e.target.value.trim()
@@ -414,7 +418,7 @@ export default function DeployHistoryPage() {
               onPressEnter={fetchDeployments}
             />
             <Select
-              placeholder="选择环境"
+              placeholder={t('selectEnvPlaceholder', '选择环境')}
               value={filters.envId}
               onChange={val => setFilters({ ...filters, envId: val })}
               allowClear
@@ -425,20 +429,20 @@ export default function DeployHistoryPage() {
               }))}
             />
             <Select
-              placeholder="状态"
+              placeholder={tc('status', '状态')}
               value={filters.status}
               onChange={val => setFilters({ ...filters, status: val })}
               allowClear
               style={{ width: 120 }}
               options={[
-                { label: '排队中', value: 'queued' },
-                { label: '部署中', value: 'running' },
-                { label: '成功', value: 'success' },
-                { label: '失败', value: 'failed' },
+                { label: t('statusQueued', '排队中'), value: 'queued' },
+                { label: t('statusDeploying', '部署中'), value: 'running' },
+                { label: tc('success', '成功'), value: 'success' },
+                { label: tc('failed', '失败'), value: 'failed' },
               ]}
             />
             <Input
-              placeholder="操作人"
+              placeholder={t('operatorPlaceholder', '操作人')}
               value={filters.triggeredBy}
               onChange={e => setFilters({ ...filters, triggeredBy: e.target.value })}
               allowClear
@@ -460,7 +464,7 @@ export default function DeployHistoryPage() {
                   setFilters({ ...filters, startTime: undefined, endTime: undefined })
                 }
               }}
-              placeholder={['开始时间', '结束时间']}
+              placeholder={[t('startTimePlaceholder', '开始时间'), t('endTimePlaceholder', '结束时间')]}
               style={{ width: 380 }}
             />
           </Space>
@@ -469,25 +473,25 @@ export default function DeployHistoryPage() {
         <div>
           <Space>
             <Button type="primary" icon={<SearchOutlined />} onClick={fetchDeployments}>
-              搜索
+              {tc('search', '搜索')}
             </Button>
             <Button icon={<ReloadOutlined />} onClick={resetFilters}>
-              重置
+              {tc('reset', '重置')}
             </Button>
           </Space>
         </div>
       </Card>
 
       <AssistantQuickActions
-        description="复用右侧运维小助手，基于当前部署记录页面上下文发起查询"
+        description={t('assistantDeployDesc', '复用右侧运维小助手，基于当前部署记录页面上下文发起查询')}
         actions={[
-          { label: '最近有哪些失败部署', query: '最近有哪些失败部署' },
-          { label: '当前还有哪些部署在执行中', query: '当前还有哪些部署在执行中' },
-          { label: '最近部署异常集中在哪些应用', query: '最近部署异常集中在哪些应用' },
+          { label: t('assistantRecentFailed', '最近有哪些失败部署'), query: t('assistantRecentFailed', '最近有哪些失败部署') },
+          { label: t('assistantCurrentRunning', '当前还有哪些部署在执行中'), query: t('assistantCurrentRunning', '当前还有哪些部署在执行中') },
+          { label: t('assistantDeployAnomalies', '最近部署异常集中在哪些应用'), query: t('assistantDeployAnomalies', '最近部署异常集中在哪些应用') },
         ]}
       />
 
-      <Card title="部署记录">
+      <Card title={t('deployRecords', '部署记录')}>
         <Table
           columns={columns}
           dataSource={deployments}
@@ -496,9 +500,9 @@ export default function DeployHistoryPage() {
             onClick: () => setSelectedDeploy(record),
           })}
           loading={loading}
-          pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total: number) => `共 ${total} 条`, showQuickJumper: true }}
+          pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total: number) => `${tc('total', '共 {{count}} 条', { count: total })}`, showQuickJumper: true }}
           scroll={{ x: 1400 }}
-          locale={{ emptyText: '暂无部署记录' }}
+          locale={{ emptyText: t('noDeployRecords', '暂无部署记录') }}
         />
       </Card>
     </div>

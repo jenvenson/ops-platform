@@ -36,17 +36,10 @@ import { alertAPI, type NotifyChannel } from '../../api/alert'
 import { cmdbAPI, type Server } from '../../api/cmdb'
 import { getFIMErrorMessage } from '../../utils/httpError'
 import { canEdit } from '../../utils/menuAccess'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 
 const { Paragraph, Text, Title } = Typography
-
-const severityLabelMap: Record<string, string> = {
-  critical: '严重',
-  high: '高',
-  warning: '警告',
-  medium: '中',
-  low: '低',
-  info: '提示',
-}
 
 type PolicyModalState = {
   open: boolean
@@ -84,6 +77,7 @@ type BaselineModalState = {
 }
 
 export default function FIMPoliciesPage() {
+  const { t } = useTranslation('security')
   const navigate = useNavigate()
   const [items, setItems] = useState<FIMPolicy[]>([])
   const [servers, setServers] = useState<Server[]>([])
@@ -102,6 +96,15 @@ export default function FIMPoliciesPage() {
   const [scanForm] = Form.useForm()
   const selectedScanAction = Form.useWatch('action', scanForm)
 
+  const severityLabelMap: Record<string, string> = {
+    critical: t('severity.critical', '严重'),
+    high: t('severity.high', '高'),
+    warning: t('severity.warning', '警告'),
+    medium: t('severity.medium', '中'),
+    low: t('severity.low', '低'),
+    info: t('severity.info', '提示'),
+  }
+
   const fetchData = async () => {
     setLoading(true)
     try {
@@ -116,7 +119,7 @@ export default function FIMPoliciesPage() {
     } catch {
       setItems([])
       setBaselineSnapshots([])
-      message.error('加载文件完整性巡检数据失败')
+      message.error(t('fim.loadPoliciesFailed', '加载文件完整性巡检数据失败'))
     } finally {
       setLoading(false)
     }
@@ -170,16 +173,16 @@ export default function FIMPoliciesPage() {
       setSubmitting(true)
       if (policyModal.policy) {
         await securityFIMAPI.updatePolicy(policyModal.policy.id, payload)
-        message.success('策略已更新')
+        message.success(t('fim.policyUpdated', '策略已更新'))
       } else {
         await securityFIMAPI.createPolicy(payload)
-        message.success('策略已创建')
+        message.success(t('fim.policyCreated', '策略已创建'))
       }
       setPolicyModal({ open: false, policy: null })
       policyForm.resetFields()
       await fetchData()
     } catch (error) {
-      message.error(getFIMErrorMessage(error, '保存策略失败'))
+      message.error(getFIMErrorMessage(error, t('fim.savePolicyFailed', '保存策略失败')))
     } finally {
       setSubmitting(false)
     }
@@ -194,7 +197,7 @@ export default function FIMPoliciesPage() {
       targetsForm.setFieldsValue({ server_ids: targetItems.map((item) => item.server_id) })
     } catch {
       setTargetsModal({ open: true, policy, items: [], loading: false })
-      message.error('加载绑定主机失败')
+      message.error(t('fim.loadTargetsFailed', '加载绑定主机失败'))
     }
   }
 
@@ -215,11 +218,11 @@ export default function FIMPoliciesPage() {
         addServerIds.length > 0 ? securityFIMAPI.addTargets(policy.id, addServerIds) : Promise.resolve(),
         ...removeTargets.map((target) => securityFIMAPI.deleteTarget(policy.id, target.id)),
       ])
-      message.success('主机绑定已更新')
+      message.success(t('fim.hostBindingUpdated', '主机绑定已更新'))
       setTargetsModal({ open: false, policy: null, items: [], loading: false })
       targetsForm.resetFields()
     } catch (error) {
-      message.error(getFIMErrorMessage(error, '更新主机绑定失败'))
+      message.error(getFIMErrorMessage(error, t('fim.hostBindingUpdateFailed', '更新主机绑定失败')))
     } finally {
       setSubmitting(false)
     }
@@ -234,7 +237,7 @@ export default function FIMPoliciesPage() {
       setPathsModal({ open: true, policy, items: resp.data ?? [], loading: false, editingItem: null })
     } catch {
       setPathsModal({ open: true, policy, items: [], loading: false, editingItem: null })
-      message.error('加载目录配置失败')
+      message.error(t('fim.loadWatchPathsFailed', '加载目录配置失败'))
     }
   }
 
@@ -272,15 +275,15 @@ export default function FIMPoliciesPage() {
       setSubmitting(true)
       if (pathsModal.editingItem) {
         await securityFIMAPI.updateWatchPath(pathsModal.editingItem.id, values)
-        message.success('目录配置已更新')
+        message.success(t('fim.dirConfigUpdated', '目录配置已更新'))
       } else {
         await securityFIMAPI.createWatchPath(policy.id, values)
-        message.success('目录配置已添加')
+        message.success(t('fim.dirConfigAdded', '目录配置已添加'))
       }
       resetWatchPathForm()
       await refreshWatchPaths(policy)
     } catch (error) {
-      message.error(getFIMErrorMessage(error, pathsModal.editingItem ? '更新目录失败' : '添加目录失败'))
+      message.error(getFIMErrorMessage(error, pathsModal.editingItem ? t('fim.updateDirFailed', '更新目录失败') : t('fim.addDirFailed', '添加目录失败')))
     } finally {
       setSubmitting(false)
     }
@@ -294,10 +297,10 @@ export default function FIMPoliciesPage() {
     try {
       setSubmitting(true)
       await securityFIMAPI.deleteWatchPath(watchPathId)
-      message.success('目录配置已删除')
+      message.success(t('fim.dirConfigDeleted', '目录配置已删除'))
       await refreshWatchPaths(policy)
     } catch (error) {
-      message.error(getFIMErrorMessage(error, '删除目录失败'))
+      message.error(getFIMErrorMessage(error, t('fim.deleteDirFailed', '删除目录失败')))
     } finally {
       setSubmitting(false)
     }
@@ -319,7 +322,7 @@ export default function FIMPoliciesPage() {
       }
     } catch {
       setScanModal({ open: true, policy, targets: [], loading: false })
-      message.error('加载可执行主机失败')
+      message.error(t('fim.loadExecutableHostsFailed', '加载可执行主机失败'))
     }
   }
 
@@ -333,15 +336,15 @@ export default function FIMPoliciesPage() {
       setSubmitting(true)
       if (values.action === 'baseline') {
         await securityFIMAPI.buildBaseline(policy.id, values.server_id)
-        message.success('已触发基线构建')
+        message.success(t('fim.baselineBuildTriggered', '已触发基线构建'))
       } else {
         await securityFIMAPI.runScan(policy.id, values.server_id, 'manual')
-        message.success('已触发手动扫描')
+        message.success(t('fim.manualScanTriggered', '已触发手动扫描'))
       }
       setScanModal({ open: false, policy: null, targets: [], loading: false })
       scanForm.resetFields()
     } catch (error) {
-      message.error(getFIMErrorMessage(error, '执行巡检失败'))
+      message.error(getFIMErrorMessage(error, t('fim.inspectionFailed', '执行巡检失败')))
     } finally {
       setSubmitting(false)
     }
@@ -354,10 +357,10 @@ export default function FIMPoliciesPage() {
       } else {
         await securityFIMAPI.disablePolicy(policy.id)
       }
-      message.success(enabled ? '策略已启用' : '策略已停用')
+      message.success(enabled ? t('fim.policyEnabled', '策略已启用') : t('fim.policyDisabled', '策略已停用'))
       await fetchData()
     } catch (error) {
-      message.error(getFIMErrorMessage(error, enabled ? '启用策略失败' : '停用策略失败'))
+      message.error(getFIMErrorMessage(error, enabled ? t('fim.policyEnableFailed', '启用策略失败') : t('fim.policyDisableFailed', '停用策略失败')))
     }
   }
 
@@ -365,10 +368,10 @@ export default function FIMPoliciesPage() {
     try {
       setSubmitting(true)
       await securityFIMAPI.deletePolicy(policy.id)
-      message.success('策略已删除')
+      message.success(t('fim.policyDeleted', '策略已删除'))
       await fetchData()
     } catch (error) {
-      message.error(getFIMErrorMessage(error, '删除策略失败'))
+      message.error(getFIMErrorMessage(error, t('fim.deletePolicyFailed', '删除策略失败')))
     } finally {
       setSubmitting(false)
     }
@@ -394,7 +397,7 @@ export default function FIMPoliciesPage() {
       })
     } catch {
       setBaselineModal({ open: true, policy, targets: [], snapshots: [], loading: false })
-      message.error('加载基线管理数据失败')
+      message.error(t('fim.loadBaselineDataFailed', '加载基线管理数据失败'))
     }
   }
 
@@ -402,10 +405,10 @@ export default function FIMPoliciesPage() {
     try {
       setSubmitting(true)
       await securityFIMAPI.buildBaseline(policy.id, target.server_id)
-      message.success('已触发基线重建，当前主机状态会作为新的比对参考')
+      message.success(t('fim.baselineRebuildTriggered', '已触发基线重建，当前主机状态会作为新的比对参考'))
       await Promise.all([fetchData(), openBaselineManager(policy)])
     } catch (error) {
-      message.error(getFIMErrorMessage(error, '重建基线失败'))
+      message.error(getFIMErrorMessage(error, t('fim.rebuildBaselineFailed', '重建基线失败')))
     } finally {
       setSubmitting(false)
     }
@@ -418,7 +421,7 @@ export default function FIMPoliciesPage() {
   const getPolicyBaselineSummary = (policyId: number) => {
     const snapshots = getActiveBaselineSnapshots(policyId)
     if (snapshots.length === 0) {
-      return '当前未建立生效基线'
+      return t('fim.noActiveBaseline', '当前未建立生效基线')
     }
     const latest = snapshots.reduce((current, item) => {
       if (!current) {
@@ -426,16 +429,16 @@ export default function FIMPoliciesPage() {
       }
       return new Date(item.started_at).getTime() > new Date(current.started_at).getTime() ? item : current
     }, snapshots[0])
-    return `当前生效基线：${snapshots.length} 台主机 | 最近基线：${formatDateTime(latest.started_at)}`
+    return t('fim.activeBaselineFormat', '当前生效基线：{{count}} 台主机 | 最近基线：{{time}}', { count: snapshots.length, time: formatDateTime(latest.started_at) })
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Card>
         <Space direction="vertical" size={4}>
-          <Title level={4} style={{ margin: 0 }}>文件完整性巡检</Title>
+          <Title level={4} style={{ margin: 0 }}>{t('fim.title', '文件完整性巡检')}</Title>
           <Paragraph type="secondary" style={{ margin: 0 }}>
-            基于 SSH 定时巡检关键目录，对比基线，发现删除、修改等异常变化。
+            {t('fim.description', '基于 SSH 定时巡检关键目录，对比基线，发现删除、修改等异常变化。')}
           </Paragraph>
         </Space>
       </Card>
@@ -443,46 +446,46 @@ export default function FIMPoliciesPage() {
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} xl={8}>
           <Card size="small">
-            <Statistic title="巡检策略" value={items.length} prefix={<SafetyCertificateOutlined />} />
+            <Statistic title={t('fim.policies', '巡检策略')} value={items.length} prefix={<SafetyCertificateOutlined />} />
           </Card>
         </Col>
         <Col xs={24} sm={12} xl={8}>
           <Card size="small">
-            <Statistic title="已启用策略" value={items.filter((item) => item.enabled).length} prefix={<SyncOutlined />} />
+            <Statistic title={t('fim.enabledPolicies', '已启用策略')} value={items.filter((item) => item.enabled).length} prefix={<SyncOutlined />} />
           </Card>
         </Col>
         <Col xs={24} sm={12} xl={8}>
           <Card size="small">
-            <Statistic title="关键目录巡检" value={items.filter((item) => item.hash_mode !== 'off').length} prefix={<FolderOpenOutlined />} />
+            <Statistic title={t('fim.criticalDirInspection', '关键目录巡检')} value={items.filter((item) => item.hash_mode !== 'off').length} prefix={<FolderOpenOutlined />} />
           </Card>
         </Col>
       </Row>
 
-      <Card title="策略列表" extra={<Button type="primary" onClick={openCreatePolicy}>新增策略</Button>}>
+      <Card title={t('fim.policyList', '策略列表')} extra={<Button type="primary" onClick={openCreatePolicy}>{t('fim.addPolicy', '新增策略')}</Button>}>
         <List
           loading={loading}
           dataSource={items}
-          locale={{ emptyText: '当前还没有文件完整性巡检策略' }}
+          locale={{ emptyText: t('fim.noPolicies', '当前还没有文件完整性巡检策略') }}
           renderItem={(item) => (
             <List.Item
               actions={[
-                canEdit() && <Button key="edit" type="link" onClick={() => openEditPolicy(item)}>编辑</Button>,
-                canEdit() && <Button key="targets" type="link" onClick={() => void loadTargets(item)}>绑定主机</Button>,
-                canEdit() && <Button key="paths" type="link" onClick={() => void loadWatchPaths(item)}>配置目录</Button>,
-                <Button key="baseline" type="link" onClick={() => void openBaselineManager(item)}>基线管理</Button>,
-                <Button key="executions" type="link" onClick={() => openExecutions(item)}>执行记录</Button>,
-                canEdit() && <Button key="scan" type="link" icon={<PlayCircleOutlined />} onClick={() => void loadScanTargets(item)}>构建基线 / 扫描</Button>,
+                canEdit() && <Button key="edit" type="link" onClick={() => openEditPolicy(item)}>{t('fim.editPolicy', '编辑')}</Button>,
+                canEdit() && <Button key="targets" type="link" onClick={() => void loadTargets(item)}>{t('fim.bindHosts', '绑定主机')}</Button>,
+                canEdit() && <Button key="paths" type="link" onClick={() => void loadWatchPaths(item)}>{t('fim.configureDir', '配置目录')}</Button>,
+                <Button key="baseline" type="link" onClick={() => void openBaselineManager(item)}>{t('fim.baselineManagement', '基线管理')}</Button>,
+                <Button key="executions" type="link" onClick={() => openExecutions(item)}>{t('fim.executionRecords', '执行记录')}</Button>,
+                canEdit() && <Button key="scan" type="link" icon={<PlayCircleOutlined />} onClick={() => void loadScanTargets(item)}>{t('fim.buildBaselineScan', '构建基线 / 扫描')}</Button>,
                 canEdit() && <Popconfirm
                   key="delete"
-                  title={`确认删除策略“${item.name}”？`}
-                  description="会同时移除策略关联的目标主机、目录配置、快照、事件和告警记录。"
-                  okText="删除"
-                  cancelText="取消"
+                  title={t('fim.confirmDeletePolicy', '确认删除策略"{{name}}"？', { name: item.name })}
+                  description={t('fim.confirmDeletePolicyDesc', '会同时移除策略关联的目标主机、目录配置、快照、事件和告警记录。')}
+                  okText={t('fim.deletePolicy', '删除')}
+                  cancelText={t('cancel', '取消')}
                   okButtonProps={{ danger: true, loading: submitting }}
                   onConfirm={() => void handleDeletePolicy(item)}
                 >
                   <Button key="delete-button" type="link" danger>
-                    删除
+                    {t('fim.deletePolicy', '删除')}
                   </Button>
                 </Popconfirm>,
               ].filter(Boolean)}
@@ -492,23 +495,23 @@ export default function FIMPoliciesPage() {
                 title={(
                   <Space wrap>
                     <span>{item.name}</span>
-                    <Tag color={item.enabled ? 'success' : 'default'}>{item.enabled ? '启用中' : '已停用'}</Tag>
+                    <Tag color={item.enabled ? 'success' : 'default'}>{item.enabled ? t('status.active', '启用中') : t('status.stopped', '已停用')}</Tag>
                     <Tag color="blue">{severityLabelMap[item.severity] || item.severity}</Tag>
                     <Switch
                       size="small"
                       checked={item.enabled}
-                      checkedChildren="启用"
-                      unCheckedChildren="停用"
+                      checkedChildren={t('status.enabled', '启用')}
+                      unCheckedChildren={t('status.disabled', '停用')}
                       onChange={(checked) => void handleTogglePolicy(item, checked)}
                     />
                   </Space>
                 )}
                 description={(
                   <Space direction="vertical" size={2}>
-                    <Text type="secondary">{item.description || '暂无描述'}</Text>
-                    <Text type="secondary">扫描周期：{item.scan_interval_sec} 秒 | Hash 模式：{item.hash_mode} | 比对模式：{item.compare_mode}</Text>
+                    <Text type="secondary">{item.description || t('fim.noDescription', '暂无描述')}</Text>
+                    <Text type="secondary">{t('fim.scanCycleFormat', '扫描周期：{{interval}} 秒 | Hash 模式：{{hashMode}} | 比对模式：{{compareMode}}', { interval: item.scan_interval_sec, hashMode: item.hash_mode, compareMode: item.compare_mode })}</Text>
                     <Text type="secondary">{getPolicyBaselineSummary(item.id)}</Text>
-                    <Text type="secondary">通知渠道：{formatNotifyChannelNames(item.notify_channels, channels)}</Text>
+                    <Text type="secondary">{t('fim.notifyChannelsFormat', '通知渠道：{{channels}}', { channels: formatNotifyChannelNames(item.notify_channels, channels, t) })}</Text>
                   </Space>
                 )}
               />
@@ -518,7 +521,7 @@ export default function FIMPoliciesPage() {
       </Card>
 
       <Modal
-        title={policyModal.policy ? '编辑巡检策略' : '新增巡检策略'}
+        title={policyModal.policy ? t('fim.editPolicy', '编辑巡检策略') : t('fim.createPolicy', '新增巡检策略')}
         open={policyModal.open}
         onOk={() => void handleSavePolicy()}
         onCancel={() => {
@@ -529,37 +532,37 @@ export default function FIMPoliciesPage() {
         destroyOnHidden
       >
         <Form form={policyForm} layout="vertical">
-          <Form.Item name="name" label="策略名称" rules={[{ required: true, message: '请输入策略名称' }]}>
-            <Input placeholder="例如：生产配置目录巡检" />
+          <Form.Item name="name" label={t('fim.policyName', '策略名称')} rules={[{ required: true, message: t('fim.policyNameRequired', '请输入策略名称') }]}>
+            <Input placeholder={t('fim.policyNamePlaceholder', '例如：生产配置目录巡检')} />
           </Form.Item>
-          <Form.Item name="description" label="策略描述">
-            <Input.TextArea rows={3} placeholder="描述巡检对象和目标" />
+          <Form.Item name="description" label={t('fim.policyDescription', '策略描述')}>
+            <Input.TextArea rows={3} placeholder={t('fim.policyDescriptionPlaceholder', '描述巡检对象和目标')} />
           </Form.Item>
-          <Form.Item name="enabled" label="启用状态" valuePropName="checked">
-            <Switch checkedChildren="启用" unCheckedChildren="停用" />
+          <Form.Item name="enabled" label={t('fim.enableStatus', '启用状态')} valuePropName="checked">
+            <Switch checkedChildren={t('status.enabled', '启用')} unCheckedChildren={t('status.disabled', '停用')} />
           </Form.Item>
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item name="severity" label="默认告警级别" rules={[{ required: true, message: '请选择默认告警级别' }]}>
+              <Form.Item name="severity" label={t('fim.defaultAlertSeverity', '默认告警级别')} rules={[{ required: true, message: t('fim.defaultAlertSeverityRequired', '请选择默认告警级别') }]}>
                 <Select options={[
-                  { value: 'critical', label: '严重' },
-                  { value: 'high', label: '高' },
-                  { value: 'warning', label: '警告' },
-                  { value: 'medium', label: '中' },
-                  { value: 'low', label: '低' },
-                  { value: 'info', label: '提示' },
+                  { value: 'critical', label: t('severity.critical', '严重') },
+                  { value: 'high', label: t('severity.high', '高') },
+                  { value: 'warning', label: t('severity.warning', '警告') },
+                  { value: 'medium', label: t('severity.medium', '中') },
+                  { value: 'low', label: t('severity.low', '低') },
+                  { value: 'info', label: t('severity.info', '提示') },
                 ]} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="scan_interval_sec" label="扫描周期（秒）" rules={[{ required: true, message: '请输入扫描周期' }]}>
+              <Form.Item name="scan_interval_sec" label={t('fim.scanInterval', '扫描周期（秒）')} rules={[{ required: true, message: t('fim.scanIntervalRequired', '请输入扫描周期') }]}>
                 <InputNumber min={30} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item name="hash_mode" label="Hash 模式" rules={[{ required: true, message: '请选择 Hash 模式' }]}>
+              <Form.Item name="hash_mode" label={t('fim.hashMode', 'Hash 模式')} rules={[{ required: true, message: t('fim.hashModeRequired', '请选择 Hash 模式') }]}>
                 <Select options={[
                   { value: 'off', label: 'off' },
                   { value: 'changed_only', label: 'changed_only' },
@@ -568,7 +571,7 @@ export default function FIMPoliciesPage() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="compare_mode" label="比对模式" rules={[{ required: true, message: '请选择比对模式' }]}>
+              <Form.Item name="compare_mode" label={t('fim.compareMode', '比对模式')} rules={[{ required: true, message: t('fim.compareModeRequired', '请选择比对模式') }]}>
                 <Select options={[
                   { value: 'baseline', label: 'baseline' },
                   { value: 'last_snapshot', label: 'last_snapshot' },
@@ -576,22 +579,22 @@ export default function FIMPoliciesPage() {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="notify_channels" label="钉钉通知渠道">
+          <Form.Item name="notify_channels" label={t('fim.notifyChannels', '钉钉通知渠道')}>
             <Select
               mode="multiple"
               allowClear
-              placeholder="选择告警中心里已配置的钉钉机器人"
+              placeholder={t('fim.notifyChannelsPlaceholder', '选择告警中心里已配置的钉钉机器人')}
               options={channels.map((item) => ({ value: String(item.id), label: item.name }))}
             />
           </Form.Item>
           <Text type="secondary">
-            这里复用“告警中心 / 通知渠道”中的钉钉机器人。FIM 产生新告警时会自动推送到所选渠道。
+            {t('fim.notifyChannelsHint', '这里复用「告警中心 / 通知渠道」中的钉钉机器人。FIM 产生新告警时会自动推送到所选渠道。')}
           </Text>
         </Form>
       </Modal>
 
       <Modal
-        title={targetsModal.policy ? `绑定主机: ${targetsModal.policy.name}` : '绑定主机'}
+        title={targetsModal.policy ? `${t('fim.bindHostsTitle', '绑定主机')}: ${targetsModal.policy.name}` : t('fim.bindHostsTitle', '绑定主机')}
         open={targetsModal.open}
         onOk={() => void handleSaveTargets()}
         onCancel={() => {
@@ -602,17 +605,17 @@ export default function FIMPoliciesPage() {
         destroyOnHidden
       >
         <Alert
-          message="提示"
-          description="请确保所选主机已在「安全 - FIM - SSH主机密钥」中添加主机公钥，否则扫描会失败。"
+          message={t('fim.bindHostsHint', '提示')}
+          description={t('fim.bindHostsWarning', '请确保所选主机已在「安全 - FIM - SSH主机密钥」中添加主机公钥，否则扫描会失败。')}
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
         />
         <Form form={targetsForm} layout="vertical">
-          <Form.Item name="server_ids" label="目标主机" rules={[{ required: true, message: '请至少选择一台主机' }]}>
+          <Form.Item name="server_ids" label={t('fim.targetHost', '目标主机')} rules={[{ required: true, message: t('fim.targetHostRequired', '请至少选择一台主机') }]}>
             <Select
               mode="multiple"
-              placeholder="请选择需要巡检的主机"
+              placeholder={t('fim.targetHostPlaceholder', '请选择需要巡检的主机')}
               loading={targetsModal.loading}
               options={servers.map((server) => ({
                 value: server.id,
@@ -626,12 +629,12 @@ export default function FIMPoliciesPage() {
           size="small"
           loading={targetsModal.loading}
           dataSource={targetsModal.items}
-          locale={{ emptyText: '当前还没有绑定主机' }}
+          locale={{ emptyText: t('fim.noBoundHosts', '当前还没有绑定主机') }}
           renderItem={(item) => (
             <List.Item>
               <List.Item.Meta
-                title={item.server_name && item.server_ip ? `${item.server_name} (${item.server_ip})` : `主机 #${item.server_id}`}
-                description={`最近扫描：${formatDateTime(item.last_scan_at)} | 状态：${item.last_scan_status || '-'}`}
+                title={item.server_name && item.server_ip ? `${item.server_name} (${item.server_ip})` : `${t('fim.targetHost', '主机')} #${item.server_id}`}
+                description={t('fim.scanStatusFormat', '最近扫描：{{lastScan}} | 状态：{{status}}', { lastScan: formatDateTime(item.last_scan_at), status: item.last_scan_status || '-' })}
               />
             </List.Item>
           )}
@@ -639,7 +642,7 @@ export default function FIMPoliciesPage() {
       </Modal>
 
       <Modal
-        title={pathsModal.policy ? `配置目录: ${pathsModal.policy.name}` : '配置目录'}
+        title={pathsModal.policy ? `${t('fim.configureDirTitle', '配置目录')}: ${pathsModal.policy.name}` : t('fim.configureDirTitle', '配置目录')}
         open={pathsModal.open}
         onCancel={() => {
           setPathsModal({ open: false, policy: null, items: [], loading: false, editingItem: null })
@@ -652,23 +655,23 @@ export default function FIMPoliciesPage() {
         <Form form={pathForm} layout="vertical">
           <Row gutter={12}>
             <Col span={14}>
-              <Form.Item name="path" label="巡检目录" rules={[{ required: true, message: '请输入巡检目录' }]}>
+              <Form.Item name="path" label={t('fim.inspectionDir', '巡检目录')} rules={[{ required: true, message: t('fim.inspectionDirRequired', '请输入巡检目录') }]}>
                 <Input placeholder="/etc/app" />
               </Form.Item>
             </Col>
             <Col span={10}>
-              <Form.Item name="file_glob" label="文件匹配">
+              <Form.Item name="file_glob" label={t('fim.fileGlob', '文件匹配')}>
                 <Input placeholder="*.conf" />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item name="scan_mode" label="扫描模式" rules={[{ required: true, message: '请选择扫描模式' }]}>
+              <Form.Item name="scan_mode" label={t('fim.scanMode', '扫描模式')} rules={[{ required: true, message: t('fim.scanModeRequired', '请选择扫描模式') }]}>
                 <Select
                   options={[
-                    { value: 'full_hash', label: '完整校验' },
-                    { value: 'presence_only', label: '仅删除监测' },
+                    { value: 'full_hash', label: t('fim.fullHash', '完整校验') },
+                    { value: 'presence_only', label: t('fim.presenceOnly', '仅删除监测') },
                   ]}
                 />
               </Form.Item>
@@ -676,18 +679,18 @@ export default function FIMPoliciesPage() {
           </Row>
           <Row gutter={12}>
             <Col span={8}>
-              <Form.Item name="recursive" label="递归扫描" valuePropName="checked">
-                <Switch checkedChildren="递归" unCheckedChildren="单层" />
+              <Form.Item name="recursive" label={t('fim.recursiveScan', '递归扫描')} valuePropName="checked">
+                <Switch checkedChildren={t('fim.recursive', '递归')} unCheckedChildren={t('fim.singleLayer', '单层')} />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="max_depth" label="最大深度">
+              <Form.Item name="max_depth" label={t('fim.maxDepth', '最大深度')}>
                 <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="hash_on_match_only" label="仅匹配文件计算 Hash" valuePropName="checked">
-                <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+              <Form.Item name="hash_on_match_only" label={t('fim.hashOnMatchOnly', '仅匹配文件计算 Hash')} valuePropName="checked">
+                <Switch checkedChildren={t('fim.on', '开启')} unCheckedChildren={t('fim.off', '关闭')} />
               </Form.Item>
             </Col>
           </Row>
@@ -695,19 +698,19 @@ export default function FIMPoliciesPage() {
             type="info"
             showIcon
             style={{ marginBottom: 16 }}
-            message="扫描模式说明"
-            description="完整校验会记录文件大小、时间和内容摘要，适合配置文件和小文件；仅删除监测只保留文件清单，适合大归档包目录，当前只检测文件是否被删除。"
+            message={t('fim.scanModeHint', '扫描模式说明')}
+            description={t('fim.scanModeHintDesc', '完整校验会记录文件大小、时间和内容摘要，适合配置文件和小文件；仅删除监测只保留文件清单，适合大归档包目录，当前只检测文件是否被删除。')}
           />
-          <Form.Item name="exclude_glob" label="排除规则">
-            <Input placeholder="*.log 或 /etc/app/cache/*" />
+          <Form.Item name="exclude_glob" label={t('fim.excludeRule', '排除规则')}>
+            <Input placeholder={t('fim.excludeRulePlaceholder', '*.log 或 /etc/app/cache/*')} />
           </Form.Item>
           <Space>
             <Button type="primary" onClick={() => void handleAddWatchPath()} loading={submitting}>
-              {pathsModal.editingItem ? '保存修改' : '添加目录'}
+              {pathsModal.editingItem ? t('fim.saveChanges', '保存修改') : t('fim.addDir', '添加目录')}
             </Button>
             {pathsModal.editingItem && (
               <Button onClick={resetWatchPathForm}>
-                取消编辑
+                {t('fim.cancelEdit', '取消编辑')}
               </Button>
             )}
           </Space>
@@ -718,23 +721,29 @@ export default function FIMPoliciesPage() {
         <List
           loading={pathsModal.loading}
           dataSource={pathsModal.items}
-          locale={{ emptyText: '当前还没有配置巡检目录' }}
+          locale={{ emptyText: t('fim.noWatchPaths', '当前还没有配置巡检目录') }}
           renderItem={(item) => (
             <List.Item
               actions={[
-                canEdit() && <Button key="edit" type="link" onClick={() => openEditWatchPath(item)}>编辑</Button>,
+                canEdit() && <Button key="edit" type="link" onClick={() => openEditWatchPath(item)}>{t('fim.editPolicy', '编辑')}</Button>,
                 canEdit() && <Popconfirm
                   key="delete"
-                  title="确认删除该目录配置？"
+                  title={t('fim.confirmDeleteWatchPath', '确认删除该目录配置？')}
                   onConfirm={() => void handleDeleteWatchPath(item.id)}
                 >
-                  <Button type="link" danger>删除</Button>
+                  <Button type="link" danger>{t('fim.deletePolicy', '删除')}</Button>
                 </Popconfirm>,
               ].filter(Boolean)}
             >
               <List.Item.Meta
                 title={item.path}
-                description={`模式：${item.scan_mode === 'presence_only' ? '仅删除监测' : '完整校验'} | 递归：${item.recursive ? '是' : '否'} | 深度：${item.max_depth} | 匹配：${item.file_glob || '-'} | 排除：${item.exclude_glob || '-'}`}
+                description={t('fim.watchPathDesc', '模式：{{scanMode}} | 递归：{{recursive}} | 深度：{{depth}} | 匹配：{{glob}} | 排除：{{exclude}}', {
+                  scanMode: item.scan_mode === 'presence_only' ? t('fim.presenceOnly', '仅删除监测') : t('fim.fullHash', '完整校验'),
+                  recursive: item.recursive ? t('fim.yes', '是') : t('fim.no', '否'),
+                  depth: item.max_depth,
+                  glob: item.file_glob || '-',
+                  exclude: item.exclude_glob || '-',
+                })}
               />
             </List.Item>
           )}
@@ -742,7 +751,7 @@ export default function FIMPoliciesPage() {
       </Modal>
 
       <Modal
-        title={baselineModal.policy ? `基线管理: ${baselineModal.policy.name}` : '基线管理'}
+        title={baselineModal.policy ? `${t('fim.baselineManagementTitle', '基线管理')}: ${baselineModal.policy.name}` : t('fim.baselineManagementTitle', '基线管理')}
         open={baselineModal.open}
         onCancel={() => setBaselineModal({ open: false, policy: null, targets: [], snapshots: [], loading: false })}
         footer={null}
@@ -752,27 +761,27 @@ export default function FIMPoliciesPage() {
         <Alert
           type="info"
           showIcon
-          message="当前生效基线就是后续比对的参考线。重新构建基线后，当前主机状态会被视为新的正常状态。"
+          message={t('fim.baselineEffectiveWarning', '当前生效基线就是后续比对的参考线。重新构建基线后，当前主机状态会被视为新的正常状态。')}
           style={{ marginBottom: 16 }}
         />
         <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
           <Col xs={24} sm={8}>
-            <Card size="small"><Statistic title="绑定主机" value={baselineModal.targets.length} /></Card>
+            <Card size="small"><Statistic title={t('fim.boundHosts', '绑定主机')} value={baselineModal.targets.length} /></Card>
           </Col>
           <Col xs={24} sm={8}>
-            <Card size="small"><Statistic title="已建基线主机" value={baselineModal.snapshots.length} /></Card>
+            <Card size="small"><Statistic title={t('fim.builtBaselineHosts', '已建基线主机')} value={baselineModal.snapshots.length} /></Card>
           </Col>
           <Col xs={24} sm={8}>
-            <Card size="small"><Statistic title="最近基线时间" value={getLatestBaselineTime(baselineModal.snapshots)} valueStyle={{ fontSize: 16 }} /></Card>
+            <Card size="small"><Statistic title={t('fim.recentBaselineTime', '最近基线时间')} value={getLatestBaselineTime(baselineModal.snapshots)} valueStyle={{ fontSize: 16 }} /></Card>
           </Col>
         </Row>
         <List
           loading={baselineModal.loading}
           dataSource={baselineModal.targets}
-          locale={{ emptyText: '当前没有绑定主机' }}
+          locale={{ emptyText: t('fim.noBoundHostsInBaseline', '当前没有绑定主机') }}
           renderItem={(item) => {
             const snapshot = baselineModal.snapshots.find((entry) => entry.server_id === item.server_id)
-            const title = item.server_name && item.server_ip ? `${item.server_name} (${item.server_ip})` : `主机 #${item.server_id}`
+            const title = item.server_name && item.server_ip ? `${item.server_name} (${item.server_ip})` : `${t('fim.targetHost', '主机')} #${item.server_id}`
             return (
               <List.Item
                 actions={[
@@ -782,20 +791,24 @@ export default function FIMPoliciesPage() {
                     loading={submitting}
                     onClick={() => baselineModal.policy && void handleRebuildBaseline(baselineModal.policy, item)}
                   >
-                    {snapshot ? '重建基线' : '构建基线'}
+                    {snapshot ? t('fim.rebuildBaseline', '重建基线') : t('fim.buildBaseline', '构建基线')}
                   </Button>,
                   <Button
                     key="history"
                     type="link"
                     onClick={() => navigate(`/security/fim/executions?policy_id=${item.policy_id}&server_id=${item.server_id}&snapshot_type=baseline`)}
                   >
-                    查看基线记录
+                    {t('fim.viewBaselineRecords', '查看基线记录')}
                   </Button>,
                 ]}
               >
                 <List.Item.Meta
                   title={title}
-                  description={`当前生效基线：${snapshot ? formatDateTime(snapshot.started_at) : '未建立'} | 最近扫描：${formatDateTime(item.last_scan_at)} | 状态：${item.last_scan_status || '-'}`}
+                  description={t('fim.baselineEffectiveStatus', '当前生效基线：{{time}} | 最近扫描：{{lastScan}} | 状态：{{status}}', {
+                    time: snapshot ? formatDateTime(snapshot.started_at) : t('fim.notEstablished', '未建立'),
+                    lastScan: formatDateTime(item.last_scan_at),
+                    status: item.last_scan_status || '-',
+                  })}
                 />
               </List.Item>
             )
@@ -804,7 +817,7 @@ export default function FIMPoliciesPage() {
       </Modal>
 
       <Modal
-        title={scanModal.policy ? `执行巡检: ${scanModal.policy.name}` : '执行巡检'}
+        title={scanModal.policy ? `${t('fim.executeInspectionTitle', '执行巡检')}: ${scanModal.policy.name}` : t('fim.executeInspectionTitle', '执行巡检')}
         open={scanModal.open}
         onOk={() => void handleRunScan()}
         onCancel={() => {
@@ -815,15 +828,15 @@ export default function FIMPoliciesPage() {
         destroyOnHidden
       >
         <Form form={scanForm} layout="vertical">
-          <Form.Item name="server_id" label="目标主机" rules={[{ required: true, message: '请选择主机' }]}>
+          <Form.Item name="server_id" label={t('fim.targetHost', '目标主机')} rules={[{ required: true, message: t('fim.selectHost', '请选择主机') }]}>
             <Select
-              placeholder="请选择执行主机"
+              placeholder={t('fim.selectExecutionHost', '请选择执行主机')}
               loading={scanModal.loading}
               options={scanModal.targets.map((target) => {
                 const server = serverMap.get(target.server_id)
                 return {
                   value: target.server_id,
-                  label: server ? `${server.hostname} (${server.ip})` : `主机 #${target.server_id}`,
+                  label: server ? `${server.hostname} (${server.ip})` : `${t('fim.targetHost', '主机')} #${target.server_id}`,
                 }
               })}
             />
@@ -832,26 +845,26 @@ export default function FIMPoliciesPage() {
             size="small"
             loading={scanModal.loading}
             dataSource={scanModal.targets}
-            locale={{ emptyText: '当前没有可执行主机' }}
+            locale={{ emptyText: t('fim.noExecutableHost', '当前没有可执行主机') }}
             style={{ marginBottom: 16 }}
             renderItem={(item) => {
               const server = serverMap.get(item.server_id)
-              const title = server ? `${server.hostname} (${server.ip})` : `主机 #${item.server_id}`
+              const title = server ? `${server.hostname} (${server.ip})` : `${t('fim.targetHost', '主机')} #${item.server_id}`
               return (
                 <List.Item>
                   <List.Item.Meta
                     title={title}
-                    description={`最近扫描：${formatDateTime(item.last_scan_at)} | 状态：${item.last_scan_status || '-'}`}
+                    description={t('fim.scanStatusFormat', '最近扫描：{{lastScan}} | 状态：{{status}}', { lastScan: formatDateTime(item.last_scan_at), status: item.last_scan_status || '-' })}
                   />
                 </List.Item>
               )
             }}
           />
-          <Form.Item name="action" label="执行动作" rules={[{ required: true, message: '请选择动作' }]}>
+          <Form.Item name="action" label={t('fim.executeAction', '执行动作')} rules={[{ required: true, message: t('fim.executeActionRequired', '请选择动作') }]}>
             <Select
               options={[
-                { value: 'baseline', label: '构建基线' },
-                { value: 'scan', label: '手动扫描' },
+                { value: 'baseline', label: t('fim.baselineBuild', '构建基线') },
+                { value: 'scan', label: t('fim.manualScan', '手动扫描') },
               ]}
             />
           </Form.Item>
@@ -859,11 +872,11 @@ export default function FIMPoliciesPage() {
             <Alert
               type="warning"
               showIcon
-              message="重建基线会把当前主机状态认定为新的正常参考线。若当前目录存在异常变更，请勿直接重建。"
+              message={t('fim.baselineRebuildWarning', '重建基线会把当前主机状态认定为新的正常参考线。若当前目录存在异常变更，请勿直接重建。')}
             />
           ) : (
             <Text type="secondary">
-              首次使用建议先构建基线，后续再执行手动扫描生成差异事件和完整性告警。
+              {t('fim.firstTimeTip', '首次使用建议先构建基线，后续再执行手动扫描生成差异事件和完整性告警。')}
             </Text>
           )}
         </Form>
@@ -899,13 +912,13 @@ function parseNotifyChannelValues(value?: string): string[] {
     .filter((item) => item.length > 0)
 }
 
-function formatNotifyChannelNames(value: string | undefined, channels: NotifyChannel[]): string {
+function formatNotifyChannelNames(value: string | undefined, channels: NotifyChannel[], t: TFunction): string {
   const ids = parseNotifyChannelValues(value)
   if (ids.length === 0) {
-    return '未配置'
+    return t('fim.notConfigured', '未配置')
   }
   const channelMap = new Map(channels.map((item) => [String(item.id), item.name]))
-  return ids.map((id) => channelMap.get(id) || `渠道 #${id}`).join('、')
+  return ids.map((id) => channelMap.get(id) || t('fim.channelNo', { defaultValue: '渠道 #{{id}}', id })).join('、')
 }
 
 function getLatestBaselineTime(snapshots: FIMSnapshot[]): string {

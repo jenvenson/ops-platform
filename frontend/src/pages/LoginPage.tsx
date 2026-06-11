@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Form, Input, Button, message, Typography, Card, Modal } from 'antd'
 import { useNavigate, Link } from 'react-router-dom'
 import { UserOutlined, LockOutlined, ArrowRightOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { notifyMenusChanged } from '../utils/menuAccess'
 
@@ -40,6 +41,8 @@ interface LoginResponse {
 }
 
 export default function LoginPage() {
+  const { t } = useTranslation('login')
+
   const [loading, setLoading] = useState(false)
   const [forceChangeVisible, setForceChangeVisible] = useState(false)
   const [changeLoading, setChangeLoading] = useState(false)
@@ -47,7 +50,7 @@ export default function LoginPage() {
   const [pendingToken, setPendingToken] = useState('')
   const [pendingMenus, setPendingMenus] = useState<MenuItem[]>([])
   const [changeForm] = Form.useForm()
-  const [siteName, setSiteName] = useState('运维管理平台')
+  const [siteName, setSiteName] = useState(t('title', '运维管理平台'))
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -78,7 +81,6 @@ export default function LoginPage() {
     try {
       const result = await apiClient.post<LoginResponse>('/auth/login', values)
       if (result.user.must_change_password) {
-        // 首次登录，显示强制改密对话框
         setPendingUser(result.user)
         setPendingToken(result.token)
         setPendingMenus(result.menus || [])
@@ -86,14 +88,14 @@ export default function LoginPage() {
         changeForm.resetFields()
       } else {
         saveLoginState(result.token, result.user, result.menus || [])
-        message.success('登录成功')
+        message.success(t('loginSuccess', '登录成功'))
         navigate('/')
       }
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { error?: string; message?: string } } }).response?.data?.error ||
         (error as { response?: { data?: { error?: string; message?: string } } }).response?.data?.message ||
-        '登录失败，请稍后重试'
+        t('loginFailed', '登录失败，请稍后重试')
       message.error(errorMessage)
     } finally {
       setLoading(false)
@@ -102,16 +104,15 @@ export default function LoginPage() {
 
   const handleForceChange = async (values: { new_password: string; confirm_password: string }) => {
     if (values.new_password !== values.confirm_password) {
-      message.error('两次输入的密码不一致')
+      message.error(t('passwordMismatch', '两次输入的密码不一致'))
       return
     }
     setChangeLoading(true)
     try {
-      // 临时存储 token 以便 API 拦截器自动附加
       localStorage.setItem('token', pendingToken)
       await apiClient.put('/user/password', { new_password: values.new_password })
       localStorage.removeItem('token')
-      message.success('密码修改成功，正在进入系统...')
+      message.success(t('passwordChanged', '密码修改成功，正在进入系统...'))
       setForceChangeVisible(false)
       if (pendingUser) {
         saveLoginState(pendingToken, pendingUser, pendingMenus)
@@ -121,7 +122,7 @@ export default function LoginPage() {
       localStorage.removeItem('token')
       const errorMessage =
         (error as { response?: { data?: { error?: string } } }).response?.data?.error ||
-        '密码修改失败，请重试'
+        t('passwordChangeFailed', '密码修改失败，请重试')
       message.error(errorMessage)
     } finally {
       setChangeLoading(false)
@@ -130,7 +131,6 @@ export default function LoginPage() {
 
   return (
     <div style={styles.container}>
-      {/* 背景装饰 */}
       <div style={styles.background}>
         <div style={styles.grid} />
         <div style={{ ...styles.orb, ...styles.orb1 }} />
@@ -138,25 +138,22 @@ export default function LoginPage() {
         <div style={{ ...styles.orb, ...styles.orb3 }} />
       </div>
 
-      {/* 登录卡片 */}
       <Card style={styles.card} styles={{ body: styles.cardBody }}>
-        {/* Logo 区域 */}
         <div style={styles.header}>
           <div style={styles.logo}>
             <span style={styles.logoText}>OPS</span>
           </div>
           <Title level={2} style={styles.title}>{siteName}</Title>
-          <Text style={styles.subtitle}>Operations Management Platform</Text>
+          <Text style={styles.subtitle}>{t('subtitle', 'Operations Management Platform')}</Text>
         </div>
 
-        {/* 表单区域 */}
         <Form onFinish={onFinish} style={styles.form}>
           <Form.Item
             name="username"
-            rules={[{ required: true, message: '请输入用户名' }]}
+            rules={[{ required: true, message: t('usernameRequired', '请输入用户名') }]}
           >
             <Input
-              placeholder="用户名"
+              placeholder={t('username', '用户名')}
               prefix={<UserOutlined style={styles.inputIcon} />}
               size="large"
               style={styles.input}
@@ -165,12 +162,12 @@ export default function LoginPage() {
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: '请输入密码' },
-              { min: 6, message: '密码长度至少 6 位' },
+              { required: true, message: t('passwordRequired', '请输入密码') },
+              { min: 6, message: t('passwordMinLength', '密码长度至少 6 位') },
             ]}
           >
             <Input.Password
-              placeholder="密码"
+              placeholder={t('password', '密码')}
               prefix={<LockOutlined style={styles.inputIcon} />}
               size="large"
               style={styles.input}
@@ -185,12 +182,12 @@ export default function LoginPage() {
               block
               style={styles.submitBtn}
             >
-              登 录 <ArrowRightOutlined />
+              {t('loginButton', '登 录')} <ArrowRightOutlined />
             </Button>
           </Form.Item>
           <Form.Item style={{ marginBottom: 0, textAlign: 'center' }}>
             <Link to="/forgot-password" style={{ color: '#8c8c8c', fontSize: 13 }}>
-              忘记密码？
+              {t('forgotPassword', '忘记密码？')}
             </Link>
           </Form.Item>
         </Form>
@@ -198,7 +195,7 @@ export default function LoginPage() {
 
       {/* 首次登录强制修改密码对话框 */}
       <Modal
-        title="首次登录，请修改密码"
+        title={t('firstLoginChangePassword', '首次登录，请修改密码')}
         open={forceChangeVisible}
         closable={false}
         maskClosable={false}
@@ -206,35 +203,35 @@ export default function LoginPage() {
         destroyOnClose
       >
         <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
-          您正在使用初始密码登录，为保证账号安全，请设置新密码。
+          {t('firstLoginHint', '您正在使用初始密码登录，为保证账号安全，请设置新密码。')}
         </Text>
         <Form form={changeForm} onFinish={handleForceChange} layout="vertical">
           <Form.Item
             name="new_password"
-            label="新密码"
+            label={t('newPassword', '新密码')}
             rules={[
-              { required: true, message: '请输入新密码' },
-              { min: 6, message: '密码长度至少 6 位' },
+              { required: true, message: t('newPasswordRequired', '请输入新密码') },
+              { min: 6, message: t('passwordMinLength', '密码长度至少 6 位') },
             ]}
           >
-            <Input.Password placeholder="请输入新密码" size="large" />
+            <Input.Password placeholder={t('newPasswordRequired', '请输入新密码')} size="large" />
           </Form.Item>
           <Form.Item
             name="confirm_password"
-            label="确认密码"
+            label={t('confirmPassword', '确认密码')}
             rules={[
-              { required: true, message: '请再次输入新密码' },
+              { required: true, message: t('confirmPasswordRequired', '请再次输入新密码') },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('new_password') === value) {
                     return Promise.resolve()
                   }
-                  return Promise.reject(new Error('两次输入的密码不一致'))
+                  return Promise.reject(new Error(t('passwordMismatch', '两次输入的密码不一致')))
                 },
               }),
             ]}
           >
-            <Input.Password placeholder="请再次输入新密码" size="large" />
+            <Input.Password placeholder={t('confirmPasswordRequired', '请再次输入新密码')} size="large" />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0 }}>
             <Button
@@ -244,7 +241,7 @@ export default function LoginPage() {
               size="large"
               block
             >
-              确认修改并登录
+              {t('confirmChangeAndLogin', '确认修改并登录')}
             </Button>
           </Form.Item>
         </Form>

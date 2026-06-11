@@ -110,7 +110,7 @@ func UpdateAuditLogSetting() gin.HandlerFunc {
 		}
 		resp := buildAuditLogSettingResponse(current)
 		audit.SetOperationAuditAfter(c, resp)
-		audit.SetOperationAuditSummary(c, "更新了平台审计开关配置。")
+		audit.SetOperationAuditSummary(c, "Updated platform audit log settings.")
 		c.JSON(http.StatusOK, resp)
 	}
 }
@@ -197,7 +197,7 @@ func UpdateFIMSSHSetting() gin.HandlerFunc {
 
 		resp := buildFIMSSHSettingResponse(current)
 		audit.SetOperationAuditAfter(c, resp)
-		audit.SetOperationAuditSummary(c, "更新了 FIM SSH 配置。")
+		audit.SetOperationAuditSummary(c, "Updated FIM SSH config.")
 		c.JSON(http.StatusOK, resp)
 	}
 }

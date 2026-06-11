@@ -10,25 +10,14 @@ import { securityFIMAPI, type FIMPolicy, type FIMSnapshot } from '../../api/secu
 import { cmdbAPI, type Server } from '../../api/cmdb'
 import { getFIMErrorMessage } from '../../utils/httpError'
 import { canEdit } from '../../utils/menuAccess'
+import { useTranslation } from 'react-i18next'
 
 const { Paragraph, Text, Title } = Typography
-
-const snapshotTypeLabelMap: Record<string, string> = {
-  baseline: '构建基线',
-  manual: '手动扫描',
-  scheduled: '自动扫描',
-}
 
 const snapshotTypeColorMap: Record<string, string> = {
   baseline: 'blue',
   manual: 'gold',
   scheduled: 'purple',
-}
-
-const statusLabelMap: Record<string, string> = {
-  running: '执行中',
-  success: '成功',
-  failed: '失败',
 }
 
 const statusColorMap: Record<string, string> = {
@@ -43,15 +32,10 @@ const baselineStateColorMap: Record<string, string> = {
   none: 'default',
 }
 
-const baselineStateLabelMap: Record<string, string> = {
-  active: '当前生效基线',
-  historical: '历史基线',
-  none: '普通扫描',
-}
-
 export default function FIMExecutionsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t } = useTranslation('security')
   const [items, setItems] = useState<FIMSnapshot[]>([])
   const [policies, setPolicies] = useState<FIMPolicy[]>([])
   const [servers, setServers] = useState<Server[]>([])
@@ -104,7 +88,7 @@ export default function FIMExecutionsPage() {
       setItems([])
       setPolicies([])
       setServers([])
-      message.error('加载执行记录失败')
+      message.error(t('fim.executions.loadFailed', '加载执行记录失败'))
     } finally {
       setLoading(false)
     }
@@ -165,10 +149,10 @@ export default function FIMExecutionsPage() {
   const validateRetryExecution = async (record: FIMSnapshot) => {
     const policy = policyMap.get(record.policy_id)
     if (!policy) {
-      throw new Error('当前策略已不存在，无法重试')
+      throw new Error(t('fim.executions.retryValidation.policyNotExist', '当前策略已不存在，无法重试'))
     }
     if (!policy.enabled) {
-      throw new Error('当前策略已停用，请先启用后再重试')
+      throw new Error(t('fim.executions.retryValidation.policyDisabled', '当前策略已停用，请先启用后再重试'))
     }
 
     const [targetsResp, pathsResp] = await Promise.all([
@@ -179,15 +163,15 @@ export default function FIMExecutionsPage() {
     const targets = targetsResp.data ?? []
     const matchedTarget = targets.find((item) => item.server_id === record.server_id)
     if (!matchedTarget) {
-      throw new Error('当前主机已不在策略绑定范围内，无法重试')
+      throw new Error(t('fim.executions.retryValidation.hostNotInScope', '当前主机已不在策略绑定范围内，无法重试'))
     }
     if (!matchedTarget.enabled) {
-      throw new Error('当前主机绑定已停用，请先启用后再重试')
+      throw new Error(t('fim.executions.retryValidation.hostDisabled', '当前主机绑定已停用，请先启用后再重试'))
     }
 
     const watchPaths = pathsResp.data ?? []
     if (watchPaths.length === 0) {
-      throw new Error('当前策略还没有配置监控目录，无法重试')
+      throw new Error(t('fim.executions.retryValidation.noWatchPaths', '当前策略还没有配置监控目录，无法重试'))
     }
   }
 
@@ -202,10 +186,10 @@ export default function FIMExecutionsPage() {
         const scanType = originType === 'scheduled' ? 'scheduled' : 'manual'
         await securityFIMAPI.runScan(record.policy_id, record.server_id, scanType)
       }
-      message.success('已重新触发执行')
+      message.success(t('fim.executions.retryTriggered', '已重新触发执行'))
       await fetchData()
     } catch (error) {
-      message.error(getFIMErrorMessage(error, '重试执行失败'))
+      message.error(getFIMErrorMessage(error, t('fim.executions.retryFailed', '重试执行失败')))
     } finally {
       setActionLoadingId(null)
     }
@@ -213,42 +197,42 @@ export default function FIMExecutionsPage() {
 
   const columns: ColumnsType<FIMSnapshot> = [
     {
-      title: '执行方式',
+      title: t('fim.executions.executionMethod', '执行方式'),
       key: 'snapshot_type',
       width: 180,
       render: (_value, record) => (
         <Space direction="vertical" size={0}>
           <Tag color={snapshotTypeColorMap[getSnapshotOriginType(record)] || 'default'}>
-            {snapshotTypeLabelMap[getSnapshotOriginType(record)] || getSnapshotOriginType(record)}
+            {t(`fim.executions.snapshotType.${getSnapshotOriginType(record)}`, getSnapshotOriginType(record))}
           </Tag>
-          <Text type="secondary">{getSnapshotExecutionHint(record)}</Text>
+          <Text type="secondary">{getSnapshotExecutionHint(record, t)}</Text>
         </Space>
       ),
     },
     {
-      title: '基线状态',
+      title: t('fim.executions.baselineState', '基线状态'),
       key: 'baseline_state',
       width: 140,
       render: (_value, record) => {
         const baselineState = getBaselineState(record)
-        return <Tag color={baselineStateColorMap[baselineState] || 'default'}>{baselineStateLabelMap[baselineState] || baselineState}</Tag>
+        return <Tag color={baselineStateColorMap[baselineState] || 'default'}>{t(`fim.executions.baselineStateLabels.${baselineState}`, baselineState)}</Tag>
       },
     },
     {
-      title: '状态',
+      title: t('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 110,
-      render: (value: string) => <Tag color={statusColorMap[value] || 'default'}>{statusLabelMap[value] || value}</Tag>,
+      render: (value: string) => <Tag color={statusColorMap[value] || 'default'}>{t(`status.${value}`, value)}</Tag>,
     },
     {
-      title: '策略',
+      title: t('fim.policyName', '策略'),
       key: 'policy',
       width: 200,
-      render: (_value, record) => record.policy_name || policyMap.get(record.policy_id)?.name || `策略 #${record.policy_id}`,
+      render: (_value, record) => record.policy_name || policyMap.get(record.policy_id)?.name || `${t('fim.policyName', '策略')} #${record.policy_id}`,
     },
     {
-      title: '主机',
+      title: t('fim.targetHost', '主机'),
       key: 'server',
       width: 220,
       render: (_value, record) => {
@@ -257,44 +241,44 @@ export default function FIMExecutionsPage() {
           ? `${record.server_name} (${record.server_ip})`
           : server
             ? `${server.hostname} (${server.ip})`
-            : `主机 #${record.server_id}`
+            : `${t('fim.targetHost', '主机')} #${record.server_id}`
       },
     },
     {
-      title: '执行人',
+      title: t('fim.executions.executor', '执行人'),
       dataIndex: 'operator',
       key: 'operator',
       width: 120,
       render: (value?: string) => value || 'system',
     },
     {
-      title: '开始时间',
+      title: t('fim.executions.startTime', '开始时间'),
       dataIndex: 'started_at',
       key: 'started_at',
       width: 180,
       render: (value: string) => formatDateTime(value),
     },
     {
-      title: '结束时间',
+      title: t('fim.executions.endTime', '结束时间'),
       dataIndex: 'finished_at',
       key: 'finished_at',
       width: 180,
       render: (value?: string) => formatDateTime(value),
     },
     {
-      title: '耗时',
+      title: t('fim.executions.duration', '耗时'),
       key: 'duration',
       width: 120,
-      render: (_value, record) => formatDuration(record.started_at, record.finished_at),
+      render: (_value, record) => formatDuration(record.started_at, record.finished_at, t),
     },
     {
-      title: '采集条目',
+      title: t('fim.executions.collectedItems', '采集条目'),
       dataIndex: 'entry_count',
       key: 'entry_count',
       width: 100,
     },
     {
-      title: '失败原因',
+      title: t('fim.executions.failureReason', '失败原因'),
       dataIndex: 'error_message',
       key: 'error_message',
       width: 260,
@@ -306,7 +290,7 @@ export default function FIMExecutionsPage() {
           <Text
             style={{ maxWidth: 240, display: 'inline-block' }}
             ellipsis={{ tooltip: value }}
-            copyable={{ text: value, tooltips: ['复制失败原因', '已复制'] }}
+            copyable={{ text: value, tooltips: [t('fim.executions.copyFailureReason', '复制失败原因'), t('fim.executions.copied', '已复制')] }}
           >
             {value}
           </Text>
@@ -314,19 +298,19 @@ export default function FIMExecutionsPage() {
       },
     },
     {
-      title: '处理',
+      title: t('fim.executions.handle', '处理'),
       key: 'actions',
       width: 280,
       render: (_value, record) => (
         <Space size={0} wrap>
           <Button size="small" type="link" onClick={() => setDetail(record)}>
-            详情
+            {t('detail', '详情')}
           </Button>
           <Button size="small" type="link" onClick={() => openRelatedEvents(record)}>
-            事件
+            {t('fim.executions.viewRelatedEvents', '事件')}
           </Button>
           <Button size="small" type="link" onClick={() => openRelatedAlerts(record)}>
-            告警
+            {t('fim.executions.viewRelatedAlerts', '告警')}
           </Button>
           {canEdit() && (
             <Button
@@ -336,7 +320,7 @@ export default function FIMExecutionsPage() {
               loading={actionLoadingId === record.id}
               onClick={() => void handleRetryExecution(record)}
             >
-              重试
+              {t('fim.executions.retry', '重试')}
             </Button>
           )}
         </Space>
@@ -348,30 +332,30 @@ export default function FIMExecutionsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Card>
         <Space direction="vertical" size={4}>
-          <Title level={4} style={{ margin: 0 }}>执行记录</Title>
+          <Title level={4} style={{ margin: 0 }}>{t('fim.executions.title', '执行记录')}</Title>
           <Paragraph type="secondary" style={{ margin: 0 }}>
-            统一查看基线构建、手动扫描和自动扫描的执行结果，重点定位是否执行、执行了谁、结果如何以及失败原因。
+            {t('fim.executions.description', '统一查看基线构建、手动扫描和自动扫描的执行结果，重点定位是否执行、执行了谁、结果如何以及失败原因。')}
           </Paragraph>
         </Space>
       </Card>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={8}>
-          <Card size="small"><Statistic title="成功执行" value={filteredItems.filter((item) => item.status === 'success').length} prefix={<CheckCircleOutlined />} /></Card>
+          <Card size="small"><Statistic title={t('fim.executions.successCount', '成功执行')} value={filteredItems.filter((item) => item.status === 'success').length} prefix={<CheckCircleOutlined />} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card size="small"><Statistic title="执行中" value={filteredItems.filter((item) => item.status === 'running').length} prefix={<SyncOutlined />} /></Card>
+          <Card size="small"><Statistic title={t('fim.executions.runningCount', '执行中')} value={filteredItems.filter((item) => item.status === 'running').length} prefix={<SyncOutlined />} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card size="small"><Statistic title="执行失败" value={filteredItems.filter((item) => item.status === 'failed').length} prefix={<CloseCircleOutlined />} /></Card>
+          <Card size="small"><Statistic title={t('fim.executions.failureCount', '执行失败')} value={filteredItems.filter((item) => item.status === 'failed').length} prefix={<CloseCircleOutlined />} /></Card>
         </Col>
       </Row>
 
-      <Card title="筛选条件">
+      <Card title={t('fim.executions.filterCondition', '筛选条件')}>
         <Space wrap size={12}>
           <Select
             allowClear
-            placeholder="按策略筛选"
+            placeholder={t('fim.executions.filterByPolicy', '按策略筛选')}
             style={{ width: 220 }}
             value={filters.policyId}
             onChange={(value) => setFilters((current) => ({ ...current, policyId: value }))}
@@ -379,7 +363,7 @@ export default function FIMExecutionsPage() {
           />
           <Select
             allowClear
-            placeholder="按主机筛选"
+            placeholder={t('fim.executions.filterByHost', '按主机筛选')}
             style={{ width: 240 }}
             value={filters.serverId}
             onChange={(value) => setFilters((current) => ({ ...current, serverId: value }))}
@@ -387,31 +371,31 @@ export default function FIMExecutionsPage() {
           />
           <Select
             allowClear
-            placeholder="按执行方式筛选"
+            placeholder={t('fim.executions.filterByExecutionMethod', '按执行方式筛选')}
             style={{ width: 180 }}
             value={filters.snapshotType}
             onChange={(value) => setFilters((current) => ({ ...current, snapshotType: value }))}
-            options={['baseline', 'manual', 'scheduled'].map((value) => ({ value, label: snapshotTypeLabelMap[value] || value }))}
+            options={['baseline', 'manual', 'scheduled'].map((value) => ({ value, label: t(`fim.executions.snapshotType.${value}`, value) }))}
           />
           <Select
             allowClear
-            placeholder="按基线状态筛选"
+            placeholder={t('fim.executions.filterByBaselineState', '按基线状态筛选')}
             style={{ width: 180 }}
             value={filters.baselineState}
             onChange={(value) => setFilters((current) => ({ ...current, baselineState: value }))}
-            options={['active', 'historical', 'none'].map((value) => ({ value, label: baselineStateLabelMap[value] || value }))}
+            options={['active', 'historical', 'none'].map((value) => ({ value, label: t(`fim.executions.baselineStateLabels.${value}`, value) }))}
           />
           <Select
             allowClear
-            placeholder="按状态筛选"
+            placeholder={t('fim.executions.filterByStatus', '按状态筛选')}
             style={{ width: 160 }}
             value={filters.status}
             onChange={(value) => setFilters((current) => ({ ...current, status: value }))}
-            options={['running', 'success', 'failed'].map((value) => ({ value, label: statusLabelMap[value] || value }))}
+            options={['running', 'success', 'failed'].map((value) => ({ value, label: t(`status.${value}`, value) }))}
           />
           <Input
             allowClear
-            placeholder="搜索策略 / 主机 / 执行人 / 失败原因"
+            placeholder={t('fim.executions.searchHint', '搜索策略 / 主机 / 执行人 / 失败原因')}
             style={{ width: 280 }}
             value={filters.keyword}
             onChange={(event) => setFilters((current) => ({ ...current, keyword: event.target.value }))}
@@ -419,20 +403,20 @@ export default function FIMExecutionsPage() {
         </Space>
       </Card>
 
-      <Card title={`执行记录 (${filteredItems.length})`}>
+      <Card title={t('fim.executions.executionRecordsCount', '执行记录 ({{count}})', { count: filteredItems.length })}>
         <Table
           rowKey="id"
           loading={loading}
           columns={columns}
           dataSource={filteredItems}
           pagination={{ pageSize: 20, showSizeChanger: false }}
-          locale={{ emptyText: '当前没有执行记录' }}
+          locale={{ emptyText: t('fim.executions.noExecutionRecords', '当前没有执行记录') }}
           scroll={{ x: 2050 }}
         />
       </Card>
 
       <Drawer
-        title="执行记录详情"
+        title={t('fim.executions.executionDetail', '执行记录详情')}
         open={detail !== null}
         onClose={() => setDetail(null)}
         width={620}
@@ -440,53 +424,53 @@ export default function FIMExecutionsPage() {
         {detail && (
           <>
             <Descriptions column={1} size="small" bordered>
-              <Descriptions.Item label="执行方式">
+              <Descriptions.Item label={t('fim.executions.executionMethod', '执行方式')}>
                 <Tag color={snapshotTypeColorMap[getSnapshotOriginType(detail)] || 'default'}>
-                  {snapshotTypeLabelMap[getSnapshotOriginType(detail)] || getSnapshotOriginType(detail)}
+                  {t(`fim.executions.snapshotType.${getSnapshotOriginType(detail)}`, getSnapshotOriginType(detail))}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="基线状态">
+              <Descriptions.Item label={t('fim.executions.baselineState', '基线状态')}>
                 <Tag color={baselineStateColorMap[getBaselineState(detail)] || 'default'}>
-                  {baselineStateLabelMap[getBaselineState(detail)] || getBaselineState(detail)}
+                  {t(`fim.executions.baselineStateLabels.${getBaselineState(detail)}`, getBaselineState(detail))}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="状态">
-                <Tag color={statusColorMap[detail.status] || 'default'}>{statusLabelMap[detail.status] || detail.status}</Tag>
+              <Descriptions.Item label={t('status', '状态')}>
+                <Tag color={statusColorMap[detail.status] || 'default'}>{t(`status.${detail.status}`, detail.status)}</Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="策略">
-                {detail.policy_name || policyMap.get(detail.policy_id)?.name || `策略 #${detail.policy_id}`}
+              <Descriptions.Item label={t('fim.policyName', '策略')}>
+                {detail.policy_name || policyMap.get(detail.policy_id)?.name || `${t('fim.policyName', '策略')} #${detail.policy_id}`}
               </Descriptions.Item>
-              <Descriptions.Item label="主机">
+              <Descriptions.Item label={t('fim.targetHost', '主机')}>
                 {detail.server_name && detail.server_ip
                   ? `${detail.server_name} (${detail.server_ip})`
                   : (() => {
                     const server = serverMap.get(detail.server_id)
-                    return server ? `${server.hostname} (${server.ip})` : `主机 #${detail.server_id}`
+                    return server ? `${server.hostname} (${server.ip})` : `${t('fim.targetHost', '主机')} #${detail.server_id}`
                   })()}
               </Descriptions.Item>
-              <Descriptions.Item label="执行人">{detail.operator || 'system'}</Descriptions.Item>
-              <Descriptions.Item label="开始时间">{formatDateTime(detail.started_at)}</Descriptions.Item>
-              <Descriptions.Item label="结束时间">{formatDateTime(detail.finished_at)}</Descriptions.Item>
-              <Descriptions.Item label="耗时">{formatDuration(detail.started_at, detail.finished_at)}</Descriptions.Item>
-              <Descriptions.Item label="采集条目">{detail.entry_count}</Descriptions.Item>
-              <Descriptions.Item label="失败原因">
+              <Descriptions.Item label={t('fim.executions.executor', '执行人')}>{detail.operator || 'system'}</Descriptions.Item>
+              <Descriptions.Item label={t('fim.executions.startTime', '开始时间')}>{formatDateTime(detail.started_at)}</Descriptions.Item>
+              <Descriptions.Item label={t('fim.executions.endTime', '结束时间')}>{formatDateTime(detail.finished_at)}</Descriptions.Item>
+              <Descriptions.Item label={t('fim.executions.duration', '耗时')}>{formatDuration(detail.started_at, detail.finished_at, t)}</Descriptions.Item>
+              <Descriptions.Item label={t('fim.executions.collectedItems', '采集条目')}>{detail.entry_count}</Descriptions.Item>
+              <Descriptions.Item label={t('fim.executions.failureReason', '失败原因')}>
                 {detail.error_message ? (
-                  <Paragraph copyable={{ text: detail.error_message, tooltips: ['复制失败原因', '已复制'] }} style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+                  <Paragraph copyable={{ text: detail.error_message, tooltips: [t('fim.executions.copyFailureReason', '复制失败原因'), t('fim.executions.copied', '已复制')] }} style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
                     {detail.error_message}
                   </Paragraph>
                 ) : '-'}
               </Descriptions.Item>
             </Descriptions>
             <Space style={{ marginTop: 16 }}>
-              <Button onClick={() => openRelatedEvents(detail)}>查看关联事件</Button>
-              <Button type="primary" onClick={() => openRelatedAlerts(detail)}>查看关联告警</Button>
+              <Button onClick={() => openRelatedEvents(detail)}>{t('fim.executions.viewRelatedEvents', '查看关联事件')}</Button>
+              <Button type="primary" onClick={() => openRelatedAlerts(detail)}>{t('fim.executions.viewRelatedAlerts', '查看关联告警')}</Button>
               {canEdit() && (
                 <Button
                   disabled={detail.status !== 'failed'}
                   loading={actionLoadingId === detail.id}
                   onClick={() => void handleRetryExecution(detail)}
                 >
-                  重试执行
+                  {t('fim.executions.retryExecution', '重试执行')}
                 </Button>
               )}
             </Space>
@@ -539,17 +523,17 @@ function getBaselineState(snapshot: FIMSnapshot): 'active' | 'historical' | 'non
   return 'none'
 }
 
-function getSnapshotExecutionHint(snapshot: FIMSnapshot): string {
+function getSnapshotExecutionHint(snapshot: FIMSnapshot, t: (key: string, fallback: string) => string): string {
   if (snapshot.snapshot_type === 'baseline') {
-    return '当前用于比对的参考线'
+    return t('fim.executions.baselineHint.active', '当前用于比对的参考线')
   }
   if (getSnapshotOriginType(snapshot) === 'baseline') {
-    return '曾作为基线，后续已被新基线替代'
+    return t('fim.executions.baselineHint.historical', '曾作为基线，后续已被新基线替代')
   }
-  return '普通巡检执行记录'
+  return t('fim.executions.baselineHint.none', '普通巡检执行记录')
 }
 
-function formatDuration(startedAt?: string, finishedAt?: string): string {
+function formatDuration(startedAt?: string, finishedAt?: string, t?: (key: string, options?: Record<string, unknown>) => string): string {
   if (!startedAt || !finishedAt) {
     return '-'
   }
@@ -560,13 +544,13 @@ function formatDuration(startedAt?: string, finishedAt?: string): string {
   }
   const durationMs = end - start
   if (durationMs < 1000) {
-    return `${durationMs} ms`
+    return t ? t('fim.executions.durationMs', { defaultValue: '{{ms}} ms', ms: durationMs }) : `${durationMs} ms`
   }
   const seconds = durationMs / 1000
   if (seconds < 60) {
-    return `${seconds.toFixed(1)} s`
+    return t ? t('fim.executions.durationS', { defaultValue: '{{s}} s', s: seconds.toFixed(1) }) : `${seconds.toFixed(1)} s`
   }
   const minutes = Math.floor(seconds / 60)
   const remainSeconds = Math.round(seconds % 60)
-  return `${minutes} 分 ${remainSeconds} 秒`
+  return t ? t('fim.executions.durationMin', { defaultValue: '{{min}} 分 {{sec}} 秒', min: minutes, sec: remainSeconds }) : `${minutes} 分 ${remainSeconds} 秒`
 }

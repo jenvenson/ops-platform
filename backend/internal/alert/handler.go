@@ -260,7 +260,7 @@ func CreateRule(c *gin.Context) {
 		return
 	}
 	audit.SetOperationAuditAfter(c, buildAuditAlertRuleRecord(rule))
-	audit.SetOperationAuditSummary(c, "创建了告警规则。")
+	audit.SetOperationAuditSummary(c, "Created alert rule.")
 	c.JSON(http.StatusOK, gin.H{"data": rule})
 }
 
@@ -286,7 +286,7 @@ func UpdateRule(c *gin.Context) {
 	if err := database.DB.First(&rule, id).Error; err == nil {
 		audit.SetOperationAuditBefore(c, before)
 		audit.SetOperationAuditAfter(c, buildAuditAlertRuleRecord(rule))
-		audit.SetOperationAuditSummary(c, "更新了告警规则。")
+		audit.SetOperationAuditSummary(c, "Updated alert rule.")
 	}
 	c.JSON(http.StatusOK, gin.H{"data": rule})
 }
@@ -303,7 +303,7 @@ func DeleteRule(c *gin.Context) {
 		return
 	}
 	audit.SetOperationAuditBefore(c, buildAuditAlertRuleRecord(rule))
-	audit.SetOperationAuditSummary(c, "删除了告警规则。")
+	audit.SetOperationAuditSummary(c, "Deleted alert rule.")
 	c.JSON(http.StatusOK, gin.H{"message": "删除成功"})
 }
 
@@ -843,7 +843,7 @@ func AckEvent(c *gin.Context) {
 	event.HandleNote = input.HandleNote
 	audit.SetOperationAuditBefore(c, before)
 	audit.SetOperationAuditAfter(c, buildAuditAlertEventRecord(event))
-	audit.SetOperationAuditSummary(c, "确认了告警。")
+	audit.SetOperationAuditSummary(c, "Acknowledged alert.")
 	_ = platformevent.RecordAlertEvent(toAlertEventPayload(event))
 
 	c.JSON(http.StatusOK, gin.H{"message": "已确认处理"})
@@ -884,7 +884,7 @@ func CloseEvent(c *gin.Context) {
 	event.ClosedBy = username
 	audit.SetOperationAuditBefore(c, before)
 	audit.SetOperationAuditAfter(c, buildAuditAlertEventRecord(event))
-	audit.SetOperationAuditSummary(c, "关闭了告警。")
+	audit.SetOperationAuditSummary(c, "Closed alert.")
 	_ = platformevent.RecordAlertEvent(toAlertEventPayload(event))
 
 	c.JSON(http.StatusOK, gin.H{"message": "已关闭"})
@@ -905,7 +905,7 @@ func DeleteEvent(c *gin.Context) {
 	// 删除事件
 	database.DB.Delete(&event)
 	audit.SetOperationAuditBefore(c, buildAuditAlertEventRecord(event))
-	audit.SetOperationAuditSummary(c, "删除了告警。")
+	audit.SetOperationAuditSummary(c, "Deleted alert.")
 	_ = platformevent.RecordAlertEventDeleted(toAlertEventPayload(event))
 
 	c.JSON(http.StatusOK, gin.H{"message": "已删除"})

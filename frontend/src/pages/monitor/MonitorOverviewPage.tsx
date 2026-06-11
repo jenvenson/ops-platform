@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, Button, Table } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import {
   PrometheusServer,
   fetchServerStatusesData,
@@ -16,6 +17,8 @@ import {
 } from './monitorShared'
 
 export default function MonitorOverviewPage() {
+  const { t } = useTranslation('monitor')
+  const { t: tc } = useTranslation('common')
   const [serverStatuses, setServerStatuses] = useState<PrometheusServer[]>([])
   const [serversLoading, setServersLoading] = useState(false)
 
@@ -47,7 +50,7 @@ export default function MonitorOverviewPage() {
   return (
     <div>
       <Card
-        title={`服务器资源总览【主机总数：${serverStatuses.length}】`}
+        title={t('serverOverview', '服务器资源总览【主机总数：{{count}}】', { count: serverStatuses.length })}
         size="small"
         style={{ marginBottom: 16 }}
         extra={
@@ -56,7 +59,7 @@ export default function MonitorOverviewPage() {
             icon={<ReloadOutlined spin={serversLoading} />}
             onClick={fetchServerStatuses}
           >
-            刷新
+            {tc('refresh', '刷新')}
           </Button>
         }
       >
@@ -64,7 +67,7 @@ export default function MonitorOverviewPage() {
           className="monitor-overview-table"
           columns={[
             {
-              title: '名称',
+              title: t('name', '名称'),
               dataIndex: 'name',
               key: 'name',
               width: 145,
@@ -73,7 +76,7 @@ export default function MonitorOverviewPage() {
               render: (name: string) => <span style={{ fontWeight: 500 }}>{name}</span>,
             },
             {
-              title: 'IP',
+              title: t('ip', 'IP'),
               dataIndex: 'ip',
               key: 'ip',
               width: 130,
@@ -83,7 +86,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: '启动(天)',
+              title: t('uptimeDays', '启动(天)'),
               dataIndex: 'uptimeDays',
               key: 'uptimeDays',
               width: 80,
@@ -91,7 +94,7 @@ export default function MonitorOverviewPage() {
               render: (days: number | undefined) => days !== undefined ? days.toFixed(1) : '-',
             },
             {
-              title: '内存',
+              title: t('memory', '内存'),
               dataIndex: 'memTotal',
               key: 'memTotal',
               width: 80,
@@ -102,7 +105,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: 'CPU',
+              title: t('cpu', 'CPU'),
               dataIndex: 'cpuCores',
               key: 'cpuCores',
               width: 55,
@@ -113,7 +116,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: '负载',
+              title: t('load', '负载'),
               dataIndex: 'load5',
               key: 'load5',
               width: 70,
@@ -121,7 +124,7 @@ export default function MonitorOverviewPage() {
               render: (load: number | undefined) => load !== undefined ? load.toFixed(2) : '-',
             },
             {
-              title: 'CPU使用率',
+              title: t('cpuUsageCol', 'CPU使用率'),
               dataIndex: 'cpuUsage',
               key: 'cpuUsage',
               width: 110,
@@ -140,7 +143,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: '内存使用率',
+              title: t('memoryUsageCol', '内存使用率'),
               dataIndex: 'memUsage',
               key: 'memUsage',
               width: 110,
@@ -159,7 +162,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: 'IOutil使用率*',
+              title: t('ioUtilUsage', 'IOutil使用率*'),
               dataIndex: 'ioUtil',
               key: 'ioUtil',
               width: 110,
@@ -178,7 +181,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: '分区使用率*',
+              title: t('diskUsageCol', '分区使用率*'),
               dataIndex: 'diskUsage',
               key: 'diskUsage',
               width: 120,
@@ -197,7 +200,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: '磁盘读取*',
+              title: t('diskRead', '磁盘读取*'),
               dataIndex: 'diskRead',
               key: 'diskRead',
               width: 100,
@@ -220,7 +223,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: '磁盘写入*',
+              title: t('diskWrite', '磁盘写入*'),
               dataIndex: 'diskWrite',
               key: 'diskWrite',
               width: 100,
@@ -243,7 +246,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: '下载带宽*',
+              title: t('downloadBandwidth', '下载带宽*'),
               dataIndex: 'netDown',
               key: 'netDown',
               width: 100,
@@ -266,7 +269,7 @@ export default function MonitorOverviewPage() {
               },
             },
             {
-              title: '上传带宽*',
+              title: t('uploadBandwidth', '上传带宽*'),
               dataIndex: 'netUp',
               key: 'netUp',
               width: 100,
@@ -296,7 +299,7 @@ export default function MonitorOverviewPage() {
             defaultPageSize: 20,
             showSizeChanger: true,
             pageSizeOptions: ['10', '20', '50', '100'],
-            showTotal: (total) => `共 ${total} 台`,
+            showTotal: (total) => t('totalMachines', '共 {{count}} 台', { count: total }),
             showQuickJumper: true,
           }}
           size="small"

@@ -4,10 +4,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, Table, Tag, Space, Button, Modal, Form, Input, Select, InputNumber, message, Popconfirm } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
+import i18next from '../../i18n'
 import { adminAPI, Menu } from '../../api/admin'
 import { canEdit } from '../../utils/menuAccess'
+import { formatDateTime } from '../../utils/dateFormat'
 
-// 树形菜单类型
 interface MenuTreeNode extends Menu {
   children?: MenuTreeNode[]
 }
@@ -48,17 +50,14 @@ const findSiblingNodes = (nodes: MenuTreeNode[], parentID: number): MenuTreeNode
   return []
 }
 
-// 将扁平菜单转换为树形结构
 const buildMenuTree = (menus: Menu[]): MenuTreeNode[] => {
   const menuMap = new Map<number, MenuTreeNode>()
   const roots: MenuTreeNode[] = []
 
-  // 创建所有节点
   menus.forEach(menu => {
     menuMap.set(menu.id, { ...menu, children: [] })
   })
 
-  // 构建树
   menus.forEach(menu => {
     const node = menuMap.get(menu.id)!
     if (menu.parent_id === 0) {
@@ -71,11 +70,9 @@ const buildMenuTree = (menus: Menu[]): MenuTreeNode[] => {
     }
   })
 
-  // 递归清理空 children 并排序
   const cleanAndSortTree = (nodes: MenuTreeNode[]): MenuTreeNode[] => {
     const sorted = [...nodes].sort((a, b) => (a.sort || 0) - (b.sort || 0))
     return sorted.map(node => {
-      // 递归处理子节点
       if (node.children && node.children.length > 0) {
         node.children = cleanAndSortTree(node.children)
       } else {
@@ -85,13 +82,20 @@ const buildMenuTree = (menus: Menu[]): MenuTreeNode[] => {
     })
   }
 
-  // 对根菜单排序
   const sortedRoots = [...roots].sort((a, b) => (a.sort || 0) - (b.sort || 0))
 
   return cleanAndSortTree(sortedRoots)
 }
 
 export default function MenusPage() {
+  const { t } = useTranslation('admin')
+
+  const getMenuDisplayTitle = (m: { key: string; title: string }) => {
+    const translated = i18next.t('menu:' + m.key, { defaultValue: '' })
+    if (translated && translated !== m.key) return translated
+    return m.title
+  }
+
   const [menus, setMenus] = useState<Menu[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
@@ -99,27 +103,24 @@ export default function MenusPage() {
   const [submitting, setSubmitting] = useState(false)
   const [form] = Form.useForm()
 
-  // 加载菜单列表
   const fetchMenus = useCallback(async () => {
     setLoading(true)
     try {
       const resp = await adminAPI.getMenus()
-      // 转换为树形数据
       const treeData = buildMenuTree(resp)
       setMenus(treeData as unknown as Menu[])
     } catch (error) {
       console.error('获取菜单列表失败:', error)
-      message.error('获取菜单列表失败')
+      message.error(t('getMenusFailed', '获取菜单列表失败'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchMenus()
   }, [fetchMenus])
 
-  // 打开新增模态框
   const handleAdd = async (parentId?: number) => {
     setEditingMenu(null)
     if (menus.length === 0) {
@@ -130,7 +131,6 @@ export default function MenusPage() {
     setModalVisible(true)
   }
 
-  // 打开编辑模态框
   const handleEdit = async (menu: Menu) => {
     setEditingMenu(menu)
     if (menus.length === 0) {
@@ -148,16 +148,15 @@ export default function MenusPage() {
     setModalVisible(true)
   }
 
-  // 删除菜单
   const handleDelete = async (id: number) => {
     try {
       await adminAPI.deleteMenu(id)
-      message.success('删除成功')
+      message.success(t('deleteMenuSuccess', '删除成功'))
       fetchMenus()
       refreshUserMenus()
     } catch (error) {
       console.error('删除菜单失败:', error)
-      message.error(error instanceof Error ? error.message : '删除菜单失败')
+      message.error(error instanceof Error ? error.message : t('deleteMenuFailed', '删除菜单失败'))
     }
   }
 
@@ -178,41 +177,33 @@ export default function MenusPage() {
       await Promise.all(
         reordered.map((item, index) => adminAPI.updateMenu(item.id, { sort: index }))
       )
-      message.success('排序已更新')
+      message.success(t('sortUpdated', '排序已更新'))
       await fetchMenus()
       await refreshUserMenus()
     } catch (error) {
       console.error('更新菜单排序失败:', error)
-      message.error(error instanceof Error ? error.message : '更新菜单排序失败')
+      message.error(error instanceof Error ? error.message : t('sortUpdateFailed', '更新菜单排序失败'))
     } finally {
       setSubmitting(false)
     }
   }
 
-  // 刷新用户菜单缓存
   const refreshUserMenus = async () => {
     try {
-      // 通知主布局组件重新加载菜单
-      // 方案1：清除缓存的菜单数据，让用户在下次访问时重新获取
       localStorage.removeItem('user_menus');
-
-      // 方案2：触发全局事件，通知所有组件更新
       window.dispatchEvent(new CustomEvent('menuUpdated'));
-
-      message.success('菜单已更新，请刷新页面以查看最新菜单');
+      message.success(t('menuUpdated', '菜单已更新，请刷新页面以查看最新菜单'));
     } catch (error) {
       console.error('刷新菜单缓存失败:', error)
     }
   }
 
-  // 提交表单
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
       setSubmitting(true)
 
       if (editingMenu) {
-        // 更新菜单
         await adminAPI.updateMenu(editingMenu.id, {
           title: values.title,
           key: values.key,
@@ -222,9 +213,8 @@ export default function MenusPage() {
           sort: values.sort,
           status: values.status === 'active' ? 1 : 0,
         })
-        message.success('更新成功')
+        message.success(t('updateMenuSuccess', '更新成功'))
       } else {
-        // 创建菜单
         await adminAPI.createMenu({
           title: values.title,
           key: values.key,
@@ -234,7 +224,7 @@ export default function MenusPage() {
           sort: values.sort || 0,
           status: values.status === 'active' ? 1 : 0,
         })
-        message.success('创建成功')
+        message.success(t('createMenuSuccess', '创建成功'))
       }
 
       setModalVisible(false)
@@ -242,74 +232,72 @@ export default function MenusPage() {
       refreshUserMenus()
     } catch (error) {
       console.error('提交失败:', error)
-      message.error(error instanceof Error ? error.message : '提交失败')
+      message.error(error instanceof Error ? error.message : t('submitFailed', '提交失败'))
     } finally {
       setSubmitting(false)
     }
   }
 
-  // 获取父级菜单选项
   const flatMenus = flattenMenuTree(menus as unknown as MenuTreeNode[])
 
   const parentMenuOptions = [
-    { label: '一级菜单', value: 0 },
+    { label: t('topLevelMenu', '一级菜单'), value: 0 },
     ...flatMenus
       .filter(m => m.parent_id === 0)
       .map(m => ({
-        label: m.title,
+        label: getMenuDisplayTitle(m),
         value: m.id,
       })),
   ]
 
-  // 表格列定义
   const columns = [
     {
-      title: '菜单标题',
+      title: t('menuTitle', '菜单标题'),
       dataIndex: 'title',
       key: 'title',
       width: 260,
       ellipsis: {
         showTitle: true,
       },
-      render: (title: string) => (
+      render: (_title: string, record: Menu) => (
         <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
-          {title}
+          {getMenuDisplayTitle(record)}
         </span>
       ),
     },
     {
-      title: '菜单标识',
+      title: t('menuKey', '菜单标识'),
       dataIndex: 'key',
       key: 'key',
       width: 150,
     },
     {
-      title: '路径',
+      title: t('menuPath', '路径'),
       dataIndex: 'path',
       key: 'path',
       width: 200,
       render: (path: string) => path || '-',
     },
     {
-      title: '图标',
+      title: t('icon', '图标'),
       dataIndex: 'icon',
       key: 'icon',
       width: 120,
       render: (icon: string) => icon ? <Tag>{icon}</Tag> : '-',
     },
     {
-      title: '状态',
+      title: t('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
       render: (status: number) => (
         <Tag color={status === 1 ? 'success' : 'default'}>
-          {status === 1 ? '启用' : '禁用'}
+          {status === 1 ? t('enable', '启用') : t('disable', '禁用')}
         </Tag>
       ),
     },
     {
-      title: '排序',
+      title: t('sortOrder', '排序'),
       dataIndex: 'sort',
       key: 'sort',
       width: 180,
@@ -329,14 +317,14 @@ export default function MenusPage() {
                   onClick={() => handleMove(record, 'up')}
                   disabled={!canMoveUp || submitting}
                 >
-                  上移
+                  {t('moveUp', '上移')}
                 </Button>
                 <Button
                   size="small"
                   onClick={() => handleMove(record, 'down')}
                   disabled={!canMoveDown || submitting}
                 >
-                  下移
+                  {t('moveDown', '下移')}
                 </Button>
               </>
             )}
@@ -345,14 +333,14 @@ export default function MenusPage() {
       },
     },
     {
-      title: '创建时间',
+      title: t('createdAt', '创建时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
-      render: (time: string) => time ? new Date(time).toLocaleString('zh-CN') : '-',
+      render: (time: string) => time ? formatDateTime(time) : '-',
     },
     {
-      title: '操作',
+      title: t('action', '操作'),
       key: 'action',
       width: 220,
       render: (_: unknown, record: Menu) => {
@@ -365,7 +353,7 @@ export default function MenusPage() {
               icon={<PlusOutlined />}
               onClick={() => handleAdd(record.id)}
             >
-              新增
+              {t('add', '新增')}
             </Button>
             <Button
               type="link"
@@ -373,14 +361,14 @@ export default function MenusPage() {
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {t('edit', '编辑')}
             </Button>
             <Popconfirm
-              title="确认删除"
-              description="确定要删除这个菜单吗？子菜单也会被删除。"
+              title={t('confirmDeleteMenu', '确认删除')}
+              description={t('confirmDeleteMenuDesc', '确定要删除这个菜单吗？子菜单也会被删除。')}
               onConfirm={() => handleDelete(record.id)}
-              okText="确认"
-              cancelText="取消"
+              okText={t('confirm', '确认')}
+              cancelText={t('cancel', '取消')}
             >
               <Button
                 type="link"
@@ -388,7 +376,7 @@ export default function MenusPage() {
                 danger
                 icon={<DeleteOutlined />}
               >
-                删除
+                {t('delete', '删除')}
               </Button>
             </Popconfirm>
           </Space>
@@ -400,15 +388,15 @@ export default function MenusPage() {
   return (
     <div>
       <Card
-        title="菜单管理"
+        title={t('menuManagement', '菜单管理')}
         extra={
           <Space>
             <Button icon={<ReloadOutlined />} onClick={fetchMenus}>
-              刷新
+              {t('refresh', '刷新')}
             </Button>
             {canEdit() && (
               <Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>
-                添加菜单
+                {t('addMenu', '添加菜单')}
               </Button>
             )}
           </Space>
@@ -421,7 +409,7 @@ export default function MenusPage() {
           loading={loading}
           pagination={false}
           scroll={{ x: 1320 }}
-          locale={{ emptyText: '暂无菜单数据' }}
+          locale={{ emptyText: t('noMenusData', '暂无菜单数据') }}
           expandable={{
             defaultExpandAllRows: true,
             indentSize: 20,
@@ -454,9 +442,8 @@ export default function MenusPage() {
         />
       </Card>
 
-      {/* 新增/编辑菜单模态框 */}
       <Modal
-        title={editingMenu ? '编辑菜单' : '新增菜单'}
+        title={editingMenu ? t('editMenu', '编辑菜单') : t('addNewMenu', '新增菜单')}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onOk={handleSubmit}
@@ -467,33 +454,33 @@ export default function MenusPage() {
         <Form form={form} layout="vertical">
           <Form.Item
             name="title"
-            label="菜单标题"
+            label={t('menuTitle', '菜单标题')}
             rules={[
-              { required: true, message: '请输入菜单标题' },
-              { min: 1, max: 50, message: '菜单标题长度必须在1-50之间' },
+              { required: true, message: t('menuTitleRequired', '请输入菜单标题') },
+              { min: 1, max: 50, message: t('menuTitleLength', '菜单标题长度必须在1-50之间') },
             ]}
           >
-            <Input placeholder="请输入菜单标题" />
+            <Input placeholder={t('menuTitlePlaceholder', '请输入菜单标题')} />
           </Form.Item>
 
           <Form.Item
             name="key"
-            label="菜单标识"
+            label={t('menuKey', '菜单标识')}
             rules={[
-              { required: true, message: '请输入菜单标识' },
-              { pattern: /^[a-z][a-z0-9-]*$/, message: '菜单标识必须以小写字母开头，只能包含小写字母、数字和连字符' },
+              { required: true, message: t('menuKeyRequired', '请输入菜单标识') },
+              { pattern: /^[a-z][a-z0-9-]*$/, message: t('menuKeyPattern', '菜单标识必须以小写字母开头，只能包含小写字母、数字和连字符') },
             ]}
           >
-            <Input placeholder="请输入菜单标识" disabled={!!editingMenu} />
+            <Input placeholder={t('menuKeyPlaceholder', '请输入菜单标识')} disabled={!!editingMenu} />
           </Form.Item>
 
-          <Form.Item name="path" label="菜单路径">
-            <Input placeholder="请输入菜单路径（可选）" />
+          <Form.Item name="path" label={t('menuPath', '菜单路径')}>
+            <Input placeholder={t('menuPathPlaceholder', '请输入菜单路径（可选）')} />
           </Form.Item>
 
-          <Form.Item name="icon" label="图标">
+          <Form.Item name="icon" label={t('icon', '图标')}>
             <Select
-              placeholder="选择图标"
+              placeholder={t('selectIcon', '选择图标')}
               options={[
                 { label: 'DashboardOutlined', value: 'DashboardOutlined' },
                 { label: 'SettingOutlined', value: 'SettingOutlined' },
@@ -518,22 +505,22 @@ export default function MenusPage() {
             />
           </Form.Item>
 
-          <Form.Item name="parent_id" label="父级菜单">
+          <Form.Item name="parent_id" label={t('parentMenu', '父级菜单')}>
             <Select
-              placeholder="选择父级菜单"
+              placeholder={t('selectParentMenu', '选择父级菜单')}
               options={parentMenuOptions}
             />
           </Form.Item>
 
-          <Form.Item name="sort" label="排序">
-            <InputNumber min={0} placeholder="排序号" style={{ width: '100%' }} />
+          <Form.Item name="sort" label={t('sortOrder', '排序')}>
+            <InputNumber min={0} placeholder={t('sortPlaceholder', '排序号')} style={{ width: '100%' }} />
           </Form.Item>
 
-          <Form.Item name="status" label="状态">
+          <Form.Item name="status" label={t('status', '状态')}>
             <Select
               options={[
-                { label: '启用', value: 'active' },
-                { label: '禁用', value: 'disabled' },
+                { label: t('enable', '启用'), value: 'active' },
+                { label: t('disable', '禁用'), value: 'disabled' },
               ]}
             />
           </Form.Item>

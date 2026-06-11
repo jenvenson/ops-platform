@@ -5,11 +5,13 @@ import { useState } from 'react'
 import { Form, Input, Button, message, Typography, Card } from 'antd'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { LockOutlined, ArrowLeftOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 
 const { Title, Text } = Typography
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation('login')
   const [loading, setLoading] = useState(false)
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -17,7 +19,7 @@ export default function ResetPasswordPage() {
 
   const onSubmit = async (values: { token: string; new_password: string; confirm_password: string }) => {
     if (values.new_password !== values.confirm_password) {
-      message.error('两次输入的密码不一致')
+      message.error(t('passwordMismatch', '两次输入的密码不一致'))
       return
     }
     setLoading(true)
@@ -26,12 +28,12 @@ export default function ResetPasswordPage() {
         token: values.token,
         new_password: values.new_password,
       })
-      message.success('密码重置成功，请使用新密码登录')
+      message.success(t('resetSuccess', '密码重置成功，请使用新密码登录'))
       navigate('/login')
     } catch (error: unknown) {
       const errMsg =
         (error as { response?: { data?: { error?: string } } }).response?.data?.error ||
-        '密码重置失败，请重试'
+        t('resetFailed', '密码重置失败，请重试')
       message.error(errMsg)
     } finally {
       setLoading(false)
@@ -45,8 +47,8 @@ export default function ResetPasswordPage() {
           <div style={styles.logo}>
             <span style={styles.logoText}>OPS</span>
           </div>
-          <Title level={3} style={{ marginTop: 16 }}>重置密码</Title>
-          <Text type="secondary">输入重置令牌和新密码</Text>
+          <Title level={3} style={{ marginTop: 16 }}>{t('resetPasswordTitle', '重置密码')}</Title>
+          <Text type="secondary">{t('resetPasswordSubtitle', '输入重置令牌和新密码')}</Text>
         </div>
         <Form
           onFinish={onSubmit}
@@ -54,10 +56,10 @@ export default function ResetPasswordPage() {
         >
           <Form.Item
             name="token"
-            rules={[{ required: true, message: '请输入重置令牌' }]}
+            rules={[{ required: true, message: t('resetTokenRequired', '请输入重置令牌') }]}
           >
             <Input.TextArea
-              placeholder="重置令牌"
+              placeholder={t('resetToken', '重置令牌')}
               size="large"
               autoSize={{ minRows: 2, maxRows: 3 }}
               style={{ fontFamily: 'monospace' }}
@@ -66,35 +68,35 @@ export default function ResetPasswordPage() {
           <Form.Item
             name="new_password"
             rules={[
-              { required: true, message: '请输入新密码' },
-              { min: 6, message: '密码长度至少 6 位' },
+              { required: true, message: t('newPasswordRequired', '请输入新密码') },
+              { min: 6, message: t('passwordMinLength', '密码长度至少 6 位') },
             ]}
           >
             <Input.Password
-              placeholder="新密码"
+              placeholder={t('newPasswordPlaceholder', '新密码')}
               prefix={<LockOutlined />}
               size="large"
             />
           </Form.Item>
           <Form.Item
             name="confirm_password"
-            rules={[{ required: true, message: '请再次输入新密码' }]}
+            rules={[{ required: true, message: t('confirmPasswordRequired', '请再次输入新密码') }]}
           >
             <Input.Password
-              placeholder="确认新密码"
+              placeholder={t('confirmPasswordPlaceholder', '确认新密码')}
               prefix={<LockOutlined />}
               size="large"
             />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block size="large">
-              重置密码
+              {t('resetPasswordButton', '重置密码')}
             </Button>
           </Form.Item>
         </Form>
         <div style={{ textAlign: 'center' }}>
           <Link to="/login">
-            <ArrowLeftOutlined /> 返回登录
+            <ArrowLeftOutlined /> {t('backToLogin', '返回登录')}
           </Link>
         </div>
       </Card>

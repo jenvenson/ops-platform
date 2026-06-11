@@ -4,6 +4,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import zhCN from 'antd/locale/zh_CN'
 import enUS from 'antd/locale/en_US'
+import i18next from '../i18n'
 
 const LOCALE_MAP: Record<string, typeof zhCN> = {
   'zh-CN': zhCN,
@@ -37,6 +38,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     if (LOCALE_MAP[newLang]) {
       localStorage.setItem('app_language', newLang)
       setLangState(newLang)
+      i18next.changeLanguage(newLang)
     }
   }, [])
 

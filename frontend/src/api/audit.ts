@@ -1,6 +1,7 @@
 // Copyright (c) 2026 OPS Platform Contributors.
 // SPDX-License-Identifier: MIT
 
+import i18next from '../i18n'
 import apiClient from './client'
 
 export interface AuditListResponse<T> {
@@ -147,7 +148,7 @@ export const auditAPI = {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
     if (!response.ok) {
-      let errorMessage = '导出日志失败'
+      let errorMessage = i18next.t('common:exportLogFailed', '导出日志失败')
       const contentType = response.headers.get('content-type') || ''
       if (contentType.includes('application/json')) {
         try {

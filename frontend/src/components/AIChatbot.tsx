@@ -3,6 +3,8 @@
 
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next'
+import i18next from '../i18n'
 import './AIChatbot.css';
 
 const navigateToPath = (path) => {
@@ -116,11 +118,11 @@ const parseAssistantSummary = (text = '') => {
 
 const formatIntentLabel = (intent = '') => {
   const labels = {
-    page_navigation: '页面导航',
-    readonly_query: '只读查询',
-    knowledge_qa: '知识问答',
-    fallback: '智能问答',
-    system_notice: '系统提示'
+    page_navigation: i18next.t('chatbot:intent.page_navigation', '页面导航'),
+    readonly_query: i18next.t('chatbot:intent.readonly_query', '只读查询'),
+    knowledge_qa: i18next.t('chatbot:intent.knowledge_qa', '知识问答'),
+    fallback: i18next.t('chatbot:intent.fallback', '智能问答'),
+    system_notice: i18next.t('chatbot:intent.system_notice', '系统提示')
   };
 
   return labels[intent] || intent;
@@ -164,6 +166,7 @@ const readResponseBody = async (response) => {
 };
 
 const AIChatbot = () => {
+  const { t } = useTranslation('chatbot')
   const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem('token')));
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -271,7 +274,7 @@ const AIChatbot = () => {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || '加载助手会话失败');
+        throw new Error(data.error || t('error.loadSessionsFailed', '加载助手会话失败'));
       }
       const items = data.sessions || [];
       setSessions((prev) => append ? [...prev, ...items] : items);
@@ -290,7 +293,7 @@ const AIChatbot = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       setIsAuthenticated(false);
-      appendSystemMessage('当前登录状态无效，请重新登录后再使用运维小助手。');
+      appendSystemMessage(t('error.invalidSession', '当前登录状态无效，请重新登录后再使用运维小助手。'));
       return null;
     }
 
@@ -313,13 +316,13 @@ const AIChatbot = () => {
         setSessionId(id);
         await loadSessionMessages(id, 1);
       } else {
-        appendSystemMessage('助手会话初始化失败，请稍后重试。');
+        appendSystemMessage(t('error.initSessionFailed', '助手会话初始化失败，请稍后重试。'));
       }
 
       return id;
     } catch (error) {
       console.error('初始化助手会话失败:', error);
-      appendSystemMessage('助手会话初始化失败，请检查登录状态或稍后重试。');
+      appendSystemMessage(t('error.initSessionFailedRetry', '助手会话初始化失败，请检查登录状态或稍后重试。'));
       return null;
     }
   };
@@ -340,7 +343,7 @@ const AIChatbot = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || '创建会话失败');
+        throw new Error(data.error || t('error.createSessionFailed', '创建会话失败'));
       }
       return data.session?.sessionId || null;
     } catch (error) {
@@ -370,7 +373,7 @@ const AIChatbot = () => {
         setIsLoading(false);
         return data;
       } else {
-        throw new Error(data.error || '未知错误');
+        throw new Error(data.error || t('error.unknownError', '未知错误'));
       }
     } catch (error) {
       console.error('获取AI响应失败:', error);
@@ -378,7 +381,7 @@ const AIChatbot = () => {
 
       // 返回更具体的错误消息
       return {
-        answer: "抱歉，AI助手暂时无法响应。请确保AI助手服务已启动。错误: " + error.message,
+        answer: t('error.aiUnavailable', '抱歉，AI助手暂时无法响应。请确保AI助手服务已启动。错误: {{message}}', { message: error.message }),
         citations: [],
         actions: []
       };
@@ -394,7 +397,7 @@ const AIChatbot = () => {
     });
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || '加载历史消息失败');
+      throw new Error(data.error || t('error.loadHistoryFailed', '加载历史消息失败'));
     }
 
     const mappedMessages = (data.messages || []).map((message) => ({
@@ -425,14 +428,14 @@ const AIChatbot = () => {
       setSessionPanelOpen(false);
     } catch (error) {
       console.error('切换助手会话失败:', error);
-      appendSystemMessage('切换会话失败，请稍后重试。');
+      appendSystemMessage(t('error.switchSessionFailed', '切换会话失败，请稍后重试。'));
     }
   };
 
   const handleCreateSession = async () => {
     const newSessionId = await createSession(true);
     if (!newSessionId) {
-      appendSystemMessage('新建会话失败，请稍后重试。');
+      appendSystemMessage(t('error.createNewSessionFailed', '新建会话失败，请稍后重试。'));
       return;
     }
 
@@ -452,7 +455,7 @@ const AIChatbot = () => {
     });
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || '更新会话失败');
+      throw new Error(data.error || t('error.updateSessionFailed', '更新会话失败'));
     }
     return data.session;
   };
@@ -463,12 +466,12 @@ const AIChatbot = () => {
       await fetchSessions({ page: 1, query: sessionQuery, status: sessionStatus, append: false });
     } catch (error) {
       console.error('更新置顶状态失败:', error);
-      appendSystemMessage('更新置顶状态失败，请稍后重试。');
+      appendSystemMessage(t('error.updatePinFailed', '更新置顶状态失败，请稍后重试。'));
     }
   };
 
   const handleRenameSession = async (session) => {
-    const nextTitle = window.prompt('输入新的会话标题', session.title || session.summary || '');
+    const nextTitle = window.prompt(t('error.renamePrompt', '输入新的会话标题'), session.title || session.summary || '');
     if (nextTitle == null) {
       return;
     }
@@ -479,7 +482,7 @@ const AIChatbot = () => {
       await fetchSessions({ page: 1, query: sessionQuery, status: sessionStatus, append: false });
     } catch (error) {
       console.error('重命名会话失败:', error);
-      appendSystemMessage('重命名会话失败，请稍后重试。');
+      appendSystemMessage(t('error.renameSessionFailed', '重命名会话失败，请稍后重试。'));
     } finally {
       setRenamingSessionId(null);
     }
@@ -497,7 +500,7 @@ const AIChatbot = () => {
       await fetchSessions({ page: 1, query: sessionQuery, status: sessionStatus, append: false });
     } catch (error) {
       console.error('归档会话失败:', error);
-      appendSystemMessage('归档会话失败，请稍后重试。');
+      appendSystemMessage(t('error.archiveSessionFailed', '归档会话失败，请稍后重试。'));
     }
   };
 
@@ -509,7 +512,7 @@ const AIChatbot = () => {
       await loadSessionMessages(sessionId, messagePage + 1);
     } catch (error) {
       console.error('加载更早消息失败:', error);
-      appendSystemMessage('加载更早消息失败，请稍后重试。');
+      appendSystemMessage(t('error.loadEarlierFailed', '加载更早消息失败，请稍后重试。'));
     }
   };
 
@@ -587,7 +590,7 @@ const AIChatbot = () => {
   };
 
   const handleDeleteSession = async (targetSessionId) => {
-    if (!window.confirm('确定删除该会话及其全部消息吗？')) {
+    if (!window.confirm(t('error.confirmDelete', '确定删除该会话及其全部消息吗？'))) {
       return;
     }
 
@@ -598,7 +601,7 @@ const AIChatbot = () => {
       });
       const data = await readResponseBody(response);
       if (!response.ok) {
-        throw new Error(data.error || '删除会话失败');
+        throw new Error(data.error || t('error.deleteSessionFailed', '删除会话失败'));
       }
 
       setSessions((prev) => prev.filter((session) => session.sessionId !== targetSessionId));
@@ -614,7 +617,7 @@ const AIChatbot = () => {
       });
     } catch (error) {
       console.error('删除会话失败:', error);
-      appendSystemMessage(`删除会话失败：${error.message || '请稍后重试。'}`);
+      appendSystemMessage(t('error.deleteSessionFailed', '删除会话失败：{{message}}', { message: error.message || t('error.pleaseRetryLater', '请稍后重试。') }));
     }
   };
 
@@ -713,7 +716,7 @@ const AIChatbot = () => {
             navigateToPath(path);
           }}
           style={{ color: '#4F46E5', textDecoration: 'underline', cursor: 'pointer' }}
-          title={`点击导航到: ${path}`}
+          title={t('navigateTo', '点击导航到: {{path}}', { path })}
         >
           {path}
         </a>
@@ -737,7 +740,7 @@ const AIChatbot = () => {
 
     return (
       <div className="ai-chatbot-response-section">
-        <div className="ai-chatbot-response-label">快捷操作</div>
+        <div className="ai-chatbot-response-label">{t('quickActions', '快捷操作')}</div>
         <div className="ai-chatbot-action-list">
           {actions.map((action, index) => (
             <button
@@ -764,7 +767,7 @@ const AIChatbot = () => {
       <div className="ai-chatbot-response-section">
         <details className="ai-chatbot-citation-details">
           <summary className="ai-chatbot-response-label ai-chatbot-citation-summary">
-            参考文档 ({citations.length})
+            {t('references', '参考文档 ({{count}})', { count: citations.length })}
           </summary>
           <div className="ai-chatbot-citation-list">
             {citations.map((citation, index) => (
@@ -805,7 +808,7 @@ const AIChatbot = () => {
         ) : null}
         {(resultCards.length || fallbackItems.length) ? (
           <div className="ai-chatbot-response-section">
-            <div className="ai-chatbot-response-label">查询结果</div>
+            <div className="ai-chatbot-response-label">{t('queryResult', '查询结果')}</div>
             <div className="ai-chatbot-result-list">
               {resultCards.map((card, index) => (
                 <div
@@ -862,7 +865,7 @@ const AIChatbot = () => {
           <div className="ai-chatbot-header">
             <div className="ai-chatbot-title-group">
               <div className="ai-chatbot-title-icon"></div>
-              <div className="ai-chatbot-title">运维小助手</div>
+              <div className="ai-chatbot-title">{t('title', '运维小助手')}</div>
             </div>
             <div className="ai-chatbot-controls">
               <button
@@ -872,7 +875,7 @@ const AIChatbot = () => {
                   e.stopPropagation();
                   setSessionPanelOpen((open) => !open);
                 }}
-                title="会话历史"
+                title={t('sessionHistory', '会话历史')}
               >
                 ≡
               </button>
@@ -883,7 +886,7 @@ const AIChatbot = () => {
                   e.stopPropagation();
                   handleCreateSession();
                 }}
-                title="新建会话"
+                title={t('newSession', '新建会话')}
               >
                 ＋
               </button>
@@ -894,7 +897,7 @@ const AIChatbot = () => {
                   e.stopPropagation();
                   toggleMaximize();
                 }}
-                title={isMaximized ? "恢复" : "最大化"}
+                title={isMaximized ? t('restore', '恢复') : t('maximize', '最大化')}
               >
                 {isMaximized ? '❐' : '☐'}
               </button>
@@ -927,13 +930,13 @@ const AIChatbot = () => {
               {sessionPanelOpen && (
                 <aside className="ai-chatbot-session-panel">
                   <div className="ai-chatbot-session-panel-header">
-                    <span>最近会话</span>
+                    <span>{t('recentSessions', '最近会话')}</span>
                     <button
                       type="button"
                       className="ai-chatbot-session-link"
                       onClick={handleCreateSession}
                     >
-                      新建会话
+                      {t('newSession', '新建会话')}
                     </button>
                   </div>
                   <div className="ai-chatbot-session-list">
@@ -943,21 +946,21 @@ const AIChatbot = () => {
                         className={`ai-chatbot-session-filter ${sessionStatus === 'active' ? 'active' : ''}`}
                         onClick={() => handleSessionStatusChange('active')}
                       >
-                        进行中
+                        {t('active', '进行中')}
                       </button>
                       <button
                         type="button"
                         className={`ai-chatbot-session-filter ${sessionStatus === 'archived' ? 'active' : ''}`}
                         onClick={() => handleSessionStatusChange('archived')}
                       >
-                        已归档
+                        {t('archived', '已归档')}
                       </button>
                       <button
                         type="button"
                         className={`ai-chatbot-session-filter ${sessionStatus === 'all' ? 'active' : ''}`}
                         onClick={() => handleSessionStatusChange('all')}
                       >
-                        全部
+                        {t('all', '全部')}
                       </button>
                     </div>
                     <div style={{ padding: '8px 12px' }}>
@@ -965,7 +968,7 @@ const AIChatbot = () => {
                         type="search"
                         value={sessionQuery}
                         onChange={handleSessionSearch}
-                        placeholder="搜索会话标题或摘要"
+                        placeholder={t('searchPlaceholder', '搜索会话标题或摘要')}
                         style={{
                           width: '100%',
                           borderRadius: '8px',
@@ -976,9 +979,9 @@ const AIChatbot = () => {
                       />
                     </div>
                     {sessionsLoading ? (
-                      <div className="ai-chatbot-session-empty">会话加载中...</div>
+                      <div className="ai-chatbot-session-empty">{t('loading', '会话加载中...')}</div>
                     ) : sessions.length === 0 ? (
-                      <div className="ai-chatbot-session-empty">暂无历史会话</div>
+                      <div className="ai-chatbot-session-empty">{t('noSessions', '暂无历史会话')}</div>
                     ) : (
                       sessions.map((session) => (
                         <div
@@ -991,12 +994,12 @@ const AIChatbot = () => {
                             onClick={() => handleSelectSession(session.sessionId)}
                           >
                             <div className="ai-chatbot-session-summary">
-                              {session.pinned ? '置顶 · ' : ''}
-                              {session.title || session.summary || '新会话'}
+                              {session.pinned ? t('pinnedPrefix', '置顶 · ') : ''}
+                              {session.title || session.summary || t('newSessionTitle', '新会话')}
                             </div>
                             <div className="ai-chatbot-session-meta">
-                              <span>{session.status === 'active' ? '进行中' : '历史会话'}</span>
-                              <span>{session.messageCount ? `${session.messageCount} 条` : formatSessionTime(session.updatedAt)}</span>
+                              <span>{session.status === 'active' ? t('active', '进行中') : t('historySession', '历史会话')}</span>
+                              <span>{session.messageCount ? t('messageCount', '{{count}} 条', { count: session.messageCount }) : formatSessionTime(session.updatedAt)}</span>
                             </div>
                           </button>
                           <div className="ai-chatbot-session-actions">
@@ -1005,7 +1008,7 @@ const AIChatbot = () => {
                               className="ai-chatbot-session-link"
                               onClick={() => handlePinSession(session)}
                             >
-                              {session.pinned ? '取消固定' : '固定'}
+                              {session.pinned ? t('unpin', '取消固定') : t('pin', '固定')}
                             </button>
                             <button
                               type="button"
@@ -1013,7 +1016,7 @@ const AIChatbot = () => {
                               disabled={renamingSessionId === session.sessionId}
                               onClick={() => handleRenameSession(session)}
                             >
-                              重命名
+                              {t('rename', '重命名')}
                             </button>
                             {session.status !== 'archived' ? (
                               <button
@@ -1021,7 +1024,7 @@ const AIChatbot = () => {
                                 className="ai-chatbot-session-link"
                                 onClick={() => handleArchiveSession(session.sessionId)}
                               >
-                                归档
+                                {t('archive', '归档')}
                               </button>
                             ) : (
                               <button
@@ -1029,18 +1032,17 @@ const AIChatbot = () => {
                                 className="ai-chatbot-session-link"
                                 onClick={() => updateSession(session.sessionId, { status: 'active' }).then(() => fetchSessions({ page: 1, query: sessionQuery, status: sessionStatus, append: false })).catch((error) => {
                                   console.error('恢复会话失败:', error);
-                                  appendSystemMessage('恢复会话失败，请稍后重试。');
+                                  appendSystemMessage(t('error.restoreSessionFailed', '恢复会话失败，请稍后重试。'));
                                 })}
                               >
-                                恢复
-                              </button>
+  {t('restore', '恢复')}</button>
                             )}
                             <button
                               type="button"
                               className="ai-chatbot-session-link"
                               onClick={() => handleDeleteSession(session.sessionId)}
                             >
-                              删除
+                              {t('delete', '删除')}
                             </button>
                           </div>
                         </div>
@@ -1054,7 +1056,7 @@ const AIChatbot = () => {
                           onClick={handleLoadMoreSessions}
                           style={{ width: '100%', justifyContent: 'center' }}
                         >
-                          加载更多
+                          {t('loadMore', '加载更多')}
                         </button>
                       </div>
                     ) : null}
@@ -1069,14 +1071,14 @@ const AIChatbot = () => {
                       className="ai-chatbot-load-more"
                       onClick={handleLoadOlderMessages}
                     >
-                      加载更早消息
+                      {t('loadEarlier', '加载更早消息')}
                     </button>
                   ) : null}
                   {messages.length === 0 ? (
                     <div className="ai-chatbot-welcome">
-                      <p>您好！我是运维小助手。</p>
-                      <p>目前支持基础问答、页面导航和只读查询。</p>
-                      <p>你可以继续问我部署、监控、告警、安全或系统管理相关问题。</p>
+                      <p>{t('welcome1', '您好！我是运维小助手。')}</p>
+                      <p>{t('welcome2', '目前支持基础问答、页面导航和只读查询。')}</p>
+                      <p>{t('welcome3', '你可以继续问我部署、监控、告警、安全或系统管理相关问题。')}</p>
                     </div>
                   ) : (
                     messages.map((message) => (
@@ -1119,7 +1121,7 @@ const AIChatbot = () => {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="输入消息..."
+                    placeholder={t('inputPlaceholder', '输入消息...')}
                     className="ai-chatbot-input"
                     rows="1"
                   />
@@ -1128,7 +1130,7 @@ const AIChatbot = () => {
                     disabled={!inputValue.trim() || isLoading}
                     className="ai-chatbot-send-btn"
                   >
-                    发送
+                    {t('send', '发送')}
                   </button>
                 </div>
               </div>

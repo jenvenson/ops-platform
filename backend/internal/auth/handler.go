@@ -412,7 +412,7 @@ func CreateUser() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditAfter(c, buildAuditUserRecord(user))
-		audit.SetOperationAuditSummary(c, "创建了用户。")
+		audit.SetOperationAuditSummary(c, "Created user.")
 
 		c.JSON(http.StatusOK, user)
 	}
@@ -475,7 +475,7 @@ func UpdateUser() gin.HandlerFunc {
 		}
 		audit.SetOperationAuditBefore(c, before)
 		audit.SetOperationAuditAfter(c, buildAuditUserRecord(user))
-		audit.SetOperationAuditSummary(c, "更新了用户信息。")
+		audit.SetOperationAuditSummary(c, "Updated user info.")
 
 		c.JSON(http.StatusOK, user)
 	}
@@ -506,7 +506,7 @@ func DeleteUser() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditBefore(c, buildAuditUserRecord(user))
-		audit.SetOperationAuditSummary(c, "删除了用户。")
+		audit.SetOperationAuditSummary(c, "Deleted user.")
 
 		c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
 	}
@@ -567,7 +567,7 @@ func CreateRole() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditAfter(c, role)
-		audit.SetOperationAuditSummary(c, "创建了角色。")
+		audit.SetOperationAuditSummary(c, "Created role.")
 
 		c.JSON(http.StatusOK, role)
 	}
@@ -629,7 +629,7 @@ func UpdateRole() gin.HandlerFunc {
 		}
 		audit.SetOperationAuditBefore(c, before)
 		audit.SetOperationAuditAfter(c, role)
-		audit.SetOperationAuditSummary(c, "更新了角色配置。")
+		audit.SetOperationAuditSummary(c, "Updated role config.")
 
 		c.JSON(http.StatusOK, role)
 	}
@@ -660,7 +660,7 @@ func DeleteRole() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditBefore(c, role)
-		audit.SetOperationAuditSummary(c, "删除了角色。")
+		audit.SetOperationAuditSummary(c, "Deleted role.")
 
 		c.JSON(http.StatusOK, gin.H{"message": "role deleted"})
 	}
@@ -728,7 +728,7 @@ func CreateMenu() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditAfter(c, menu)
-		audit.SetOperationAuditSummary(c, "创建了菜单配置。")
+		audit.SetOperationAuditSummary(c, "Created menu config.")
 
 		c.JSON(http.StatusOK, menu)
 	}
@@ -802,7 +802,7 @@ func UpdateMenu() gin.HandlerFunc {
 		}
 		audit.SetOperationAuditBefore(c, before)
 		audit.SetOperationAuditAfter(c, menu)
-		audit.SetOperationAuditSummary(c, "更新了菜单配置。")
+		audit.SetOperationAuditSummary(c, "Updated menu config.")
 
 		c.JSON(http.StatusOK, menu)
 	}
@@ -840,7 +840,7 @@ func DeleteMenu() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditBefore(c, menu)
-		audit.SetOperationAuditSummary(c, "删除了菜单配置。")
+		audit.SetOperationAuditSummary(c, "Deleted menu config.")
 
 		c.JSON(http.StatusOK, gin.H{"message": "menu deleted"})
 	}
@@ -932,7 +932,7 @@ func UpdateRoleMenus() gin.HandlerFunc {
 		}
 		audit.SetOperationAuditBefore(c, auditRoleMenuRecord{RoleID: uint(roleID), Role: role.Name, MenuIDs: beforeMenuIDs})
 		audit.SetOperationAuditAfter(c, auditRoleMenuRecord{RoleID: uint(roleID), Role: role.Name, MenuIDs: req.MenuIDs})
-		audit.SetOperationAuditSummary(c, "更新了角色菜单授权。")
+		audit.SetOperationAuditSummary(c, "Updated role menu authorization.")
 
 		c.JSON(http.StatusOK, gin.H{"message": "role menus updated"})
 	}

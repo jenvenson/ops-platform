@@ -9,10 +9,13 @@ import {
   ArrowLeftOutlined,
   LinkOutlined,
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { monitorAPI, GrafanaDashboard } from '../../api/monitor.js'
 import { getGrafanaProxyBase, openGrafana } from './monitorShared'
 
 export default function MonitorDashboardsPage() {
+  const { t } = useTranslation('monitor')
+  const { t: tc } = useTranslation('common')
   const [loading, setLoading] = useState(true)
   const [dashboards, setDashboards] = useState<GrafanaDashboard[]>([])
   const [selectedDashboard, setSelectedDashboard] = useState<string>('')
@@ -45,17 +48,17 @@ export default function MonitorDashboardsPage() {
       <div>
         <Space style={{ marginBottom: 16 }}>
           <Button icon={<ArrowLeftOutlined />} onClick={() => setSelectedDashboard('')}>
-            返回列表
+            {t('backToList', '返回列表')}
           </Button>
           <Button
             type="primary"
             icon={<ExpandOutlined />}
             onClick={() => openGrafana(`/d/${selectedDashboard}`)}
           >
-            在 Grafana 中打开
+            {t('openInGrafana', '在 Grafana 中打开')}
           </Button>
         </Space>
-        <Card title={dashboard?.title || '仪表盘'} size="small">
+        <Card title={dashboard?.title || t('dashboard', '仪表盘')} size="small">
           <iframe
             src={`${proxyBase}/d/${selectedDashboard}?orgId=1&kiosk`}
             width="100%"
@@ -71,20 +74,20 @@ export default function MonitorDashboardsPage() {
   // 仪表盘列表视图
   return (
     <div>
-      <Card title="Grafana 仪表盘" size="small">
+      <Card title={t('grafanaDashboards', 'Grafana 仪表盘')} size="small">
         <div style={{ marginBottom: 16 }}>
           <Button
             type="primary"
             icon={<LinkOutlined />}
             onClick={() => openGrafana('/dashboards')}
           >
-            在 Grafana 中查看全部
+            {t('viewAllInGrafana', '在 Grafana 中查看全部')}
           </Button>
         </div>
         <Table
           columns={[
             {
-              title: '仪表盘名称',
+              title: t('dashboardName', '仪表盘名称'),
               dataIndex: 'title',
               key: 'title',
               render: (title: string, record: GrafanaDashboard) => (
@@ -95,7 +98,7 @@ export default function MonitorDashboardsPage() {
               ),
             },
             {
-              title: '标签',
+              title: t('tags', '标签'),
               dataIndex: 'tags',
               key: 'tags',
               width: 250,
@@ -107,7 +110,7 @@ export default function MonitorDashboardsPage() {
               ),
             },
             {
-              title: '操作',
+              title: tc('action', '操作'),
               key: 'action',
               width: 180,
               render: (_: unknown, record: GrafanaDashboard) => (
@@ -117,7 +120,7 @@ export default function MonitorDashboardsPage() {
                     size="small"
                     onClick={() => handleDashboardClick(record.uid)}
                   >
-                    嵌入查看
+                    {t('embedView', '嵌入查看')}
                   </Button>
                   <Button
                     type="link"
@@ -125,7 +128,7 @@ export default function MonitorDashboardsPage() {
                     icon={<ExpandOutlined />}
                     onClick={() => openGrafana(record.url)}
                   >
-                    新窗口
+                    {t('newWindow', '新窗口')}
                   </Button>
                 </Space>
               ),

@@ -7,6 +7,7 @@ import {
   FullscreenOutlined,
   FullscreenExitOutlined,
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { PrometheusServer, fetchServerStatusesData, formatBytesRate, formatBitsRate, getDiskRateColor, getBandwidthColor } from './monitorShared'
 
 // 深色主题 - 与安全概览一致
@@ -20,6 +21,8 @@ const theme = {
 }
 
 export default function MonitorBigScreenPage() {
+  const { t } = useTranslation('monitor')
+  const { t: tc } = useTranslation('common')
   const [serverStatuses, setServerStatuses] = useState<PrometheusServer[]>([])
   const [serversLoading, setServersLoading] = useState(false)
   const [bigScreenFull, setBigScreenFull] = useState(false)
@@ -190,7 +193,7 @@ export default function MonitorBigScreenPage() {
     }}>
       {/* 顶部工具栏 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div style={{ fontSize: 18, fontWeight: 600, color: theme.text }}>监控大屏</div>
+        <div style={{ fontSize: 18, fontWeight: 600, color: theme.text }}>{t('bigScreenTitle', '监控大屏')}</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             onClick={() => { fetchServerStatuses() }}
@@ -202,7 +205,7 @@ export default function MonitorBigScreenPage() {
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
           >
-            <ReloadOutlined spin={serversLoading} /> 刷新数据
+            <ReloadOutlined spin={serversLoading} /> {t('refreshData', '刷新数据')}
           </button>
           <button
             onClick={() => setBigScreenFull(!bigScreenFull)}
@@ -214,23 +217,23 @@ export default function MonitorBigScreenPage() {
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)' }}
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
           >
-            {bigScreenFull ? <><FullscreenExitOutlined /> 退出全屏</> : <><FullscreenOutlined /> 最大化</>}
+            {bigScreenFull ? <><FullscreenExitOutlined /> {t('exitFullscreen', '退出全屏')}</> : <><FullscreenOutlined /> {t('maximize', '最大化')}</>}
           </button>
         </div>
       </div>
 
       {/* 顶部：主机状态 */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 13, color: theme.textSecondary, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>主机状态</div>
+        <div style={{ fontSize: 13, color: theme.textSecondary, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{t('hostStatus', '主机状态')}</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
           {/* 在线主机 */}
           <div style={{ ...cardStyle }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 13, color: theme.textSecondary }}>在线 (Up)</span>
+              <span style={{ fontSize: 13, color: theme.textSecondary }}>{t('onlineUp', '在线 (Up)')}</span>
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e', animation: 'pulse 1.5s ease-in-out infinite' }} />
             </div>
             <div style={{ fontSize: 42, fontWeight: 700, color: '#22c55e', lineHeight: 1 }}>{onlineCount}</div>
-            <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>总主机: {total}</div>
+            <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>{t('totalHosts', '总主机')}: {total}</div>
           </div>
           {/* 离线主机 */}
           <div style={{
@@ -238,23 +241,23 @@ export default function MonitorBigScreenPage() {
             ...(offlineCount > 0 ? { background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' } : {}),
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 13, color: theme.textSecondary }}>离线 (Down)</span>
+              <span style={{ fontSize: 13, color: theme.textSecondary }}>{t('offlineDown', '离线 (Down)')}</span>
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: offlineCount > 0 ? '#ef4444' : '#444', boxShadow: offlineCount > 0 ? '0 0 8px #ef4444' : 'none' }} />
             </div>
             <div style={{ fontSize: 42, fontWeight: 700, color: offlineCount > 0 ? '#ef4444' : '#666', lineHeight: 1 }}>{offlineCount}</div>
-            <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>{offlineCount > 0 ? '需要关注!' : '全部正常'}</div>
+            <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>{offlineCount > 0 ? t('needsAttention', '需要关注!') : t('allNormal', '全部正常')}</div>
           </div>
           {/* CPU 均值 */}
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, color: theme.textSecondary, marginBottom: 8 }}>CPU 均值</div>
+            <div style={{ fontSize: 13, color: theme.textSecondary, marginBottom: 8 }}>{t('cpuAverage', 'CPU 均值')}</div>
             <div style={{ fontSize: 42, fontWeight: 700, color: badgeLabel(cpuAvg).color, lineHeight: 1 }}>{cpuAvg.toFixed(1)}%</div>
-            <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>{cpuWarnCount > 0 ? `${cpuWarnCount} 台超过 90%` : '全部正常'}</div>
+            <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>{cpuWarnCount > 0 ? t('machinesOverThreshold', '{{count}} 台超过 90%', { count: cpuWarnCount }) : t('allNormal', '全部正常')}</div>
           </div>
           {/* 内存均值 */}
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, color: theme.textSecondary, marginBottom: 8 }}>内存均值</div>
+            <div style={{ fontSize: 13, color: theme.textSecondary, marginBottom: 8 }}>{t('memoryAverage', '内存均值')}</div>
             <div style={{ fontSize: 42, fontWeight: 700, color: badgeLabel(memAvg).color, lineHeight: 1 }}>{memAvg.toFixed(1)}%</div>
-            <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>{memWarnCount > 0 ? `${memWarnCount} 台超过 90%` : '全部正常'}</div>
+            <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>{memWarnCount > 0 ? t('machinesOverThreshold', '{{count}} 台超过 90%', { count: memWarnCount }) : t('allNormal', '全部正常')}</div>
           </div>
         </div>
       </div>
@@ -264,17 +267,17 @@ export default function MonitorBigScreenPage() {
         {/* CPU 使用率 */}
         <div style={cardStyle}>
           <div style={titleStyle}>
-            CPU 使用率
+            {t('cpuUsage', 'CPU 使用率')}
             <span style={{
               fontSize: 11, padding: '2px 8px', borderRadius: 10,
               background: `${badgeLabel(cpuAvg).color}33`, color: badgeLabel(cpuAvg).color,
-            }}>Top 5</span>
+            }}>{t('top5', 'Top 5')}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            {renderGauge(cpuAvg, '集群均值')}
+            {renderGauge(cpuAvg, t('clusterAverage', '集群均值'))}
             <div style={{ flex: 1 }}>
               {cpuTop5.map(s => renderTopItem(s.name, s.cpuUsage ?? 0))}
-              {cpuTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>暂无数据</div>}
+              {cpuTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>{tc('noData', '暂无数据')}</div>}
             </div>
           </div>
         </div>
@@ -282,17 +285,17 @@ export default function MonitorBigScreenPage() {
         {/* 内存使用率 */}
         <div style={cardStyle}>
           <div style={titleStyle}>
-            内存使用率
+            {t('memoryUsage', '内存使用率')}
             <span style={{
               fontSize: 11, padding: '2px 8px', borderRadius: 10,
               background: `${badgeLabel(memAvg).color}33`, color: badgeLabel(memAvg).color,
-            }}>Top 5</span>
+            }}>{t('top5', 'Top 5')}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            {renderGauge(memAvg, '集群均值')}
+            {renderGauge(memAvg, t('clusterAverage', '集群均值'))}
             <div style={{ flex: 1 }}>
               {memTop5.map(s => renderTopItem(s.name, s.memUsage ?? 0))}
-              {memTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>暂无数据</div>}
+              {memTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>{tc('noData', '暂无数据')}</div>}
             </div>
           </div>
         </div>
@@ -300,17 +303,17 @@ export default function MonitorBigScreenPage() {
         {/* 磁盘使用率 */}
         <div style={cardStyle}>
           <div style={titleStyle}>
-            磁盘使用率
+            {t('diskUsage', '磁盘使用率')}
             <span style={{
               fontSize: 11, padding: '2px 8px', borderRadius: 10,
               background: `${badgeLabel(diskAvg).color}33`, color: badgeLabel(diskAvg).color,
-            }}>Top 5</span>
+            }}>{t('top5', 'Top 5')}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            {renderGauge(diskAvg, '集群均值')}
+            {renderGauge(diskAvg, t('clusterAverage', '集群均值'))}
             <div style={{ flex: 1 }}>
               {diskTop5.map(s => renderTopItem(s.name, s.diskUsage ?? 0))}
-              {diskTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>暂无数据</div>}
+              {diskTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>{tc('noData', '暂无数据')}</div>}
             </div>
           </div>
         </div>
@@ -318,22 +321,22 @@ export default function MonitorBigScreenPage() {
         {/* 系统负载 */}
         <div style={cardStyle}>
           <div style={titleStyle}>
-            系统负载（5分钟）
+            {t('systemLoad5min', '系统负载（5分钟）')}
             <span style={{
               fontSize: 11, padding: '2px 8px', borderRadius: 10,
               background: 'rgba(59, 130, 246, 0.2)', color: theme.primary,
-            }}>Top 5</span>
+            }}>{t('top5', 'Top 5')}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             {/* 负载仪表盘 - 用相对于核数的百分比 */}
             {(() => {
               const avgCores = avg(serverStatuses.map(s => s.cpuCores))
               const loadPct = avgCores > 0 ? Math.min((loadAvg / avgCores) * 100, 100) : 0
-              return renderGauge(loadPct, '负载/核数')
+              return renderGauge(loadPct, t('loadPerCore', '负载/核数'))
             })()}
             <div style={{ flex: 1 }}>
               {loadTop5.map(s => renderTopItem(s.name, s.load5 ?? 0, ''))}
-              {loadTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>暂无数据</div>}
+              {loadTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>{tc('noData', '暂无数据')}</div>}
             </div>
           </div>
         </div>
@@ -341,23 +344,23 @@ export default function MonitorBigScreenPage() {
         {/* 磁盘读写 */}
         <div style={cardStyle}>
           <div style={titleStyle}>
-            磁盘读写
+            {t('diskIO', '磁盘读写')}
             <span style={{
               fontSize: 11, padding: '2px 8px', borderRadius: 10,
               background: 'rgba(139, 92, 246, 0.2)', color: '#8b5cf6',
-            }}>Top 5</span>
+            }}>{t('top5', 'Top 5')}</span>
           </div>
           <div style={{ display: 'flex', gap: 20 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 12 }}>读取</div>
+              <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 12 }}>{t('read', '读取')}</div>
               {diskReadTop5.map(s => renderRateItem(s.name, s.diskRead, formatBytesRate, getDiskRateColor, true))}
-              {diskReadTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>暂无数据</div>}
+              {diskReadTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>{tc('noData', '暂无数据')}</div>}
             </div>
             <div style={{ width: 1, background: theme.border }} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 12 }}>写入</div>
+              <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 12 }}>{t('write', '写入')}</div>
               {diskWriteTop5.map(s => renderRateItem(s.name, s.diskWrite, formatBytesRate, getDiskRateColor, true))}
-              {diskWriteTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>暂无数据</div>}
+              {diskWriteTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>{tc('noData', '暂无数据')}</div>}
             </div>
           </div>
         </div>
@@ -365,23 +368,23 @@ export default function MonitorBigScreenPage() {
         {/* 网络带宽 */}
         <div style={cardStyle}>
           <div style={titleStyle}>
-            网络带宽
+            {t('networkBandwidth', '网络带宽')}
             <span style={{
               fontSize: 11, padding: '2px 8px', borderRadius: 10,
               background: 'rgba(16, 185, 129, 0.2)', color: '#10b981',
-            }}>Top 5</span>
+            }}>{t('top5', 'Top 5')}</span>
           </div>
           <div style={{ display: 'flex', gap: 20 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 12 }}>下载</div>
+              <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 12 }}>{t('download', '下载')}</div>
               {netDownTop5.map(s => renderRateItem(s.name, s.netDown, formatBitsRate, getBandwidthColor, false))}
-              {netDownTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>暂无数据</div>}
+              {netDownTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>{tc('noData', '暂无数据')}</div>}
             </div>
             <div style={{ width: 1, background: theme.border }} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 12 }}>上传</div>
+              <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 12 }}>{t('upload', '上传')}</div>
               {netUpTop5.map(s => renderRateItem(s.name, s.netUp, formatBitsRate, getBandwidthColor, false))}
-              {netUpTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>暂无数据</div>}
+              {netUpTop5.length === 0 && <div style={{ color: theme.textSecondary, fontSize: 13 }}>{tc('noData', '暂无数据')}</div>}
             </div>
           </div>
         </div>

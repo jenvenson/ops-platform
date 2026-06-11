@@ -7,6 +7,7 @@ import { ConfigProvider } from 'antd'
 import MainLayout from './components/MainLayout'
 import { ThemeProvider, useTheme } from './contexts/ThemeContext'
 import { LocaleProvider, useLocale } from './contexts/LocaleContext'
+import PageLoader from './components/PageLoader'
 
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
@@ -58,7 +59,7 @@ const PlatformAuditPage = lazy(() => import('./pages/platform/PlatformAuditPage'
 
 function withPageLoader(element: JSX.Element) {
   return (
-    <Suspense fallback={<div style={{ padding: 24 }}>加载中...</div>}>
+    <Suspense fallback={<PageLoader />}>
       {element}
     </Suspense>
   )

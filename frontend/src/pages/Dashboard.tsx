@@ -12,6 +12,7 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { cmdbAPI } from '../api/cmdb'
 import { deployAPI, DeployRecord, ArchiveRecord } from '../api/cmdb.js'
 import { aggregatedHistoryAPI, AggregatedHistory } from '../api/aggregated-history'
@@ -19,6 +20,7 @@ import { alertAPI, AlertEvent } from '../api/alert'
 import { platformEventsAPI } from '../api/platform-events'
 import { securityAPI, SecurityScanTask, SecurityVulnerability } from '../api/security'
 import { MENU_CHANGED_EVENT, hasMenuAccess, readAllowedPaths, readStoredMenus } from '../utils/menuAccess'
+import { formatDateTime } from '../utils/dateFormat'
 
 import '../styles/dashboard.css'
 
@@ -27,6 +29,8 @@ const currentDateValue = new Date().toISOString().slice(0, 10)
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const { t } = useTranslation('dashboard')
+  const { t: tc } = useTranslation('common')
   const [allowedPaths, setAllowedPaths] = useState<Set<string>>(() => readAllowedPaths())
   const [menusReady, setMenusReady] = useState(() => readStoredMenus().length > 0)
   const hasAccess = (path: string) => hasMenuAccess(path, allowedPaths)
@@ -182,34 +186,34 @@ export default function Dashboard() {
   }, [allowedPathSignature, menusReady])
 
   const statusMap: Record<string, { color: string; text: string }> = {
-    pending: { color: 'default', text: '待执行' },
-    queued: { color: 'processing', text: '排队中' },
-    running: { color: 'processing', text: '部署中' },
-    success: { color: 'success', text: '成功' },
-    failed: { color: 'error', text: '失败' },
+    pending: { color: 'default', text: t('statusPending', '待执行') },
+    queued: { color: 'processing', text: t('statusQueued', '排队中') },
+    running: { color: 'processing', text: t('statusDeploying', '部署中') },
+    success: { color: 'success', text: t('statusSuccess', '成功') },
+    failed: { color: 'error', text: t('statusFailed', '失败') },
   }
 
   const aggregateStatusMap: Record<string, { color: string; text: string }> = {
-    pending: { color: 'default', text: '待执行' },
-    queued: { color: 'processing', text: '排队中' },
-    running: { color: 'processing', text: '归档中' },
-    archiving: { color: 'processing', text: '归档中' },
-    success: { color: 'success', text: '完成' },
-    completed: { color: 'success', text: '完成' },
-    failed: { color: 'error', text: '失败' },
+    pending: { color: 'default', text: t('statusPending', '待执行') },
+    queued: { color: 'processing', text: t('statusQueued', '排队中') },
+    running: { color: 'processing', text: t('statusArchiving', '归档中') },
+    archiving: { color: 'processing', text: t('statusArchiving', '归档中') },
+    success: { color: 'success', text: t('statusComplete', '完成') },
+    completed: { color: 'success', text: t('statusComplete', '完成') },
+    failed: { color: 'error', text: t('statusFailed', '失败') },
   }
 
   const alertSeverityMap: Record<string, { color: string; text: string }> = {
-    critical: { color: 'red', text: '严重' },
-    warning: { color: 'orange', text: '警告' },
-    info: { color: 'blue', text: '提醒' },
+    critical: { color: 'red', text: t('severityCritical', '严重') },
+    warning: { color: 'orange', text: t('severityWarning', '警告') },
+    info: { color: 'blue', text: t('severityInfo', '提醒') },
   }
 
   const alertEventStatusMap: Record<string, { color: string; text: string }> = {
-    firing: { color: 'error', text: '告警中' },
-    acknowledged: { color: 'warning', text: '已介入' },
-    resolved: { color: 'success', text: '已恢复' },
-    closed: { color: 'default', text: '已关闭' },
+    firing: { color: 'error', text: t('alertFiring', '告警中') },
+    acknowledged: { color: 'warning', text: t('alertAcknowledged', '已介入') },
+    resolved: { color: 'success', text: t('alertResolved', '已恢复') },
+    closed: { color: 'default', text: t('alertClosed', '已关闭') },
   }
 
   const vulnerabilitySeverityMap: Record<string, string> = {
@@ -221,17 +225,17 @@ export default function Dashboard() {
   }
 
   const vulnerabilityStatusMap: Record<string, { color: string; text: string }> = {
-    open: { color: 'red', text: '待处理' },
-    acknowledged: { color: 'orange', text: '已确认' },
-    fixed: { color: 'green', text: '已修复' },
-    ignored: { color: 'default', text: '已忽略' },
+    open: { color: 'red', text: t('vulnOpen', '待处理') },
+    acknowledged: { color: 'orange', text: t('vulnAcknowledged', '已确认') },
+    fixed: { color: 'green', text: t('vulnFixed', '已修复') },
+    ignored: { color: 'default', text: t('vulnIgnored', '已忽略') },
   }
 
   const scanTaskStatusMap: Record<string, { color: string; text: string }> = {
-    pending: { color: 'default', text: '待执行' },
-    running: { color: 'processing', text: '扫描中' },
-    completed: { color: 'success', text: '已完成' },
-    failed: { color: 'error', text: '失败' },
+    pending: { color: 'default', text: t('statusPending', '待执行') },
+    running: { color: 'processing', text: t('statusScanning', '扫描中') },
+    completed: { color: 'success', text: t('statusComplete', '已完成') },
+    failed: { color: 'error', text: t('statusFailed', '失败') },
   }
 
   const onlineRate = stats.serverCount > 0
@@ -245,9 +249,9 @@ export default function Dashboard() {
       icon: <ProjectOutlined />,
       iconClass: 'blue',
       value: stats.projectCount,
-      label: '项目',
+      label: t('projects', '项目'),
       trend: null,
-      footer: '业务范围和归属',
+      footer: t('projectsDesc', '业务范围和归属'),
     },
     {
       key: 'applications',
@@ -255,9 +259,9 @@ export default function Dashboard() {
       icon: <AppstoreOutlined />,
       iconClass: 'blue',
       value: stats.applicationCount,
-      label: '应用',
+      label: t('applications', '应用'),
       trend: null,
-      footer: '流水线和发布配置',
+      footer: t('applicationsDesc', '流水线和发布配置'),
     },
     {
       key: 'environments',
@@ -265,13 +269,13 @@ export default function Dashboard() {
       icon: <CloudOutlined />,
       iconClass: 'green',
       value: stats.environmentCount,
-      label: '环境',
+      label: t('environments', '环境'),
       trend: null,
       footer: (
         <Space size={[4, 4]} wrap>
-          <Tag color="blue" className="dashboard-tag">开发 {stats.envByType.dev}</Tag>
-          <Tag color="orange" className="dashboard-tag">测试 {stats.envByType.test}</Tag>
-          <Tag color="red" className="dashboard-tag">生产 {stats.envByType.prod}</Tag>
+          <Tag color="blue" className="dashboard-tag">{t('environmentsDev', '开发')} {stats.envByType.dev}</Tag>
+          <Tag color="orange" className="dashboard-tag">{t('environmentsTest', '测试')} {stats.envByType.test}</Tag>
+          <Tag color="red" className="dashboard-tag">{t('environmentsProd', '生产')} {stats.envByType.prod}</Tag>
         </Space>
       ),
     },
@@ -281,7 +285,7 @@ export default function Dashboard() {
       icon: <DesktopOutlined />,
       iconClass: 'purple',
       value: stats.serverCount,
-      label: '主机',
+      label: t('servers', '主机'),
       trend: {
         value: onlineRate,
         suffix: '%',
@@ -289,9 +293,9 @@ export default function Dashboard() {
       },
       footer: (
         <Space size={[4, 4]} wrap>
-          <Tag color="green" className="dashboard-tag">在线 {stats.onlineServerCount} 台</Tag>
+          <Tag color="green" className="dashboard-tag">{t('serversOnline', '在线')} {stats.onlineServerCount} {t('serversUnit', '台')}</Tag>
           {stats.serverCount - stats.onlineServerCount > 0 ? (
-            <Tag color="red" className="dashboard-tag">离线 {stats.serverCount - stats.onlineServerCount} 台</Tag>
+            <Tag color="red" className="dashboard-tag">{t('serversOffline', '离线')} {stats.serverCount - stats.onlineServerCount} {t('serversUnit', '台')}</Tag>
           ) : null}
         </Space>
       ),
@@ -310,16 +314,15 @@ export default function Dashboard() {
     || hasAccess('/security/vulnerabilities')
     || canViewPlatformEvents
 
-  // 部署记录列配置
   const deployColumns = [
     {
-      title: '应用',
+      title: t('colApp', '应用'),
       dataIndex: 'app_name',
       key: 'app_name',
       width: 120,
     },
     {
-      title: '环境',
+      title: t('colEnv', '环境'),
       dataIndex: 'env_name',
       key: 'env_name',
       width: 80,
@@ -330,7 +333,7 @@ export default function Dashboard() {
       ),
     },
     {
-      title: '状态',
+      title: t('colStatus', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 80,
@@ -340,31 +343,30 @@ export default function Dashboard() {
       },
     },
     {
-      title: '发起人',
+      title: t('colTriggeredBy', '发起人'),
       dataIndex: 'triggered_by',
       key: 'triggered_by',
       width: 110,
       render: (value: string) => value || '-',
     },
     {
-      title: '时间',
+      title: t('colTime', '时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 140,
-      render: (time: string) => (time ? new Date(time).toLocaleString('zh-CN') : '-'),
+      render: (time: string) => (time ? formatDateTime(time) : '-'),
     },
   ]
 
-  // 归档记录列配置
   const archiveColumns = [
     {
-      title: '应用',
+      title: t('colApp', '应用'),
       dataIndex: 'app_name',
       key: 'app_name',
       width: 120,
     },
     {
-      title: '环境',
+      title: t('colEnv', '环境'),
       dataIndex: 'env_name',
       key: 'env_name',
       width: 80,
@@ -375,7 +377,7 @@ export default function Dashboard() {
       ),
     },
     {
-      title: '状态',
+      title: t('colStatus', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 80,
@@ -385,38 +387,38 @@ export default function Dashboard() {
       },
     },
     {
-      title: '操作人',
+      title: t('colOperator', '操作人'),
       dataIndex: 'operator',
       key: 'operator',
       width: 110,
       render: (value: string) => value || '-',
     },
     {
-      title: '归档时间',
+      title: t('colArchiveTime', '归档时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 140,
-      render: (time: string) => (time ? new Date(time).toLocaleString('zh-CN') : '-'),
+      render: (time: string) => (time ? formatDateTime(time) : '-'),
     },
   ]
 
   const aggregateColumns = [
     {
-      title: '项目',
+      title: t('colProject', '项目'),
       dataIndex: 'project_name',
       key: 'project_name',
       width: 120,
       render: (value: string) => value || '-',
     },
     {
-      title: '标签',
+      title: t('colTag', '标签'),
       dataIndex: 'environment',
       key: 'environment',
       width: 100,
       render: (value: string) => <Tag color="blue">{value || '-'}</Tag>,
     },
     {
-      title: '状态',
+      title: t('colStatus', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 90,
@@ -426,24 +428,24 @@ export default function Dashboard() {
       },
     },
     {
-      title: '操作人',
+      title: t('colOperator', '操作人'),
       dataIndex: 'operator_name',
       key: 'operator_name',
       width: 110,
       render: (value: string, record: AggregatedHistory) => value || record.operator || '-',
     },
     {
-      title: '时间',
+      title: t('colTime', '时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 140,
-      render: (time: string) => (time ? new Date(time).toLocaleString('zh-CN') : '-'),
+      render: (time: string) => (time ? formatDateTime(time) : '-'),
     },
   ]
 
   const alertColumns = [
     {
-      title: '级别',
+      title: t('colSeverity', '级别'),
       dataIndex: 'severity',
       key: 'severity',
       width: 80,
@@ -453,7 +455,7 @@ export default function Dashboard() {
       },
     },
     {
-      title: '规则',
+      title: t('colRule', '规则'),
       dataIndex: 'rule_name',
       key: 'rule_name',
       width: 170,
@@ -461,7 +463,7 @@ export default function Dashboard() {
       render: (value: string) => value || '-',
     },
     {
-      title: '状态',
+      title: t('colStatus', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 90,
@@ -471,24 +473,24 @@ export default function Dashboard() {
       },
     },
     {
-      title: '时间',
+      title: t('colTime', '时间'),
       dataIndex: 'fired_at',
       key: 'fired_at',
       width: 150,
-      render: (time: string) => (time ? new Date(time).toLocaleString('zh-CN') : '-'),
+      render: (time: string) => (time ? formatDateTime(time) : '-'),
     },
   ]
 
   const vulnerabilityColumns = [
     {
-      title: '级别',
+      title: t('colSeverity', '级别'),
       dataIndex: 'severity',
       key: 'severity',
       width: 80,
       render: (severity: string) => <Tag color={vulnerabilitySeverityMap[severity] || 'default'}>{severity || '-'}</Tag>,
     },
     {
-      title: '漏洞标题',
+      title: t('colVulnTitle', '漏洞标题'),
       dataIndex: 'title',
       key: 'title',
       width: 180,
@@ -496,7 +498,7 @@ export default function Dashboard() {
       render: (value: string) => value || '-',
     },
     {
-      title: '状态',
+      title: t('colStatus', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 90,
@@ -506,17 +508,17 @@ export default function Dashboard() {
       },
     },
     {
-      title: '时间',
+      title: t('colTime', '时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 150,
-      render: (time: string) => (time ? new Date(time).toLocaleString('zh-CN') : '-'),
+      render: (time: string) => (time ? formatDateTime(time) : '-'),
     },
   ]
 
   const scanTaskColumns = [
     {
-      title: '任务名称',
+      title: t('colTaskName', '任务名称'),
       dataIndex: 'name',
       key: 'name',
       width: 170,
@@ -524,22 +526,22 @@ export default function Dashboard() {
       render: (value: string) => value || '-',
     },
     {
-      title: '类型',
+      title: t('colType', '类型'),
       dataIndex: 'scan_type',
       key: 'scan_type',
       width: 90,
       render: (value: string) => {
         const labelMap: Record<string, string> = {
-          port: '端口',
-          'host-vuln': '主机漏洞',
-          web: 'Web',
-          all: '全量',
+          port: t('scanTypePort', '端口'),
+          'host-vuln': t('scanTypeHostVuln', '主机漏洞'),
+          web: t('scanTypeWeb', 'Web'),
+          all: t('scanTypeAll', '全量'),
         }
         return <Tag color="blue">{labelMap[value] || value || '-'}</Tag>
       },
     },
     {
-      title: '状态',
+      title: t('colStatus', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 90,
@@ -549,18 +551,18 @@ export default function Dashboard() {
       },
     },
     {
-      title: '时间',
+      title: t('colTime', '时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 150,
-      render: (time: string) => (time ? new Date(time).toLocaleString('zh-CN') : '-'),
+      render: (time: string) => (time ? formatDateTime(time) : '-'),
     },
   ]
 
   const moreActivityTabs = [
     hasAccess('/deploy/archived') ? {
       key: 'archives',
-      label: '归档',
+      label: t('tabArchives', '归档'),
       path: '/deploy/archived',
       children: (
         <Table
@@ -570,13 +572,13 @@ export default function Dashboard() {
           pagination={false}
           size="small"
           scroll={{ x: 520 }}
-          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="还没有归档记录。" /> }}
+          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('noArchiveRecords', '还没有归档记录。')} /> }}
         />
       ),
     } : null,
     hasAccess('/deploy/aggregated-history') ? {
       key: 'aggregates',
-      label: '聚合',
+      label: t('tabAggregates', '聚合'),
       path: '/deploy/aggregated-history',
       children: (
         <Table
@@ -586,13 +588,13 @@ export default function Dashboard() {
           pagination={false}
           size="small"
           scroll={{ x: 560 }}
-          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="还没有聚合记录。" /> }}
+          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('noAggregateRecords', '还没有聚合记录。')} /> }}
         />
       ),
     } : null,
     hasAccess('/security/tasks') ? {
       key: 'scanTasks',
-      label: '扫描任务',
+      label: t('tabScanTasks', '扫描任务'),
       path: '/security/tasks',
       children: (
         <Table
@@ -602,13 +604,13 @@ export default function Dashboard() {
           pagination={false}
           size="small"
           scroll={{ x: 520 }}
-          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="还没有扫描任务记录。" /> }}
+          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('noScanTaskRecords', '还没有扫描任务记录。')} /> }}
         />
       ),
     } : null,
     hasAccess('/security/vulnerabilities') ? {
       key: 'vulnerabilities',
-      label: '扫描漏洞',
+      label: t('tabVulnerabilities', '扫描漏洞'),
       path: '/security/vulnerabilities',
       children: (
         <Table
@@ -618,7 +620,7 @@ export default function Dashboard() {
           pagination={false}
           size="small"
           scroll={{ x: 520 }}
-          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="还没有扫描漏洞记录。" /> }}
+          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('noVulnerabilityRecords', '还没有扫描漏洞记录。')} /> }}
         />
       ),
     } : null,
@@ -651,7 +653,7 @@ export default function Dashboard() {
       {menusReady && !hasVisibleContent && (
         <Card>
           <Empty
-            description="当前账号暂未分配工作台可见模块，请联系管理员分配菜单权限。"
+            description={t('noPermission', '当前账号暂未分配工作台可见模块，请联系管理员分配菜单权限。')}
           />
         </Card>
       )}
@@ -689,11 +691,11 @@ export default function Dashboard() {
         <div className="dashboard-events-card">
           <div className="card-header">
             <div>
-              <div className="card-title">平台事件中心</div>
-              <div className="card-subtitle">只展示今日统计，详情在事件中心查看</div>
+              <div className="card-title">{t('platformEvents', '平台事件中心')}</div>
+              <div className="card-subtitle">{t('platformEventsSubtitle', '只展示今日统计，详情在事件中心查看')}</div>
             </div>
             <Button type="link" size="small" onClick={() => navigate('/platform/events')} style={{ color: 'var(--primary)', fontWeight: 500, padding: '4px 0' }}>
-              查看全部
+              {tc('viewAll', '查看全部')}
             </Button>
           </div>
           <div className="dashboard-events-grid">
@@ -701,25 +703,25 @@ export default function Dashboard() {
               <div className={`event-value ${platformEventSummary.todayTotal === 0 ? 'muted' : ''}`}>
                 {platformEventSummary.todayTotal}
               </div>
-              <div className="event-label">今日事件</div>
+              <div className="event-label">{t('todayEvents', '今日事件')}</div>
             </div>
             <div className="dashboard-event-stat">
               <div className={`event-value ${platformEventSummary.attention > 0 ? 'warning' : 'muted'}`}>
                 {platformEventSummary.attention}
               </div>
-              <div className="event-label">待关注</div>
+              <div className="event-label">{t('pendingAttention', '待关注')}</div>
             </div>
             <div className="dashboard-event-stat">
               <div className={`event-value ${platformEventSummary.failed > 0 ? 'danger' : 'muted'}`}>
                 {platformEventSummary.failed}
               </div>
-              <div className="event-label">失败事件</div>
+              <div className="event-label">{t('failedEvents', '失败事件')}</div>
             </div>
             <div className="dashboard-event-stat">
               <div className={`event-value ${platformEventSummary.highRisk > 0 ? 'danger' : 'muted'}`}>
                 {platformEventSummary.highRisk}
               </div>
-              <div className="event-label">高风险</div>
+              <div className="event-label">{t('highRisk', '高风险')}</div>
             </div>
           </div>
         </div>
@@ -730,9 +732,9 @@ export default function Dashboard() {
         {hasAccess('/deploy/history') && (
           <div className="dashboard-data-card">
             <div className="card-header">
-              <span className="card-title">最近部署</span>
+              <span className="card-title">{t('recentDeploys', '最近部署')}</span>
               <Button type="link" size="small" onClick={() => navigate('/deploy/history')} style={{ color: 'var(--primary)', fontWeight: 500, padding: '4px 0' }}>
-                查看全部
+                {tc('viewAll', '查看全部')}
               </Button>
             </div>
             <div className="card-body">
@@ -748,7 +750,7 @@ export default function Dashboard() {
               ) : (
                 <Empty
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  description="还没有部署记录，可以从【应用发布】开始第一条变更。"
+                  description={t('noDeployRecords', '还没有部署记录，可以从【应用发布】开始第一条变更。')}
                 />
               )}
             </div>
@@ -758,9 +760,9 @@ export default function Dashboard() {
         {hasAccess('/alarm/events') && (
           <div className="dashboard-data-card">
             <div className="card-header">
-              <span className="card-title">最近告警</span>
+              <span className="card-title">{t('recentAlerts', '最近告警')}</span>
               <Button type="link" size="small" onClick={() => navigate('/alarm/events')} style={{ color: 'var(--primary)', fontWeight: 500, padding: '4px 0' }}>
-                查看全部
+                {tc('viewAll', '查看全部')}
               </Button>
             </div>
             <div className="card-body">
@@ -776,7 +778,7 @@ export default function Dashboard() {
               ) : (
                 <Empty
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  description="还没有告警记录。"
+                  description={t('noAlertRecords', '还没有告警记录。')}
                 />
               )}
             </div>
@@ -789,8 +791,8 @@ export default function Dashboard() {
         <div className="dashboard-more-card">
           <div className="card-header">
             <div>
-              <div className="card-title">更多动态</div>
-              <div className="card-subtitle">次级模块改为分页签展示，减少首页并列信息量</div>
+              <div className="card-title">{t('moreActivity', '更多动态')}</div>
+              <div className="card-subtitle">{t('moreActivitySubtitle', '次级模块改为分页签展示，减少首页并列信息量')}</div>
             </div>
           </div>
           <Tabs

@@ -161,7 +161,7 @@ func (h *Handler) CreateFIMPolicy() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditAfter(c, item)
-		audit.SetOperationAuditSummary(c, "创建了 FIM 巡检策略。")
+		audit.SetOperationAuditSummary(c, "Created FIM policy.")
 		c.JSON(http.StatusOK, item)
 	}
 }
@@ -190,7 +190,7 @@ func (h *Handler) UpdateFIMPolicy() gin.HandlerFunc {
 		}
 		audit.SetOperationAuditBefore(c, before)
 		audit.SetOperationAuditAfter(c, item)
-		audit.SetOperationAuditSummary(c, "更新了 FIM 巡检策略。")
+		audit.SetOperationAuditSummary(c, "Updated FIM policy.")
 		c.JSON(http.StatusOK, item)
 	}
 }
@@ -212,7 +212,7 @@ func (h *Handler) DeleteFIMPolicy() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditBefore(c, before)
-		audit.SetOperationAuditSummary(c, "删除了 FIM 巡检策略。")
+		audit.SetOperationAuditSummary(c, "Deleted FIM policy.")
 		c.JSON(http.StatusOK, gin.H{"message": "ok"})
 	}
 }
@@ -352,7 +352,7 @@ func (h *Handler) CreateFIMWatchPath() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditAfter(c, item)
-		audit.SetOperationAuditSummary(c, "新增了 FIM 监控目录配置。")
+		audit.SetOperationAuditSummary(c, "Added FIM watch path config.")
 		c.JSON(http.StatusOK, item)
 	}
 }
@@ -381,7 +381,7 @@ func (h *Handler) UpdateFIMWatchPath() gin.HandlerFunc {
 		}
 		audit.SetOperationAuditBefore(c, before)
 		audit.SetOperationAuditAfter(c, item)
-		audit.SetOperationAuditSummary(c, "更新了 FIM 监控目录配置。")
+		audit.SetOperationAuditSummary(c, "Updated FIM watch path config.")
 		c.JSON(http.StatusOK, item)
 	}
 }
@@ -403,7 +403,7 @@ func (h *Handler) DeleteFIMWatchPath() gin.HandlerFunc {
 			return
 		}
 		audit.SetOperationAuditBefore(c, before)
-		audit.SetOperationAuditSummary(c, "删除了 FIM 监控目录配置。")
+		audit.SetOperationAuditSummary(c, "Deleted FIM watch path config.")
 		c.JSON(http.StatusOK, gin.H{"message": "ok"})
 	}
 }

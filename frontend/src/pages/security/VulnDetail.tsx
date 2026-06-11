@@ -14,6 +14,7 @@ import {
   CheckCircleOutlined,
 } from '@ant-design/icons'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -60,6 +61,7 @@ interface VulnDetailProps {
 }
 
 export default function VulnDetail({ vuln }: VulnDetailProps) {
+  const { t } = useTranslation('security')
   const sectionTitleStyle = {
     color: '#f8fafc',
     marginBottom: 12,
@@ -156,7 +158,7 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
       <div style={{ marginBottom: 16 }}>
         <Title level={5} style={sectionTitleStyle}>
           <SafetyOutlined style={sectionIconStyle} />
-          影响范围
+          {t('vulnDetail.affectedScope', '影响范围')}
         </Title>
         <Card size="small" style={{ background: theme.cardHover, borderColor: theme.border }}>
           <Descriptions
@@ -165,10 +167,10 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
             labelStyle={{ color: '#cbd5e1', fontWeight: 600 }}
             contentStyle={{ color: '#f8fafc', fontWeight: 500 }}
           >
-            <Descriptions.Item label="受影响产品">
+            <Descriptions.Item label={t('vulnDetail.affectedProduct', '受影响产品')}>
               <Text style={{ color: '#f8fafc', fontWeight: 500 }}>{vuln.affected_product || 'Unknown'}</Text>
             </Descriptions.Item>
-            <Descriptions.Item label="受影响版本">
+            <Descriptions.Item label={t('vulnDetail.affectedVersion', '受影响版本')}>
               <Text style={{ color: '#f8fafc', fontWeight: 500 }}>{vuln.affected_version || 'Unknown'}</Text>
             </Descriptions.Item>
           </Descriptions>
@@ -179,11 +181,11 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
       <div style={{ marginBottom: 16 }}>
         <Title level={5} style={sectionTitleStyle}>
           <FileTextOutlined style={sectionIconStyle} />
-          漏洞描述
+          {t('vulnDetail.description', '漏洞描述')}
         </Title>
         <Card size="small" style={{ background: theme.cardHover, borderColor: theme.border }}>
           <Paragraph style={{ color: '#f8fafc', margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.75, fontWeight: 500 }}>
-            {vuln.description || '暂无详细描述'}
+            {vuln.description || t('vulnDetail.noDescription', '暂无详细描述')}
           </Paragraph>
         </Card>
       </div>
@@ -192,7 +194,7 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
       <div style={{ marginBottom: 16 }}>
         <Title level={5} style={sectionTitleStyle}>
           <ToolOutlined style={sectionIconStyle} />
-          修复建议
+          {t('vulnDetail.fixSuggestion', '修复建议')}
         </Title>
         <Card
           size="small"
@@ -205,7 +207,7 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
             <CheckCircleOutlined style={{ color: theme.low, fontSize: 20, marginTop: 4 }} />
             <div style={{ flex: 1 }}>
               <Paragraph style={{ color: '#f8fafc', margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.75, fontWeight: 500 }}>
-                {vuln.solution || '暂无修复建议'}
+                {vuln.solution || t('vulnDetail.noSolution', '暂无修复建议')}
               </Paragraph>
               {vuln.patch_url && (
                 <div style={{ marginTop: 8 }}>
@@ -216,7 +218,7 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
                     target="_blank"
                     style={{ padding: 0, color: '#7dd3fc', fontWeight: 600 }}
                   >
-                    查看官方补丁
+                  {t('vulnDetail.viewOfficialPatch', '查看官方补丁')}
                   </Button>
                 </div>
               )}
@@ -230,7 +232,7 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
         <div style={{ marginBottom: 16 }}>
           <Title level={5} style={sectionTitleStyle}>
             <WarningOutlined style={sectionIconStyle} />
-            缓解措施
+            {t('vulnDetail.mitigation', '缓解措施')}
           </Title>
           <Card size="small" style={{ background: theme.cardHover, borderColor: theme.border }}>
             <Paragraph style={{ color: '#f8fafc', margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.75, fontWeight: 500 }}>
@@ -244,7 +246,7 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
       {vuln.cvss_vector && (
         <div style={{ marginBottom: 16 }}>
           <Title level={5} style={sectionTitleStyle}>
-            CVSS 向量
+            {t('vulnDetail.cvssVector', 'CVSS 向量')}
           </Title>
           <Card
             size="small"
@@ -271,7 +273,7 @@ export default function VulnDetail({ vuln }: VulnDetailProps) {
         <div>
           <Title level={5} style={sectionTitleStyle}>
             <LinkOutlined style={sectionIconStyle} />
-            参考链接
+            {t('vulnDetail.references', '参考链接')}
           </Title>
           <Card size="small" style={{ background: theme.cardHover, borderColor: theme.border }}>
             {vuln.references.split('\n').filter(Boolean).map((ref: string, idx: number) => (

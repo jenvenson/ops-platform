@@ -3,6 +3,7 @@
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import './i18n'
 import App from './App.tsx'
 import 'antd/dist/reset.css'
 import './styles/theme-variables.css'

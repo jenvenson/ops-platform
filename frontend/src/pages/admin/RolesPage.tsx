@@ -4,10 +4,26 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, Table, Tag, Space, Button, Modal, Input, Form, Select, message, Popconfirm, Checkbox, Tree } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { adminAPI, Role, Menu } from '../../api/admin'
 import { canEdit } from '../../utils/menuAccess'
+import { formatDateTime } from '../../utils/dateFormat'
 
-// 树节点类型
+const roleDisplayKeyMap: Record<string, string> = {
+  admin: 'roleDisplayNameAdmin',
+  ops: 'roleDisplayNameOps',
+  dev: 'roleDisplayNameDev',
+  qa: 'roleDisplayNameQa',
+  user: 'roleDisplayNameUser',
+}
+
+const roleDescriptionKeyMap: Record<string, string> = {
+  admin: 'roleDescriptionAdmin',
+  ops: 'roleDescriptionOps',
+  dev: 'roleDescriptionDev',
+  user: 'roleDescriptionUser',
+}
+
 interface MenuNode {
   id: number
   title: string
@@ -16,6 +32,9 @@ interface MenuNode {
 }
 
 export default function RolesPage() {
+  const { t } = useTranslation('admin')
+  const { t: tc } = useTranslation('common')
+
   const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
@@ -23,13 +42,11 @@ export default function RolesPage() {
   const [submitting, setSubmitting] = useState(false)
   const [form] = Form.useForm()
 
-  // 菜单权限配置相关状态
   const [menuModalVisible, setMenuModalVisible] = useState(false)
   const [currentRole, setCurrentRole] = useState<Role | null>(null)
   const [allMenus, setAllMenus] = useState<Menu[]>([])
   const [selectedMenuIds, setSelectedMenuIds] = useState<number[]>([])
 
-  // 加载角色列表
   const fetchRoles = useCallback(async () => {
     setLoading(true)
     try {
@@ -37,24 +54,22 @@ export default function RolesPage() {
       setRoles(resp)
     } catch (error) {
       console.error('获取角色列表失败:', error)
-      message.error('获取角色列表失败')
+      message.error(t('getRolesFailed', '获取角色列表失败'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchRoles()
   }, [fetchRoles])
 
-  // 打开新增模态框
   const handleAdd = () => {
     setEditingRole(null)
     form.resetFields()
     setModalVisible(true)
   }
 
-  // 打开编辑模态框
   const handleEdit = (role: Role) => {
     setEditingRole(role)
     form.setFieldsValue({
@@ -66,84 +81,74 @@ export default function RolesPage() {
     setModalVisible(true)
   }
 
-  // 删除角色
   const handleDelete = async (id: number) => {
     try {
       await adminAPI.deleteRole(id)
-      message.success('删除成功')
+      message.success(t('deleteRoleSuccess', '删除成功'))
       fetchRoles()
     } catch (error) {
       console.error('删除角色失败:', error)
-      message.error(error instanceof Error ? error.message : '删除角色失败')
+      message.error(error instanceof Error ? error.message : t('deleteRoleFailed', '删除角色失败'))
     }
   }
 
-  // 提交表单
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
       setSubmitting(true)
 
       if (editingRole) {
-        // 更新角色
         await adminAPI.updateRole(editingRole.id, {
           name: values.name,
           code: values.code,
           description: values.description,
           status: values.status === 'active' ? 1 : 0,
         })
-        message.success('更新成功')
+        message.success(t('updateRoleSuccess', '更新成功'))
       } else {
-        // 创建角色
         await adminAPI.createRole({
           name: values.name,
           code: values.code,
           description: values.description,
           status: values.status === 'active' ? 1 : 0,
         })
-        message.success('创建成功')
+        message.success(t('createRoleSuccess', '创建成功'))
       }
 
       setModalVisible(false)
       fetchRoles()
     } catch (error) {
       console.error('提交失败:', error)
-      message.error(error instanceof Error ? error.message : '提交失败')
+      message.error(error instanceof Error ? error.message : t('submitFailed', '提交失败'))
     } finally {
       setSubmitting(false)
     }
   }
 
-  // 打开菜单配置模态框
   const handleConfigMenus = async (role: Role) => {
     setCurrentRole(role)
     try {
-      // 获取所有菜单
       const menusResp = await adminAPI.getMenus()
       setAllMenus(menusResp)
 
-      // 获取角色的菜单权限
       const roleMenusResp = await adminAPI.getRoleMenus(role.id)
       setSelectedMenuIds(roleMenusResp.menu_ids)
 
       setMenuModalVisible(true)
     } catch (error) {
       console.error('获取数据失败:', error)
-      message.error('获取数据失败')
+      message.error(t('getDataFailed', '获取数据失败'))
     }
   }
 
-  // 构建树形数据
   const buildTreeData = (): MenuNode[] => {
     const menuMap = new Map<number, MenuNode>()
     const roots: MenuNode[] = []
 
-    // 创建所有节点
     allMenus.forEach(menu => {
       menuMap.set(menu.id, { id: menu.id, title: menu.title, key: String(menu.id) })
     })
 
-    // 构建树
     allMenus.forEach(menu => {
       const node = menuMap.get(menu.id)!
       if (menu.parent_id === 0) {
@@ -160,23 +165,21 @@ export default function RolesPage() {
     return roots
   }
 
-  // 处理菜单选择变更
   const handleMenuCheck = (checkedKeys: React.Key[] | { checked: React.Key[]; halfChecked: React.Key[] }) => {
     const keys = Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked
     setSelectedMenuIds(keys.map(k => Number(k)))
   }
 
-  // 保存菜单配置
   const handleSaveMenus = async () => {
     if (!currentRole) return
 
     try {
       await adminAPI.updateRoleMenus(currentRole.id, selectedMenuIds)
-      message.success('菜单权限配置保存成功')
+      message.success(t('menuPermissionSaved', '菜单权限配置保存成功'))
       setMenuModalVisible(false)
     } catch (error) {
       console.error('保存失败:', error)
-      message.error('保存失败')
+      message.error(t('saveFailed', '保存失败'))
     }
   }
 
@@ -188,44 +191,52 @@ export default function RolesPage() {
       width: 80,
     },
     {
-      title: '角色名称',
+      title: t('roleName', '角色名称'),
       dataIndex: 'name',
       key: 'name',
       width: 150,
+      render: (name: string, record: Role) => {
+        const key = roleDisplayKeyMap[record.code]
+        return key ? t(key, name) : name
+      },
     },
     {
-      title: '角色编码',
+      title: t('roleCode', '角色编码'),
       dataIndex: 'code',
       key: 'code',
       width: 150,
     },
     {
-      title: '描述',
+      title: t('description', '描述'),
       dataIndex: 'description',
       key: 'description',
       width: 300,
-      render: (desc: string) => desc || '-',
+      render: (desc: string, record: Role) => {
+        if (!desc) return '-'
+        const key = roleDescriptionKeyMap[record.code]
+        return key ? t(key, desc) : desc
+      },
     },
     {
-      title: '状态',
+      title: t('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
       render: (status: number) => (
         <Tag color={status === 1 ? 'success' : 'default'}>
-          {status === 1 ? '启用' : '禁用'}
+          {status === 1 ? t('enable', '启用') : t('disable', '禁用')}
         </Tag>
       ),
     },
     {
-      title: '创建时间',
+      title: t('createdAt', '创建时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
-      render: (time: string) => time ? new Date(time).toLocaleString('zh-CN') : '-',
+      render: (time: string) => time ? formatDateTime(time) : '-',
     },
     {
-      title: '操作',
+      title: t('action', '操作'),
       key: 'action',
       width: 200,
       render: (_: unknown, record: Role) => {
@@ -238,7 +249,7 @@ export default function RolesPage() {
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             >
-              编辑
+              {t('edit', '编辑')}
             </Button>
             <Button
               type="link"
@@ -246,15 +257,15 @@ export default function RolesPage() {
               icon={<SettingOutlined />}
               onClick={() => handleConfigMenus(record)}
             >
-              配置菜单
+              {t('configMenus', '配置菜单')}
             </Button>
             {record.code !== 'admin' && (
               <Popconfirm
-                title="确认删除"
-                description="确定要删除这个角色吗？"
+                title={t('confirmDeleteRole', '确认删除')}
+                description={t('confirmDeleteRoleDesc', '确定要删除这个角色吗？')}
                 onConfirm={() => handleDelete(record.id)}
-                okText="确认"
-                cancelText="取消"
+                okText={t('confirm', '确认')}
+                cancelText={t('cancel', '取消')}
               >
                 <Button
                   type="link"
@@ -262,7 +273,7 @@ export default function RolesPage() {
                   danger
                   icon={<DeleteOutlined />}
                 >
-                  删除
+                  {t('delete', '删除')}
                 </Button>
               </Popconfirm>
             )}
@@ -275,15 +286,15 @@ export default function RolesPage() {
   return (
     <div>
       <Card
-        title="角色管理"
+        title={t('roleManagement', '角色管理')}
         extra={
           <Space>
             <Button icon={<ReloadOutlined />} onClick={fetchRoles}>
-              刷新
+              {t('refresh', '刷新')}
             </Button>
             {canEdit() && (
               <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                添加角色
+                {t('addRole', '添加角色')}
               </Button>
             )}
           </Space>
@@ -294,15 +305,14 @@ export default function RolesPage() {
           dataSource={roles}
           rowKey="id"
           loading={loading}
-          pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total: number) => `共 ${total} 条`, showQuickJumper: true }}
+          pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total: number) => tc('total', '共 {{count}} 条', { count: total }), showQuickJumper: true }}
           scroll={{ x: 1000 }}
-          locale={{ emptyText: '暂无角色数据' }}
+          locale={{ emptyText: t('noRolesData', '暂无角色数据') }}
         />
       </Card>
 
-      {/* 新增/编辑角色模态框 */}
       <Modal
-        title={editingRole ? '编辑角色' : '新增角色'}
+        title={editingRole ? t('editRole', '编辑角色') : t('addNewRole', '新增角色')}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onOk={handleSubmit}
@@ -312,47 +322,46 @@ export default function RolesPage() {
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
-            label="角色名称"
+            label={t('roleName', '角色名称')}
             rules={[
-              { required: true, message: '请输入角色名称' },
-              { min: 2, max: 50, message: '角色名称长度必须在2-50之间' },
+              { required: true, message: t('roleNameRequired', '请输入角色名称') },
+              { min: 2, max: 50, message: t('roleNameLength', '角色名称长度必须在2-50之间') },
             ]}
           >
-            <Input placeholder="请输入角色名称" />
+            <Input placeholder={t('roleNamePlaceholder', '请输入角色名称')} />
           </Form.Item>
 
           <Form.Item
             name="code"
-            label="角色编码"
+            label={t('roleCode', '角色编码')}
             rules={[
-              { required: true, message: '请输入角色编码' },
-              { pattern: /^[a-z][a-z0-9_]*$/, message: '角色编码必须以小写字母开头，只能包含小写字母、数字和下划线' },
+              { required: true, message: t('roleCodeRequired', '请输入角色编码') },
+              { pattern: /^[a-z][a-z0-9_]*$/, message: t('roleCodePattern', '角色编码必须以小写字母开头，只能包含小写字母、数字和下划线') },
             ]}
           >
-            <Input placeholder="请输入角色编码" disabled={!!editingRole} />
+            <Input placeholder={t('roleCodePlaceholder', '请输入角色编码')} disabled={!!editingRole} />
           </Form.Item>
 
-          <Form.Item name="description" label="描述">
+          <Form.Item name="description" label={t('description', '描述')}>
             <Input.TextArea
-              placeholder="请输入角色描述（可选）"
+              placeholder={t('descriptionPlaceholder', '请输入角色描述（可选）')}
               rows={3}
             />
           </Form.Item>
 
-          <Form.Item name="status" label="状态">
+          <Form.Item name="status" label={t('status', '状态')}>
             <Select
               options={[
-                { label: '启用', value: 'active' },
-                { label: '禁用', value: 'disabled' },
+                { label: t('enable', '启用'), value: 'active' },
+                { label: t('disable', '禁用'), value: 'disabled' },
               ]}
             />
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* 菜单权限配置模态框 */}
       <Modal
-        title={`配置菜单权限 - ${currentRole?.name}`}
+        title={`${t('configMenuPermission', '配置菜单权限')} - ${currentRole?.name}`}
         open={menuModalVisible}
         onCancel={() => setMenuModalVisible(false)}
         onOk={handleSaveMenus}
@@ -370,7 +379,7 @@ export default function RolesPage() {
               }
             }}
           >
-            全选/取消全选
+            {t('selectAll', '全选/取消全选')}
           </Checkbox>
         </div>
         <Tree

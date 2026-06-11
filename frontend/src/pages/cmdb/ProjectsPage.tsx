@@ -4,18 +4,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Table, Button, Modal, Form, Input, message, Popconfirm } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { cmdbAPI, Project } from '../../api/cmdb'
 import SearchBar, { SearchField } from '../../components/SearchBar'
 import { canEdit } from '../../utils/menuAccess'
 
-// 搜索字段配置
-const searchFields: SearchField[] = [
-  { name: 'name', label: '项目名称', type: 'text' },
-  { name: 'code', label: '项目编号', type: 'text' },
-  { name: 'description', label: '描述', type: 'text' },
-]
-
 export default function ProjectsPage() {
+  const { t } = useTranslation('cmdb')
+  const { t: tc } = useTranslation('common')
+
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
@@ -23,13 +20,20 @@ export default function ProjectsPage() {
   const [searchValues, setSearchValues] = useState<Record<string, string>>({})
   const [form] = Form.useForm()
 
+  // 搜索字段配置
+  const searchFields: SearchField[] = [
+    { name: 'name', label: t('projectName', '项目名称'), type: 'text' },
+    { name: 'code', label: t('projectCode', '项目编号'), type: 'text' },
+    { name: 'description', label: t('description', '描述'), type: 'text' },
+  ]
+
   const fetchProjects = async () => {
     setLoading(true)
     try {
       const resp = await cmdbAPI.getProjects({ limit: 1000 })
       setProjects(resp.data)
     } catch (error) {
-      message.error('加载项目失败')
+      message.error(t('loadProjectsFailed', '加载项目失败'))
     } finally {
       setLoading(false)
     }
@@ -78,10 +82,10 @@ export default function ProjectsPage() {
   const handleDelete = async (id: number) => {
     try {
       await cmdbAPI.deleteProject(id)
-      message.success('删除成功')
+      message.success(tc('deleteSuccess', '删除成功'))
       fetchProjects()
     } catch (error) {
-      message.error('删除失败')
+      message.error(tc('deleteFailed', '删除失败'))
     }
   }
 
@@ -90,24 +94,24 @@ export default function ProjectsPage() {
       const values = await form.validateFields()
       if (editingProject) {
         await cmdbAPI.updateProject(editingProject.id, values)
-        message.success('更新成功')
+        message.success(tc('updateSuccess', '更新成功'))
       } else {
         await cmdbAPI.createProject(values)
-        message.success('创建成功')
+        message.success(tc('createSuccess', '创建成功'))
       }
       setModalVisible(false)
       fetchProjects()
     } catch (error) {
-      message.error('操作失败')
+      message.error(tc('operationFailed', '操作失败'))
     }
   }
 
   const columns = [
-    { title: '项目名称', dataIndex: 'name', key: 'name' },
-    { title: '项目编号', dataIndex: 'code', key: 'code', width: 120 },
-    { title: '描述', dataIndex: 'description', key: 'description', ellipsis: true },
+    { title: t('projectName', '项目名称'), dataIndex: 'name', key: 'name' },
+    { title: t('projectCode', '项目编号'), dataIndex: 'code', key: 'code', width: 120 },
+    { title: t('description', '描述'), dataIndex: 'description', key: 'description', ellipsis: true },
     {
-      title: '操作',
+      title: tc('action', '操作'),
       key: 'action',
       width: 160,
       fixed: 'right' as 'right',
@@ -115,9 +119,9 @@ export default function ProjectsPage() {
         if (!canEdit()) return '-'
         return (
           <div style={{ whiteSpace: 'nowrap' }}>
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} style={{ padding: '4px 8px' }}>编辑</Button>
-            <Popconfirm title="确定要删除此项目吗？" onConfirm={() => handleDelete(record.id)}>
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} style={{ padding: '4px 8px' }}>删除</Button>
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} style={{ padding: '4px 8px' }}>{tc('edit', '编辑')}</Button>
+            <Popconfirm title={t('deleteProjectConfirm', '确定要删除此项目吗？')} onConfirm={() => handleDelete(record.id)}>
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} style={{ padding: '4px 8px' }}>{tc('delete', '删除')}</Button>
             </Popconfirm>
           </div>
         )
@@ -137,7 +141,7 @@ export default function ProjectsPage() {
       <div style={{ marginBottom: 16 }}>
         {canEdit() && (
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增项目
+              {t('addProject', '新增项目')}
           </Button>
         )}
       </div>
@@ -147,10 +151,10 @@ export default function ProjectsPage() {
         rowKey="id"
         loading={loading}
         scroll={{ x: 600 }}
-        pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total) => `共 ${total} 条`, showQuickJumper: true }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total) => tc('total', '共 {{count}} 条', { count: total }), showQuickJumper: true }}
       />
       <Modal
-        title={editingProject ? '编辑项目' : '新增项目'}
+        title={editingProject ? t('editProject', '编辑项目') : t('addProject', '新增项目')}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
@@ -158,20 +162,20 @@ export default function ProjectsPage() {
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
-            label="项目名称"
-            rules={[{ required: true, message: '请输入项目名称' }]}
+            label={t('projectName', '项目名称')}
+            rules={[{ required: true, message: t('projectNameRequired', '请输入项目名称') }]}
           >
-            <Input placeholder="请输入项目名称" />
+            <Input placeholder={t('projectNamePlaceholder', '请输入项目名称')} />
           </Form.Item>
           <Form.Item
             name="code"
-            label="项目编号"
-            rules={[{ required: true, message: '请输入项目编号' }]}
+            label={t('projectCode', '项目编号')}
+            rules={[{ required: true, message: t('projectCodeRequired', '请输入项目编号') }]}
           >
-            <Input placeholder="请输入项目编号" />
+            <Input placeholder={t('projectCodePlaceholder', '请输入项目编号')} />
           </Form.Item>
-          <Form.Item name="description" label="描述">
-            <Input.TextArea rows={4} placeholder="请输入项目描述" />
+          <Form.Item name="description" label={t('description', '描述')}>
+            <Input.TextArea rows={4} placeholder={t('projectDescPlaceholder', '请输入项目描述')} />
           </Form.Item>
         </Form>
       </Modal>

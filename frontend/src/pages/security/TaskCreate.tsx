@@ -1,7 +1,9 @@
 // Copyright (c) 2026 OPS Platform Contributors.
 // SPDX-License-Identifier: MIT
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { TFunction } from 'i18next'
 import { Card, Steps, Form, Input, Button, Space, Typography, Radio, Alert, Tag, Row, Col, Checkbox } from 'antd'
 import {
   AimOutlined,
@@ -51,52 +53,57 @@ interface TaskFormData {
   precheck_session_carrier?: 'unknown' | 'cookie' | 'header' | 'mixed'
 }
 
-const webScanOptionConfigs = [
-  { value: 'sql-injection', label: 'SQL 注入' },
-  { value: 'xss', label: 'XSS 跨站脚本' },
-  { value: 'ssrf', label: 'SSRF 服务端请求伪造' },
-  { value: 'csrf', label: 'CSRF 跨站请求伪造' },
-  { value: 'rce', label: '远程代码执行' },
-  { value: 'information-disclosure', label: '信息泄露' },
-  { value: 'broken-access', label: '越权访问' },
-  { value: 'file-inclusion', label: '文件包含' },
-  { value: 'header-injection', label: '响应头注入' },
+const getWebScanOptionConfigs = (t: TFunction) => [
+  { value: 'sql-injection', label: t('sqlInjection', 'SQL 注入') },
+  { value: 'xss', label: t('xss', 'XSS 跨站脚本') },
+  { value: 'ssrf', label: t('ssrf', 'SSRF 服务端请求伪造') },
+  { value: 'csrf', label: t('csrf', 'CSRF 跨站请求伪造') },
+  { value: 'rce', label: t('rce', '远程代码执行') },
+  { value: 'information-disclosure', label: t('informationDisclosure', '信息泄露') },
+  { value: 'broken-access', label: t('brokenAccess', '越权访问') },
+  { value: 'file-inclusion', label: t('fileInclusion', '文件包含') },
+  { value: 'header-injection', label: t('headerInjection', '响应头注入') },
 ]
 
-const webScanModeConfigs = [
+const getWebScanModeConfigs = (t: TFunction) => [
   {
     value: 'standard',
-    title: '标准扫描',
-    desc: '适合首轮排查，使用推荐的 Web 通用模板与规则集，覆盖面更广。',
+    title: t('standardScan', '标准扫描'),
+    desc: t('standardScanCardDesc', '适合首轮排查，使用推荐的 Web 通用模板与规则集，覆盖面更广。'),
     tone: 'info' as const,
   },
   {
     value: 'special',
-    title: '专项扫描',
-    desc: '按选中类别做更积极的专项验证，默认使用更深预算，适合重点目标复测和深挖。',
+    title: t('specialScan', '专项扫描'),
+    desc: t('specialScanCardDesc', '按选中类别做更积极的专项验证，默认使用更深预算，适合重点目标复测和深挖。'),
     tone: 'warning' as const,
   },
 ]
 
-const scanTypeOptions = [
-  { value: 'host-vuln', label: '主机漏洞扫描', desc: '检测 SSH/数据库/Redis 等服务的安全漏洞', icon: <WarningOutlined /> },
-  { value: 'web', label: 'Web漏洞扫描', desc: '使用 Nuclei 检测 Web 应用漏洞', icon: <GlobalOutlined /> },
+const getScanTypeOptions = (t: TFunction) => [
+  { value: 'host-vuln', label: t('hostVulnScan', '主机漏洞扫描'), desc: t('hostVulnScanDesc', '检测 SSH/数据库/Redis 等服务的安全漏洞'), icon: <WarningOutlined /> },
+  { value: 'web', label: t('webVulnScan', 'Web漏洞扫描'), desc: t('webVulnScanDesc', '使用 Nuclei 检测 Web 应用漏洞'), icon: <GlobalOutlined /> },
 ]
 
-const vulnTypes = webScanOptionConfigs.map(option => option.value)
-
 export default function TaskCreate() {
+  const { t } = useTranslation('security')
+  const { t: tc } = useTranslation('common')
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
   const [form] = Form.useForm<TaskFormData>()
   const [loading, setLoading] = useState(false)
   const [taskId, setTaskId] = useState<number | null>(null)
 
+  const webScanOptionConfigs = useMemo(() => getWebScanOptionConfigs(t), [t])
+  const webScanModeConfigs = useMemo(() => getWebScanModeConfigs(t), [t])
+  const scanTypeOptions = useMemo(() => getScanTypeOptions(t), [t])
+  const vulnTypes = useMemo(() => webScanOptionConfigs.map(option => option.value), [webScanOptionConfigs])
+
   const steps = [
-    { title: '目标', icon: <AimOutlined /> },
-    { title: '扫描类型', icon: <RadarChartOutlined /> },
-    { title: '配置', icon: <ScanOutlined /> },
-    { title: '确认', icon: <CheckCircleOutlined /> },
+    { title: t('target', '目标'), icon: <AimOutlined /> },
+    { title: t('scanType', '扫描类型'), icon: <RadarChartOutlined /> },
+    { title: t('stepConfiguration', '配置'), icon: <ScanOutlined /> },
+    { title: tc('confirm', '确认'), icon: <CheckCircleOutlined /> },
   ]
 
   const handleNext = async () => {
@@ -124,7 +131,7 @@ export default function TaskCreate() {
               .find((item: string) => item.length > 0)
 
             if (!entryTarget) {
-              form.setFields([{ name: 'target', errors: ['请先输入扫描目标 URL'] }])
+              form.setFields([{ name: 'target', errors: [t('enterTargetUrlFirst', '请先输入扫描目标 URL')] }])
               setCurrent(2)
               return
             }
@@ -158,13 +165,13 @@ export default function TaskCreate() {
           setTaskId(task.id)
           setCurrent(current + 1)
         } catch (error) {
-          console.error('创建任务失败:', error)
+          console.error(t('createTaskFailed', '创建任务失败'), error)
         } finally {
           setLoading(false)
         }
       }
     } catch (error) {
-      console.error('验证失败:', error)
+      console.error(t('validationFailed', '验证失败'), error)
     }
   }
 
@@ -181,50 +188,50 @@ export default function TaskCreate() {
           <div>
             <Title level={4} style={{ color: theme.text, marginBottom: 24 }}>
               <AimOutlined style={{ marginRight: 8 }} />
-              输入扫描目标
+              {t('enterScanTarget', '输入扫描目标')}
             </Title>
 
             <Form.Item
               name="name"
-              label="任务名称"
-              rules={[{ required: true, message: '请输入任务名称' }]}
+              label={t('taskName', '任务名称')}
+              rules={[{ required: true, message: t('taskNameRequired', '请输入任务名称') }]}
             >
-              <Input placeholder="例如：生产服务器安全扫描" />
+              <Input placeholder={t('scanTaskNamePlaceholder', '例如：生产服务器安全扫描')} />
             </Form.Item>
 
             <Form.Item
               name="target_type"
-              label="目标类型"
-              rules={[{ required: true, message: '请选择目标类型' }]}
+              label={t('targetType', '目标类型')}
+              rules={[{ required: true, message: t('targetTypeRequired', '请选择目标类型') }]}
               initialValue="ip_list"
             >
               <Radio.Group buttonStyle="solid">
-                <Radio.Button value="ip_list">IP 列表</Radio.Button>
-                <Radio.Button value="url">URL 列表</Radio.Button>
+                <Radio.Button value="ip_list">{t('ipList', 'IP 列表')}</Radio.Button>
+                <Radio.Button value="url">{t('urlList', 'URL 列表')}</Radio.Button>
               </Radio.Group>
             </Form.Item>
 
             <Form.Item
               name="target"
-              label="目标地址"
-              rules={[{ required: true, message: '请输入目标地址' }]}
+              label={t('targetAddress', '目标地址')}
+              rules={[{ required: true, message: t('targetAddressRequired', '请输入目标地址') }]}
             >
               <TextArea
                 rows={4}
                 placeholder={
                   form.getFieldValue('target_type') === 'url'
-                    ? 'https://example.com\nhttps://api.example.com'
-                    : '192.168.1.1\n192.168.1.2\n192.168.1.10-192.168.1.20'
+                    ? t('targetUrlPlaceholder', 'https://example.com\nhttps://api.example.com')
+                    : t('targetIpPlaceholder', '192.168.1.1\n192.168.1.2\n192.168.1.10-192.168.1.20')
                 }
               />
             </Form.Item>
 
             <Alert
-              message="提示"
+              message={t('hint', '提示')}
               description={
                 form.getFieldValue('target_type') === 'url'
-                  ? '登录后 Web 扫描只支持 URL 列表；每行一个 URL，必须包含 http:// 或 https://'
-                  : '每行一个 IP 或 IP 范围（如 192.168.1.1-10）'
+                  ? t('targetUrlHintDesc', '登录后 Web 扫描只支持 URL 列表；每行一个 URL，必须包含 http:// 或 https://')
+                  : t('targetIPHintDesc', '每行一个 IP 或 IP 范围（如 192.168.1.1-10）')
               }
               type="info"
               showIcon
@@ -243,12 +250,12 @@ export default function TaskCreate() {
           <div>
             <Title level={4} style={{ color: theme.text, marginBottom: 24 }}>
               <RadarChartOutlined style={{ marginRight: 8 }} />
-              选择扫描类型
+              {t('selectScanType', '选择扫描类型')}
             </Title>
 
             <Form.Item
               name="scan_type"
-              rules={[{ required: true, message: '请选择扫描类型' }]}
+              rules={[{ required: true, message: t('scanTypeRequired', '请选择扫描类型') }]}
             >
               <Radio.Group style={{ width: '100%' }}>
                 <Space direction="vertical" style={{ width: '100%' }} size="middle">
@@ -284,14 +291,14 @@ export default function TaskCreate() {
           <div>
             <Title level={4} style={{ color: theme.text, marginBottom: 24 }}>
               <ScanOutlined style={{ marginRight: 8 }} />
-              扫描配置
+              {t('scanConfiguration', '扫描配置')}
             </Title>
 
             {scanType === 'web' ? (
               <>
                 <Alert
-                  message="Web 漏扫建议"
-                  description="优先直接录入业务 URL。默认会先自动登录并发现页面/API，再对发现到的入口执行 Nuclei 模板探测。"
+                  message={t('webScanSuggestion', 'Web 漏扫建议')}
+                  description={t('webScanSuggestionDesc', '优先直接录入业务 URL。默认会先自动登录并发现页面/API，再对发现到的入口执行 Nuclei 模板探测。')}
                   type="info"
                   showIcon
                   style={{ marginBottom: 16 }}
@@ -299,7 +306,7 @@ export default function TaskCreate() {
 
                 <Form.Item
                   name="web_scan_mode"
-                  label="扫描策略"
+                  label={t('scanStrategy', '扫描策略')}
                   initialValue="standard"
                 >
                   <Radio.Group style={{ width: '100%' }}>
@@ -326,13 +333,13 @@ export default function TaskCreate() {
                 <Alert
                   message={
                     form.getFieldValue('web_scan_mode') === 'special'
-                      ? '专项 Web 扫描'
-                      : '标准 Web 扫描'
+                      ? t('specialWebScanTitle', '专项 Web 扫描')
+                      : t('standardWebScanTitle', '标准 Web 扫描')
                   }
                   description={
                     form.getFieldValue('web_scan_mode') === 'special'
-                      ? '会按你勾选的漏洞类别执行模板和内置规则，并自动使用更积极的验证预算，适合专项复测和重点目标深挖。'
-                      : '默认使用推荐的 Web 通用模板与规则集，适合首轮扫描和常规普查。'
+                      ? t('specialWebScanAlertDesc', '会按你勾选的漏洞类别执行模板和内置规则，并自动使用更积极的验证预算，适合专项复测和重点目标深挖。')
+                      : t('standardWebScanAlertDesc', '默认使用推荐的 Web 通用模板与规则集，适合首轮扫描和常规普查。')
                   }
                   type={form.getFieldValue('web_scan_mode') === 'standard' ? 'info' : 'warning'}
                   showIcon
@@ -340,8 +347,8 @@ export default function TaskCreate() {
                 />
 
                 <Alert
-                  message="自动发现后扫描"
-                  description="当前创建入口默认使用自动发现策略，更适合首轮排查 SPA、登录后系统和真实业务 API。"
+                  message={t('autoDiscoveryScan', '自动发现后扫描')}
+                  description={t('autoDiscoveryScanDesc', '当前创建入口默认使用自动发现策略，更适合首轮排查 SPA、登录后系统和真实业务 API。')}
                   type="success"
                   showIcon
                   style={{ marginBottom: 16 }}
@@ -354,10 +361,10 @@ export default function TaskCreate() {
                   {({ getFieldValue }) => (
                     <Form.Item
                       name="web_scan_options"
-                      label="漏洞类别"
+                      label={t('vulnCategory', '漏洞类别')}
                       initialValue={vulnTypes}
                       hidden={getFieldValue('web_scan_mode') !== 'special'}
-                      extra="默认已全选。专项扫描会只执行你保留的类别，并使用更深的验证预算。"
+                      extra={t('vulnCategoryExtraSpecial', '默认已全选。专项扫描会只执行你保留的类别，并使用更深的验证预算。')}
                     >
                       <Checkbox.Group style={{ width: '100%' }}>
                         <Row gutter={[12, 12]}>
@@ -374,43 +381,43 @@ export default function TaskCreate() {
                   )}
                 </Form.Item>
 
-                <Title level={5} style={{ color: theme.text, marginBottom: 8 }}>认证配置</Title>
+                <Title level={5} style={{ color: theme.text, marginBottom: 8 }}>{t('authConfiguration', '认证配置')}</Title>
                 <Paragraph style={{ color: theme.textSecondary, marginBottom: 16 }}>
-                  Web 扫描已调整为只做登录后扫描。请提供测试账号、密码和可选登录接口，认证流程会自动生成。
+                  {t('webScanAuthDesc', 'Web 扫描已调整为只做登录后扫描。请提供测试账号、密码和可选登录接口，认证流程会自动生成。')}
                 </Paragraph>
 
                 <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item
                       name="username"
-                      label="登录账号"
-                      rules={[{ required: true, message: '请输入账号' }]}
+                      label={t('loginAccount', '登录账号')}
+                      rules={[{ required: true, message: t('loginAccountRequired', '请输入账号') }]}
                     >
-                      <Input placeholder="例如：default" />
+                      <Input placeholder={t('loginAccountPlaceholder', '例如：default')} />
                     </Form.Item>
                   </Col>
                   <Col span={12}>
                     <Form.Item
                       name="password"
-                      label="登录密码"
-                      rules={[{ required: true, message: '请输入密码' }]}
+                      label={t('loginPassword', '登录密码')}
+                      rules={[{ required: true, message: t('loginPasswordRequired', '请输入密码') }]}
                     >
-                      <Input.Password placeholder="请输入密码" />
+                      <Input.Password placeholder={t('loginPasswordPlaceholder', '请输入密码')} />
                     </Form.Item>
                   </Col>
                 </Row>
 
                 <Form.Item
                   name="login_url"
-                  label="登录接口 URL（可选）"
-                  extra="不填则默认使用目标 URL 推断登录入口。"
+                  label={t('loginUrlOptional', '登录接口 URL（可选）')}
+                  extra={t('loginUrlHint', '不填则默认使用目标 URL 推断登录入口')}
                 >
-                  <Input placeholder="例如：http://target/api/login" />
+                  <Input placeholder={t('loginUrlPlaceholder', '例如：http://target/api/login')} />
                 </Form.Item>
 
                 <Alert
-                  message="登录态处理"
-                  description="系统会根据当前目标自动生成认证流程；匿名扫描已禁用。"
+                  message={t('loginSessionHandling', '登录态处理')}
+                  description={t('loginSessionHandlingDesc', '系统会根据当前目标自动生成认证流程；匿名扫描已禁用。')}
                   type="info"
                   showIcon
                   style={{ marginBottom: 16 }}
@@ -420,25 +427,25 @@ export default function TaskCreate() {
 
                 <Card size="small" style={{ background: theme.card, borderColor: theme.border }}>
                   <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                    <Text style={{ color: theme.text }}>推荐操作顺序</Text>
-                    <Text type="secondary">1. 先填写业务入口 URL 和可登录测试账号</Text>
-                    <Text type="secondary">2. 首轮排查选标准扫描，重点目标复测或深挖时切到专项扫描</Text>
-                    <Text type="secondary">3. 专项扫描默认全选全部类别，你再按需要删减</Text>
-                    <Text type="secondary">4. 登录接口可选，不填时系统会自动推断</Text>
+                    <Text style={{ color: theme.text }}>{t('recommendedProcedure', '推荐操作顺序')}</Text>
+                    <Text type="secondary">{t('recommendedStep1', '1. 先填写业务入口 URL 和可登录测试账号')}</Text>
+                    <Text type="secondary">{t('recommendedStep2', '2. 首轮排查选标准扫描，重点目标复测或深挖时切到专项扫描')}</Text>
+                    <Text type="secondary">{t('recommendedStep3', '3. 专项扫描默认全选全部类别，你再按需要删减')}</Text>
+                    <Text type="secondary">{t('recommendedStep4', '4. 登录接口可选，不填时系统会自动推断')}</Text>
                   </Space>
                 </Card>
               </>
             ) : scanType === 'host-vuln' ? (
               <Alert
-                message="主机漏洞扫描配置"
-                description="主机漏洞扫描将自动检测 SSH、数据库、Redis 等服务的安全漏洞，无需额外配置"
+                message={t('hostVulnScanConfigTitle', '主机漏洞扫描配置')}
+                description={t('hostVulnScanConfigDesc', '主机漏洞扫描将自动检测 SSH、数据库、Redis 等服务的安全漏洞，无需额外配置')}
                 type="success"
                 showIcon
               />
             ) : (
               <Alert
-                message="扫描配置"
-                description="请选择网站漏洞或主机漏洞扫描类型后继续配置。"
+                message={t('scanConfiguration', '扫描配置')}
+                description={t('selectScanTypeFirst', '请选择网站漏洞或主机漏洞扫描类型后继续配置。')}
                 type="info"
                 showIcon
               />
@@ -453,29 +460,29 @@ export default function TaskCreate() {
           <div>
             <Title level={4} style={{ color: theme.text, marginBottom: 24 }}>
               <CheckCircleOutlined style={{ marginRight: 8 }} />
-              确认扫描任务
+              {t('confirmScanTask', '确认扫描任务')}
             </Title>
 
             <Card style={{ background: theme.card, borderColor: theme.border, marginBottom: 16 }}>
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                  <Text style={{ color: theme.textSecondary }}>任务名称</Text>
+                  <Text style={{ color: theme.textSecondary }}>{t('taskName', '任务名称')}</Text>
                   <div style={{ color: theme.text, fontWeight: 600 }}>{values.name}</div>
                 </Col>
                 <Col span={12}>
-                  <Text style={{ color: theme.textSecondary }}>扫描类型</Text>
+                  <Text style={{ color: theme.textSecondary }}>{t('scanType', '扫描类型')}</Text>
                   <div style={{ color: theme.primary, fontWeight: 600 }}>
                     {scanTypeOptions.find(s => s.value === values.scan_type)?.label}
                   </div>
                 </Col>
                 <Col span={12}>
-                  <Text style={{ color: theme.textSecondary }}>目标类型</Text>
+                  <Text style={{ color: theme.textSecondary }}>{t('targetType', '目标类型')}</Text>
                   <div style={{ color: theme.text }}>{displayTargetType?.toUpperCase()}</div>
                 </Col>
                 <Col span={12}>
-                  <Text style={{ color: theme.textSecondary }}>目标数量</Text>
+                  <Text style={{ color: theme.textSecondary }}>{t('targetCount', '目标数量')}</Text>
                   <div style={{ color: theme.text }}>
-                    {values.target?.split('\n').filter(Boolean).length || 1} 个目标
+                    {values.target?.split('\n').filter(Boolean).length || 1} {t('targetsUnit', '个目标')}
                   </div>
                 </Col>
               </Row>
@@ -483,12 +490,12 @@ export default function TaskCreate() {
 
             {values.scan_type === 'web' && (
               <div style={{ marginBottom: 16 }}>
-                <Text style={{ color: theme.textSecondary }}>Web 扫描方式：</Text>
+                <Text style={{ color: theme.textSecondary }}>{t('webScanMethod', 'Web 扫描方式：')}</Text>
                 <div style={{ marginTop: 8 }}>
-                  <Tag color="cyan" style={{ marginBottom: 4 }}>自动发现后扫描</Tag>
+                  <Tag color="cyan" style={{ marginBottom: 4 }}>{t('autoDiscoveryScan', '自动发现后扫描')}</Tag>
                   {values.web_scan_mode === 'special' ? (
                     <>
-                      <Tag color="orange" style={{ marginBottom: 4 }}>专项扫描</Tag>
+                      <Tag color="orange" style={{ marginBottom: 4 }}>{t('specialScan', '专项扫描')}</Tag>
                       {(values.web_scan_options || []).map((type: string) => {
                         const option = webScanOptionConfigs.find(item => item.value === type)
                         return (
@@ -499,7 +506,7 @@ export default function TaskCreate() {
                       })}
                     </>
                   ) : (
-                    <Tag color="green" style={{ marginBottom: 4 }}>标准扫描（推荐模板集）</Tag>
+                    <Tag color="green" style={{ marginBottom: 4 }}>{t('standardScanTemplate', '标准扫描（推荐模板集）')}</Tag>
                   )}
                 </div>
               </div>
@@ -507,21 +514,21 @@ export default function TaskCreate() {
 
             {values.scan_type === 'web' && (
               <div style={{ marginBottom: 16 }}>
-                <Text style={{ color: theme.textSecondary }}>认证方式：</Text>
+                <Text style={{ color: theme.textSecondary }}>{t('authMethod', '认证方式：')}</Text>
                 <div style={{ marginTop: 8 }}>
-                  <Tag color="blue">登录后扫描</Tag>
-                  <Tag color="cyan">自动生成认证流程</Tag>
+                  <Tag color="blue">{t('postLoginScan', '登录后扫描')}</Tag>
+                  <Tag color="cyan">{t('autoAuthFlow', '自动生成认证流程')}</Tag>
                 </div>
               </div>
             )}
 
             {(values.scan_type === 'host-vuln') && (
               <Alert
-                message="漏洞检测范围"
+                message={t('vulnDetectionScope', '漏洞检测范围')}
                 description={
                   values.scan_type === 'host-vuln'
-                    ? '将检测 SSH 弱口令、数据库未授权访问、Redis 未授权等主机层面漏洞'
-                    : '将检测 Web 漏洞 + 主机层面漏洞（SSH/数据库/Redis 等）'
+                    ? t('hostVulnDetectionDesc', '将检测 SSH 弱口令、数据库未授权访问、Redis 未授权等主机层面漏洞')
+                    : t('webAndHostVulnDetectionDesc', '将检测 Web 漏洞 + 主机层面漏洞（SSH/数据库/Redis 等）')
                 }
                 type="info"
                 showIcon
@@ -530,8 +537,8 @@ export default function TaskCreate() {
             )}
 
             <Alert
-              message="开始扫描后，任务将立即执行"
-              description="扫描过程可能需要较长时间，请耐心等待。您可以在任务列表中查看进度。"
+              message={t('scanWillStartImmediately', '开始扫描后，任务将立即执行')}
+              description={t('scanMayTakeLongTime', '扫描过程可能需要较长时间，请耐心等待。您可以在任务列表中查看进度。')}
               type="warning"
               showIcon
             />
@@ -545,17 +552,17 @@ export default function TaskCreate() {
               <CheckCircleOutlined />
             </div>
             <Title level={3} style={{ color: theme.text, marginBottom: 16 }}>
-              任务创建成功！
+              {t('taskCreatedTitle', '任务创建成功！')}
             </Title>
             <Paragraph style={{ color: theme.textSecondary, marginBottom: 32 }}>
-              扫描任务已提交，正在后台执行。您可以前往任务列表查看进度。
+              {t('taskCreatedDesc', '扫描任务已提交，正在后台执行。您可以前往任务列表查看进度。')}
             </Paragraph>
             <Space>
               <Button type="primary" onClick={() => navigate(`/security/tasks/${taskId}`)}>
-                查看任务详情
+                {t('viewScanTaskDetail', '查看任务详情')}
               </Button>
               <Button onClick={() => navigate('/security/tasks')}>
-                返回任务列表
+                {t('backToTaskList', '返回任务列表')}
               </Button>
             </Space>
           </div>
@@ -602,7 +609,7 @@ export default function TaskCreate() {
               disabled={current === 0}
               icon={<ArrowLeftOutlined />}
             >
-              上一步
+              {t('previousStep', '上一步')}
             </Button>
             <Button
               type="primary"
@@ -610,7 +617,7 @@ export default function TaskCreate() {
               loading={loading}
               icon={current === steps.length - 1 ? <ScanOutlined /> : <ArrowRightOutlined />}
             >
-              {current === steps.length - 1 ? '开始扫描' : '下一步'}
+              {current === steps.length - 1 ? t('startScan', '开始扫描') : t('nextStep', '下一步')}
             </Button>
           </div>
         )}

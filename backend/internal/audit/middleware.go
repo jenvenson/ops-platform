@@ -353,9 +353,9 @@ type requestMeta struct {
 func resolveRequestMeta(path, method, pagePathHint string) requestMeta {
 	meta := requestMeta{
 		MenuKey:      "platform-api",
-		MenuTitle:    "接口访问",
+		MenuTitle:    "API Access",
 		PagePath:     firstNonEmptyPagePath(pagePathHint, path),
-		Module:       "平台通用",
+		Module:       "general",
 		ResourceType: "api",
 		ResourceName: deriveGenericResourceName(path),
 		Action:       inferAction(method, path),
@@ -370,7 +370,7 @@ func resolveRequestMeta(path, method, pagePathHint string) requestMeta {
 		if meta.ResourceType == "api" {
 			meta.ResourceType = pageMeta.ResourceType
 		}
-		if meta.ResourceName == "" || meta.ResourceName == "接口访问" {
+		if meta.ResourceName == "" || meta.ResourceName == "API Access" {
 			meta.ResourceName = pageMeta.ResourceName
 		}
 	}
@@ -378,65 +378,65 @@ func resolveRequestMeta(path, method, pagePathHint string) requestMeta {
 	switch {
 	case strings.HasPrefix(path, "/api/security/fim/"):
 		meta.MenuKey = "security-fim"
-		meta.MenuTitle = "文件完整性巡检"
+		meta.MenuTitle = "File Integrity Monitoring"
 		meta.PagePath = "/security/fim/policies"
-		meta.Module = "安全中心"
+		meta.Module = "security"
 		meta.ResourceType = "fim"
 		meta.ResourceName = resolveFIMResourceName(path)
 	case strings.HasPrefix(path, "/api/admin/settings"):
 		meta.MenuKey = "admin-settings"
-		meta.MenuTitle = "系统设置"
+		meta.MenuTitle = "System Settings"
 		meta.PagePath = "/admin/settings"
-		meta.Module = "系统管理"
+		meta.Module = "system"
 		meta.ResourceType = "settings"
-		meta.ResourceName = "系统设置"
+		meta.ResourceName = "System Settings"
 	case strings.HasPrefix(path, "/api/admin/audit"):
 		meta.MenuKey = "platform-audit"
-		meta.MenuTitle = "平台审计"
+		meta.MenuTitle = "Platform Audit"
 		meta.PagePath = "/platform/audit"
-		meta.Module = "平台审计"
+		meta.Module = "audit"
 		meta.ResourceType = "audit"
-		meta.ResourceName = "平台审计"
+		meta.ResourceName = "Platform Audit"
 	case strings.HasPrefix(path, "/api/alert/"):
 		meta.MenuKey = "alarm-center"
-		meta.MenuTitle = "告警中心"
+		meta.MenuTitle = "Alert Center"
 		meta.PagePath = "/alarm/events"
-		meta.Module = "告警中心"
+		meta.Module = "alert"
 		meta.ResourceType = "alert"
-		meta.ResourceName = "告警中心"
+		meta.ResourceName = "Alert Center"
 	case strings.HasPrefix(path, "/api/auth/login"):
 		meta.MenuKey = "auth-login"
-		meta.MenuTitle = "登录日志"
+		meta.MenuTitle = "Login Log"
 		meta.PagePath = "/login"
-		meta.Module = "认证中心"
+		meta.Module = "auth"
 		meta.ResourceType = "login"
-		meta.ResourceName = "后台管理平台"
+		meta.ResourceName = "Management Platform"
 	case strings.HasPrefix(path, "/api/user/menus"):
 		meta.MenuKey = "platform-audit"
-		meta.MenuTitle = "平台审计"
+		meta.MenuTitle = "Platform Audit"
 		meta.PagePath = "/platform/audit"
-		meta.Module = "平台审计"
+		meta.Module = "audit"
 		meta.ResourceType = "menu_access"
-		meta.ResourceName = "菜单访问"
+		meta.ResourceName = "Menu Access"
 	case strings.HasPrefix(path, "/api/user/"):
 		meta.MenuKey = "platform-user"
-		meta.MenuTitle = "用户中心"
+		meta.MenuTitle = "User Center"
 		meta.PagePath = "/profile"
-		meta.Module = "用户中心"
+		meta.Module = "user"
 		meta.ResourceType = "user"
 		meta.ResourceName = deriveGenericResourceName(path)
 	case strings.HasPrefix(path, "/api/auth/"):
 		meta.MenuKey = "auth-center"
-		meta.MenuTitle = "认证中心"
+		meta.MenuTitle = "Auth Center"
 		meta.PagePath = "/login"
-		meta.Module = "认证中心"
+		meta.Module = "auth"
 		meta.ResourceType = "auth"
 		meta.ResourceName = deriveGenericResourceName(path)
 	case strings.HasPrefix(path, "/api/admin/"):
 		meta.MenuKey = "system-admin"
-		meta.MenuTitle = "系统管理"
+		meta.MenuTitle = "System Management"
 		meta.PagePath = "/admin/settings"
-		meta.Module = "系统管理"
+		meta.Module = "system"
 		meta.ResourceType = "admin"
 		meta.ResourceName = deriveGenericResourceName(path)
 	}
@@ -456,87 +456,87 @@ func firstNonEmptyPagePath(pagePathHint, path string) string {
 func resolveMenuMetaByPage(pagePath string) (requestMeta, bool) {
 	switch {
 	case pagePath == "/" || pagePath == "":
-		return requestMeta{MenuKey: "dashboard", MenuTitle: "工作台", PagePath: "/", Module: "工作台", ResourceType: "dashboard", ResourceName: "工作台"}, true
+		return requestMeta{MenuKey: "dashboard", MenuTitle: "Dashboard", PagePath: "/", Module: "dashboard", ResourceType: "dashboard", ResourceName: "Dashboard"}, true
 	case strings.HasPrefix(pagePath, "/cmdb/projects"):
-		return requestMeta{MenuKey: "cmdb-projects", MenuTitle: "项目管理", PagePath: "/cmdb/projects", Module: "资产中心", ResourceType: "project", ResourceName: "项目管理"}, true
+		return requestMeta{MenuKey: "cmdb-projects", MenuTitle: "Projects", PagePath: "/cmdb/projects", Module: "cmdb", ResourceType: "project", ResourceName: "Projects"}, true
 	case strings.HasPrefix(pagePath, "/cmdb/environments"):
-		return requestMeta{MenuKey: "cmdb-environments", MenuTitle: "环境管理", PagePath: "/cmdb/environments", Module: "资产中心", ResourceType: "environment", ResourceName: "环境管理"}, true
+		return requestMeta{MenuKey: "cmdb-environments", MenuTitle: "Environments", PagePath: "/cmdb/environments", Module: "cmdb", ResourceType: "environment", ResourceName: "Environments"}, true
 	case strings.HasPrefix(pagePath, "/cmdb/servers"):
-		return requestMeta{MenuKey: "cmdb-servers", MenuTitle: "主机管理", PagePath: "/cmdb/servers", Module: "资产中心", ResourceType: "server", ResourceName: "主机管理"}, true
+		return requestMeta{MenuKey: "cmdb-servers", MenuTitle: "Servers", PagePath: "/cmdb/servers", Module: "cmdb", ResourceType: "server", ResourceName: "Servers"}, true
 	case strings.HasPrefix(pagePath, "/cmdb/applications"):
-		return requestMeta{MenuKey: "cmdb-applications", MenuTitle: "应用流水线管理", PagePath: "/cmdb/applications", Module: "资产中心", ResourceType: "application", ResourceName: "应用流水线管理"}, true
+		return requestMeta{MenuKey: "cmdb-applications", MenuTitle: "Applications", PagePath: "/cmdb/applications", Module: "cmdb", ResourceType: "application", ResourceName: "Applications"}, true
 	case strings.HasPrefix(pagePath, "/deploy/release"):
-		return requestMeta{MenuKey: "deploy-release", MenuTitle: "迭代部署", PagePath: "/deploy/release", Module: "变更发布", ResourceType: "deploy", ResourceName: "迭代部署"}, true
+		return requestMeta{MenuKey: "deploy-release", MenuTitle: "Release Deploy", PagePath: "/deploy/release", Module: "deploy", ResourceType: "deploy", ResourceName: "Release Deploy"}, true
 	case strings.HasPrefix(pagePath, "/deploy/history"):
-		return requestMeta{MenuKey: "deploy-history", MenuTitle: "部署记录", PagePath: "/deploy/history", Module: "变更发布", ResourceType: "deploy_record", ResourceName: "部署记录"}, true
+		return requestMeta{MenuKey: "deploy-history", MenuTitle: "Deploy History", PagePath: "/deploy/history", Module: "deploy", ResourceType: "deploy_record", ResourceName: "Deploy History"}, true
 	case strings.HasPrefix(pagePath, "/deploy/archived"):
-		return requestMeta{MenuKey: "deploy-archived", MenuTitle: "归档历史", PagePath: "/deploy/archived", Module: "变更发布", ResourceType: "archive_record", ResourceName: "归档历史"}, true
+		return requestMeta{MenuKey: "deploy-archived", MenuTitle: "Archive History", PagePath: "/deploy/archived", Module: "deploy", ResourceType: "archive_record", ResourceName: "Archive History"}, true
 	case strings.HasPrefix(pagePath, "/deploy/archive"):
-		return requestMeta{MenuKey: "deploy-archive", MenuTitle: "归档打包", PagePath: "/deploy/archive", Module: "变更发布", ResourceType: "archive", ResourceName: "归档打包"}, true
+		return requestMeta{MenuKey: "deploy-archive", MenuTitle: "Archive Package", PagePath: "/deploy/archive", Module: "deploy", ResourceType: "archive", ResourceName: "Archive Package"}, true
 	case strings.HasPrefix(pagePath, "/deploy/aggregate-package"):
-		return requestMeta{MenuKey: "deploy-aggregate-package", MenuTitle: "聚合打包", PagePath: "/deploy/aggregate-package", Module: "变更发布", ResourceType: "aggregate_package", ResourceName: "聚合打包"}, true
+		return requestMeta{MenuKey: "deploy-aggregate-package", MenuTitle: "Aggregate Package", PagePath: "/deploy/aggregate-package", Module: "deploy", ResourceType: "aggregate_package", ResourceName: "Aggregate Package"}, true
 	case strings.HasPrefix(pagePath, "/deploy/aggregated-history"):
-		return requestMeta{MenuKey: "aggregated-history", MenuTitle: "聚合历史", PagePath: "/deploy/aggregated-history", Module: "变更发布", ResourceType: "aggregate_history", ResourceName: "聚合历史"}, true
+		return requestMeta{MenuKey: "aggregated-history", MenuTitle: "Aggregated History", PagePath: "/deploy/aggregated-history", Module: "deploy", ResourceType: "aggregate_history", ResourceName: "Aggregated History"}, true
 	case strings.HasPrefix(pagePath, "/consul/config"):
-		return requestMeta{MenuKey: "consul-config", MenuTitle: "配置管理", PagePath: "/consul/config", Module: "变更发布", ResourceType: "consul_config", ResourceName: "配置管理"}, true
+		return requestMeta{MenuKey: "consul-config", MenuTitle: "Config Management", PagePath: "/consul/config", Module: "deploy", ResourceType: "consul_config", ResourceName: "Config Management"}, true
 	case strings.HasPrefix(pagePath, "/consul/batch-all"):
-		return requestMeta{MenuKey: "consul-batch-all", MenuTitle: "批量配置下发", PagePath: "/consul/batch-all", Module: "变更发布", ResourceType: "consul_batch", ResourceName: "批量配置下发"}, true
+		return requestMeta{MenuKey: "consul-batch-all", MenuTitle: "Batch Config Push", PagePath: "/consul/batch-all", Module: "deploy", ResourceType: "consul_batch", ResourceName: "Batch Config Push"}, true
 	case strings.HasPrefix(pagePath, "/consul/operations"):
-		return requestMeta{MenuKey: "consul-operations", MenuTitle: "配置操作记录", PagePath: "/consul/operations", Module: "变更发布", ResourceType: "consul_operation", ResourceName: "配置操作记录"}, true
+		return requestMeta{MenuKey: "consul-operations", MenuTitle: "Config Operations", PagePath: "/consul/operations", Module: "deploy", ResourceType: "consul_operation", ResourceName: "Config Operations"}, true
 	case strings.HasPrefix(pagePath, "/jenkins/views"):
-		return requestMeta{MenuKey: "jenkins-views", MenuTitle: "视图管理", PagePath: "/jenkins/views", Module: "变更发布", ResourceType: "jenkins_view", ResourceName: "视图管理"}, true
+		return requestMeta{MenuKey: "jenkins-views", MenuTitle: "Jenkins Views", PagePath: "/jenkins/views", Module: "deploy", ResourceType: "jenkins_view", ResourceName: "Jenkins Views"}, true
 	case strings.HasPrefix(pagePath, "/monitor/bigscreen") || pagePath == "/monitor":
-		return requestMeta{MenuKey: "monitor-bigscreen", MenuTitle: "监控大屏", PagePath: "/monitor/bigscreen", Module: "监控中心", ResourceType: "monitor", ResourceName: "监控大屏"}, true
+		return requestMeta{MenuKey: "monitor-bigscreen", MenuTitle: "Monitor Dashboard", PagePath: "/monitor/bigscreen", Module: "monitor", ResourceType: "monitor", ResourceName: "Monitor Dashboard"}, true
 	case strings.HasPrefix(pagePath, "/monitor/overview"):
-		return requestMeta{MenuKey: "monitor-overview", MenuTitle: "监控概览", PagePath: "/monitor/overview", Module: "监控中心", ResourceType: "monitor", ResourceName: "监控概览"}, true
+		return requestMeta{MenuKey: "monitor-overview", MenuTitle: "Monitor Overview", PagePath: "/monitor/overview", Module: "monitor", ResourceType: "monitor", ResourceName: "Monitor Overview"}, true
 	case strings.HasPrefix(pagePath, "/monitor/dashboards"):
-		return requestMeta{MenuKey: "monitor-dashboards", MenuTitle: "Grafana仪表盘", PagePath: "/monitor/dashboards", Module: "监控中心", ResourceType: "grafana", ResourceName: "Grafana仪表盘"}, true
+		return requestMeta{MenuKey: "monitor-dashboards", MenuTitle: "Grafana Dashboards", PagePath: "/monitor/dashboards", Module: "monitor", ResourceType: "grafana", ResourceName: "Grafana Dashboards"}, true
 	case strings.HasPrefix(pagePath, "/alarm/events") || pagePath == "/alarm":
-		return requestMeta{MenuKey: "alarm-events", MenuTitle: "告警事件", PagePath: "/alarm/events", Module: "告警中心", ResourceType: "alert_event", ResourceName: "告警事件"}, true
+		return requestMeta{MenuKey: "alarm-events", MenuTitle: "Alert Events", PagePath: "/alarm/events", Module: "alert", ResourceType: "alert_event", ResourceName: "Alert Events"}, true
 	case strings.HasPrefix(pagePath, "/alarm/rules"):
-		return requestMeta{MenuKey: "alarm-rules", MenuTitle: "告警规则", PagePath: "/alarm/rules", Module: "告警中心", ResourceType: "alert_rule", ResourceName: "告警规则"}, true
+		return requestMeta{MenuKey: "alarm-rules", MenuTitle: "Alert Rules", PagePath: "/alarm/rules", Module: "alert", ResourceType: "alert_rule", ResourceName: "Alert Rules"}, true
 	case strings.HasPrefix(pagePath, "/alarm/contacts"):
-		return requestMeta{MenuKey: "alarm-contacts", MenuTitle: "联系人管理", PagePath: "/alarm/contacts", Module: "告警中心", ResourceType: "alert_contact", ResourceName: "联系人管理"}, true
+		return requestMeta{MenuKey: "alarm-contacts", MenuTitle: "Contacts", PagePath: "/alarm/contacts", Module: "alert", ResourceType: "alert_contact", ResourceName: "Contacts"}, true
 	case strings.HasPrefix(pagePath, "/alarm/channels"):
-		return requestMeta{MenuKey: "alarm-channels", MenuTitle: "通知渠道", PagePath: "/alarm/channels", Module: "告警中心", ResourceType: "notify_channel", ResourceName: "通知渠道"}, true
+		return requestMeta{MenuKey: "alarm-channels", MenuTitle: "Notify Channels", PagePath: "/alarm/channels", Module: "alert", ResourceType: "notify_channel", ResourceName: "Notify Channels"}, true
 	case strings.HasPrefix(pagePath, "/alarm/templates"):
-		return requestMeta{MenuKey: "alarm-templates", MenuTitle: "通知模板", PagePath: "/alarm/templates", Module: "告警中心", ResourceType: "notify_template", ResourceName: "通知模板"}, true
+		return requestMeta{MenuKey: "alarm-templates", MenuTitle: "Notify Templates", PagePath: "/alarm/templates", Module: "alert", ResourceType: "notify_template", ResourceName: "Notify Templates"}, true
 	case strings.HasPrefix(pagePath, "/security/overview") || pagePath == "/security":
-		return requestMeta{MenuKey: "security-overview", MenuTitle: "安全概览", PagePath: "/security/overview", Module: "安全中心", ResourceType: "security_overview", ResourceName: "安全概览"}, true
+		return requestMeta{MenuKey: "security-overview", MenuTitle: "Security Overview", PagePath: "/security/overview", Module: "security", ResourceType: "security_overview", ResourceName: "Security Overview"}, true
 	case strings.HasPrefix(pagePath, "/security/fim/policies"):
-		return requestMeta{MenuKey: "security-fim-policies", MenuTitle: "巡检策略", PagePath: "/security/fim/policies", Module: "安全中心", ResourceType: "fim_policy", ResourceName: "巡检策略"}, true
+		return requestMeta{MenuKey: "security-fim-policies", MenuTitle: "FIM Policies", PagePath: "/security/fim/policies", Module: "security", ResourceType: "fim_policy", ResourceName: "FIM Policies"}, true
 	case strings.HasPrefix(pagePath, "/security/fim/executions"):
-		return requestMeta{MenuKey: "security-fim-executions", MenuTitle: "执行记录", PagePath: "/security/fim/executions", Module: "安全中心", ResourceType: "fim_snapshot", ResourceName: "执行记录"}, true
+		return requestMeta{MenuKey: "security-fim-executions", MenuTitle: "FIM Executions", PagePath: "/security/fim/executions", Module: "security", ResourceType: "fim_snapshot", ResourceName: "FIM Executions"}, true
 	case strings.HasPrefix(pagePath, "/security/fim/events"):
-		return requestMeta{MenuKey: "security-fim-events", MenuTitle: "文件变更事件", PagePath: "/security/fim/events", Module: "安全中心", ResourceType: "fim_event", ResourceName: "文件变更事件"}, true
+		return requestMeta{MenuKey: "security-fim-events", MenuTitle: "File Change Events", PagePath: "/security/fim/events", Module: "security", ResourceType: "fim_event", ResourceName: "File Change Events"}, true
 	case strings.HasPrefix(pagePath, "/security/fim/alerts"):
-		return requestMeta{MenuKey: "security-fim-alerts", MenuTitle: "完整性告警", PagePath: "/security/fim/alerts", Module: "安全中心", ResourceType: "fim_alert", ResourceName: "完整性告警"}, true
+		return requestMeta{MenuKey: "security-fim-alerts", MenuTitle: "Integrity Alerts", PagePath: "/security/fim/alerts", Module: "security", ResourceType: "fim_alert", ResourceName: "Integrity Alerts"}, true
 	case strings.HasPrefix(pagePath, "/security/tasks"):
-		return requestMeta{MenuKey: "security-tasks", MenuTitle: "扫描任务", PagePath: "/security/tasks", Module: "安全中心", ResourceType: "security_task", ResourceName: "扫描任务"}, true
+		return requestMeta{MenuKey: "security-tasks", MenuTitle: "Scan Tasks", PagePath: "/security/tasks", Module: "security", ResourceType: "security_task", ResourceName: "Scan Tasks"}, true
 	case strings.HasPrefix(pagePath, "/security/assets"):
-		return requestMeta{MenuKey: "security-assets", MenuTitle: "安全资产", PagePath: "/security/assets", Module: "安全中心", ResourceType: "security_asset", ResourceName: "安全资产"}, true
+		return requestMeta{MenuKey: "security-assets", MenuTitle: "Security Assets", PagePath: "/security/assets", Module: "security", ResourceType: "security_asset", ResourceName: "Security Assets"}, true
 	case strings.HasPrefix(pagePath, "/security/vulnerabilities"):
-		return requestMeta{MenuKey: "security-vulnerabilities", MenuTitle: "漏洞管理", PagePath: "/security/vulnerabilities", Module: "安全中心", ResourceType: "security_vulnerability", ResourceName: "漏洞管理"}, true
+		return requestMeta{MenuKey: "security-vulnerabilities", MenuTitle: "Vulnerabilities", PagePath: "/security/vulnerabilities", Module: "security", ResourceType: "security_vulnerability", ResourceName: "Vulnerabilities"}, true
 	case strings.HasPrefix(pagePath, "/security/tickets"):
-		return requestMeta{MenuKey: "security-tickets", MenuTitle: "漏洞工单", PagePath: "/security/tickets", Module: "安全中心", ResourceType: "security_ticket", ResourceName: "漏洞工单"}, true
+		return requestMeta{MenuKey: "security-tickets", MenuTitle: "Vulnerability Tickets", PagePath: "/security/tickets", Module: "security", ResourceType: "security_ticket", ResourceName: "Vulnerability Tickets"}, true
 	case strings.HasPrefix(pagePath, "/security/vuln-db"):
-		return requestMeta{MenuKey: "security-vuln-db", MenuTitle: "漏洞知识库", PagePath: "/security/vuln-db", Module: "安全中心", ResourceType: "security_vuln_db", ResourceName: "漏洞知识库"}, true
+		return requestMeta{MenuKey: "security-vuln-db", MenuTitle: "Vulnerability Knowledge DB", PagePath: "/security/vuln-db", Module: "security", ResourceType: "security_vuln_db", ResourceName: "Vulnerability Knowledge DB"}, true
 	case strings.HasPrefix(pagePath, "/admin/users"):
-		return requestMeta{MenuKey: "admin-users", MenuTitle: "用户管理", PagePath: "/admin/users", Module: "系统管理", ResourceType: "admin_user", ResourceName: "用户管理"}, true
+		return requestMeta{MenuKey: "admin-users", MenuTitle: "Users", PagePath: "/admin/users", Module: "system", ResourceType: "admin_user", ResourceName: "Users"}, true
 	case strings.HasPrefix(pagePath, "/admin/roles"):
-		return requestMeta{MenuKey: "admin-roles", MenuTitle: "角色管理", PagePath: "/admin/roles", Module: "系统管理", ResourceType: "admin_role", ResourceName: "角色管理"}, true
+		return requestMeta{MenuKey: "admin-roles", MenuTitle: "Roles", PagePath: "/admin/roles", Module: "system", ResourceType: "admin_role", ResourceName: "Roles"}, true
 	case strings.HasPrefix(pagePath, "/admin/menus"):
-		return requestMeta{MenuKey: "admin-menus", MenuTitle: "菜单管理", PagePath: "/admin/menus", Module: "系统管理", ResourceType: "admin_menu", ResourceName: "菜单管理"}, true
+		return requestMeta{MenuKey: "admin-menus", MenuTitle: "Menus", PagePath: "/admin/menus", Module: "system", ResourceType: "admin_menu", ResourceName: "Menus"}, true
 	case strings.HasPrefix(pagePath, "/admin/settings"):
-		return requestMeta{MenuKey: "admin-settings", MenuTitle: "系统设置", PagePath: "/admin/settings", Module: "系统管理", ResourceType: "settings", ResourceName: "系统设置"}, true
+		return requestMeta{MenuKey: "admin-settings", MenuTitle: "System Settings", PagePath: "/admin/settings", Module: "system", ResourceType: "settings", ResourceName: "System Settings"}, true
 	case strings.HasPrefix(pagePath, "/platform/audit"):
-		return requestMeta{MenuKey: "platform-audit", MenuTitle: "平台审计", PagePath: "/platform/audit", Module: "平台审计", ResourceType: "audit", ResourceName: "平台审计"}, true
+		return requestMeta{MenuKey: "platform-audit", MenuTitle: "Platform Audit", PagePath: "/platform/audit", Module: "audit", ResourceType: "audit", ResourceName: "Platform Audit"}, true
 	case strings.HasPrefix(pagePath, "/platform/events"):
-		return requestMeta{MenuKey: "platform-events", MenuTitle: "平台事件中心", PagePath: "/platform/events", Module: "平台事件", ResourceType: "platform_event", ResourceName: "平台事件中心"}, true
+		return requestMeta{MenuKey: "platform-events", MenuTitle: "Platform Events", PagePath: "/platform/events", Module: "events", ResourceType: "platform_event", ResourceName: "Platform Events"}, true
 	case strings.HasPrefix(pagePath, "/profile"):
-		return requestMeta{MenuKey: "profile", MenuTitle: "我的资料", PagePath: "/profile", Module: "用户中心", ResourceType: "profile", ResourceName: "我的资料"}, true
+		return requestMeta{MenuKey: "profile", MenuTitle: "My Profile", PagePath: "/profile", Module: "user", ResourceType: "profile", ResourceName: "My Profile"}, true
 	case strings.HasPrefix(pagePath, "/user-manual"):
-		return requestMeta{MenuKey: "user-manual", MenuTitle: "用户手册", PagePath: "/user-manual", Module: "平台通用", ResourceType: "manual", ResourceName: "用户手册"}, true
+		return requestMeta{MenuKey: "user-manual", MenuTitle: "User Manual", PagePath: "/user-manual", Module: "general", ResourceType: "manual", ResourceName: "User Manual"}, true
 	default:
 		return requestMeta{}, false
 	}
@@ -580,55 +580,55 @@ func inferAction(method, path string) string {
 func inferActionLabel(method, path string) string {
 	switch inferAction(method, path) {
 	case "login":
-		return "登录"
+		return "login"
 	case "export":
-		return "导出日志"
+		return "export_logs"
 	case "archive":
-		return "归档日志"
+		return "archive_logs"
 	case "cleanup":
-		return "清理日志"
+		return "cleanup_logs"
 	case "ack":
-		return "确认"
+		return "acknowledge"
 	case "resolve":
-		return "解决"
+		return "resolve"
 	case "close":
-		return "关闭"
+		return "close"
 	case "enable":
-		return "启用"
+		return "enable"
 	case "disable":
-		return "停用"
+		return "disable"
 	case "execute":
-		return "执行操作"
+		return "execute"
 	case "create":
-		return "新增"
+		return "create"
 	case "update":
-		return "更新配置"
+		return "update"
 	case "delete":
-		return "删除"
+		return "delete"
 	default:
-		return "访问页面"
+		return "visit_page"
 	}
 }
 
 func resolveFIMResourceName(path string) string {
 	switch {
 	case strings.Contains(path, "/scan"):
-		return "FIM 扫描任务"
+		return "FIM Scan Task"
 	case strings.Contains(path, "/alerts"):
-		return "完整性告警"
+		return "Integrity Alert"
 	case strings.Contains(path, "/events"):
-		return "文件变更事件"
+		return "File Change Event"
 	case strings.Contains(path, "/watch-paths"):
-		return "巡检目录配置"
+		return "Watch Path Config"
 	default:
-		return "文件完整性巡检"
+		return "File Integrity Monitoring"
 	}
 }
 
 func deriveGenericResourceName(path string) string {
 	trimmed := strings.Trim(path, "/")
 	if trimmed == "" {
-		return "接口访问"
+		return "API Access"
 	}
 	parts := strings.Split(trimmed, "/")
 	if len(parts) <= 1 {
@@ -641,13 +641,13 @@ func deriveGenericResourceName(path string) string {
 	last = strings.ReplaceAll(last, "-", "_")
 	switch last {
 	case "profile":
-		return "个人信息"
+		return "Profile"
 	case "menus":
-		return "菜单访问"
+		return "Menu Access"
 	case "settings":
-		return "系统设置"
+		return "System Settings"
 	case "login":
-		return "登录接口"
+		return "Login"
 	default:
 		return last
 	}
@@ -655,9 +655,9 @@ func deriveGenericResourceName(path string) string {
 
 func buildChangeSummary(meta requestMeta, path string) string {
 	if meta.Action == "query" {
-		return fmt.Sprintf("访问了 %s，查看当前列表或详情。", meta.MenuTitle)
+		return fmt.Sprintf("Viewed %s page, browsing current list or details.", meta.MenuTitle)
 	}
-	return fmt.Sprintf("在 %s 中执行了%s，请求路径 %s。", meta.MenuTitle, meta.ActionLabel, path)
+	return fmt.Sprintf("Performed %s in %s at %s.", meta.ActionLabel, meta.MenuTitle, path)
 }
 
 func resolveResourceID(path string) string {

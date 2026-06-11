@@ -1,19 +1,21 @@
 // Copyright (c) 2026 OPS Platform Contributors.
 // SPDX-License-Identifier: MIT
 
-import { useState } from 'react';
-import { Card, Tabs, Typography } from 'antd';
-import ViewsPage from './ViewsPage';
+import { useState } from 'react'
+import { Card, Tabs, Typography } from 'antd'
+import { useTranslation } from 'react-i18next'
+import ViewsPage from './ViewsPage'
 
-const { Title } = Typography;
+const { Title } = Typography
 
 export default function JenkinsManagementPage() {
-  const [activeKey, setActiveKey] = useState('views');
+  const [activeKey, setActiveKey] = useState('views')
+  const { t } = useTranslation('platform')
 
   return (
     <div style={{ padding: 24 }}>
       <Card>
-        <Title level={2} style={{ marginBottom: 24 }}>Jenkins管理</Title>
+        <Title level={2} style={{ marginBottom: 24 }}>{t('jenkinsManagement', 'Jenkins管理')}</Title>
 
         <Tabs
           activeKey={activeKey}
@@ -21,7 +23,7 @@ export default function JenkinsManagementPage() {
           items={[
             {
               key: 'views',
-              label: '视图管理',
+              label: t('viewManagement', '视图管理'),
               children: <ViewsPage />,
             },
           ]}

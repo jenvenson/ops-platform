@@ -22,6 +22,7 @@ import {
   FullscreenOutlined,
   FullscreenExitOutlined,
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { monitorAPI, GrafanaDashboard } from '../../api/monitor.js'
 
 // 从 Prometheus 获取的服务器状态（与 Grafana 服务器资源总览表一致）
@@ -95,6 +96,9 @@ const getBandwidthColor = (bitsPerSec: number): string => {
 }
 
 export default function MonitorCenter() {
+  const { t } = useTranslation('monitor')
+  const { t: tc } = useTranslation('common')
+
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('bigscreen')
   const [bigScreenFull, setBigScreenFull] = useState(false)
@@ -108,9 +112,9 @@ export default function MonitorCenter() {
   const [serverStatuses, setServerStatuses] = useState<PrometheusServer[]>([])
   const [serversLoading, setServersLoading] = useState(false)
 
-  
 
-  
+
+
 
   // 获取 Grafana 基础数据（仪表盘、数据源列表）
   const fetchGrafanaData = useCallback(async () => {
@@ -119,11 +123,11 @@ export default function MonitorCenter() {
       setDashboards(dashboardsData)
       setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '获取监控数据失败')
+      setError(err instanceof Error ? err.message : t('monitorDataFetchFailed', '监控数据获取失败'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   // 从 Prometheus 查询结果中提取指定 instance 的值
   const getMetricValue = (result: { data?: { result?: Array<{ metric: Record<string, string>; value?: [number, string] }> } } | null, instance: string): number | undefined => {
@@ -394,7 +398,7 @@ export default function MonitorCenter() {
       }}>
         {/* 顶部工具栏 */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <div style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>监控大屏</div>
+          <div style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>{t('bigScreenTitle', '监控大屏')}</div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               onClick={() => { fetchServerStatuses() }}
@@ -406,7 +410,7 @@ export default function MonitorCenter() {
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
             >
-              <ReloadOutlined spin={serversLoading} /> 刷新数据
+              <ReloadOutlined spin={serversLoading} />{' '}{t('refreshData', '刷新数据')}
             </button>
             <button
               onClick={() => setBigScreenFull(!bigScreenFull)}
@@ -418,23 +422,23 @@ export default function MonitorCenter() {
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
             >
-              {bigScreenFull ? <><FullscreenExitOutlined /> 退出全屏</> : <><FullscreenOutlined /> 最大化</>}
+              {bigScreenFull ? <><FullscreenExitOutlined />{' '}{t('exitFullscreen', '退出全屏')}</> : <><FullscreenOutlined />{' '}{t('maximize', '最大化')}</>}
             </button>
           </div>
         </div>
 
         {/* 顶部：主机状态 */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 13, color: '#666', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>主机状态</div>
+          <div style={{ fontSize: 13, color: '#666', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{t('hostStatus', '主机状态')}</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
             {/* 在线主机 */}
             <div style={{ ...cardStyle }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 13, color: '#888' }}>在线 (Up)</span>
+                <span style={{ fontSize: 13, color: '#888' }}>{t('onlineUp', '在线 (Up)')}</span>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e', animation: 'pulse 1.5s ease-in-out infinite' }} />
               </div>
               <div style={{ fontSize: 42, fontWeight: 700, color: '#22c55e', lineHeight: 1 }}>{onlineCount}</div>
-              <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>总主机: {total}</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{t('totalHosts', '总主机')}: {total}</div>
             </div>
             {/* 离线主机 */}
             <div style={{
@@ -442,23 +446,23 @@ export default function MonitorCenter() {
               ...(offlineCount > 0 ? { background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' } : {}),
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 13, color: '#888' }}>离线 (Down)</span>
+                <span style={{ fontSize: 13, color: '#888' }}>{t('offlineDown', '离线 (Down)')}</span>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', background: offlineCount > 0 ? '#ef4444' : '#444', boxShadow: offlineCount > 0 ? '0 0 8px #ef4444' : 'none' }} />
               </div>
               <div style={{ fontSize: 42, fontWeight: 700, color: offlineCount > 0 ? '#ef4444' : '#444', lineHeight: 1 }}>{offlineCount}</div>
-              <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{offlineCount > 0 ? '需要关注!' : '全部正常'}</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{offlineCount > 0 ? t('needsAttention', '需要关注!') : t('allNormal', '全部正常')}</div>
             </div>
             {/* CPU 均值 */}
             <div style={cardStyle}>
-              <div style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>CPU 均值</div>
+              <div style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>{t('cpuAverage', 'CPU 均值')}</div>
               <div style={{ fontSize: 42, fontWeight: 700, color: badgeLabel(cpuAvg).color, lineHeight: 1 }}>{cpuAvg.toFixed(1)}%</div>
-              <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{cpuWarnCount > 0 ? `${cpuWarnCount} 台超过 90%` : '全部正常'}</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{cpuWarnCount > 0 ? t('machinesOverThreshold', '{{count}} 台超过 90%', { count: cpuWarnCount }) : t('allNormal', '全部正常')}</div>
             </div>
             {/* 内存均值 */}
             <div style={cardStyle}>
-              <div style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>内存均值</div>
+              <div style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>{t('memoryAverage', '内存均值')}</div>
               <div style={{ fontSize: 42, fontWeight: 700, color: badgeLabel(memAvg).color, lineHeight: 1 }}>{memAvg.toFixed(1)}%</div>
-              <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{memWarnCount > 0 ? `${memWarnCount} 台超过 90%` : '全部正常'}</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{memWarnCount > 0 ? t('machinesOverThreshold', '{{count}} 台超过 90%', { count: memWarnCount }) : t('allNormal', '全部正常')}</div>
             </div>
           </div>
         </div>
@@ -468,17 +472,17 @@ export default function MonitorCenter() {
           {/* CPU 使用率 */}
           <div style={cardStyle}>
             <div style={titleStyle}>
-              CPU 使用率
+              {t('cpuUsage', 'CPU 使用率')}
               <span style={{
                 fontSize: 11, padding: '2px 8px', borderRadius: 10,
                 background: `${badgeLabel(cpuAvg).color}33`, color: badgeLabel(cpuAvg).color,
-              }}>均值 {cpuAvg.toFixed(1)}%</span>
+              }}>{t('averageLabel', '均值')} {cpuAvg.toFixed(1)}%</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              {renderGauge(cpuAvg, '集群均值')}
+              {renderGauge(cpuAvg, t('clusterAverage', '集群均值'))}
               <div style={{ flex: 1 }}>
                 {cpuTop5.map(s => renderTopItem(s.name, s.cpuUsage ?? 0))}
-                {cpuTop5.length === 0 && <div style={{ color: '#666', fontSize: 13 }}>暂无数据</div>}
+                {cpuTop5.length === 0 && <div style={{ color: '#666', fontSize: 13 }}>{t('noData', '暂无数据')}</div>}
               </div>
             </div>
           </div>
@@ -486,17 +490,17 @@ export default function MonitorCenter() {
           {/* 内存使用率 */}
           <div style={cardStyle}>
             <div style={titleStyle}>
-              内存使用率
+              {t('memoryUsage', '内存使用率')}
               <span style={{
                 fontSize: 11, padding: '2px 8px', borderRadius: 10,
                 background: `${badgeLabel(memAvg).color}33`, color: badgeLabel(memAvg).color,
-              }}>均值 {memAvg.toFixed(1)}%</span>
+              }}>{t('averageLabel', '均值')} {memAvg.toFixed(1)}%</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              {renderGauge(memAvg, '集群均值')}
+              {renderGauge(memAvg, t('clusterAverage', '集群均值'))}
               <div style={{ flex: 1 }}>
                 {memTop5.map(s => renderTopItem(s.name, s.memUsage ?? 0))}
-                {memTop5.length === 0 && <div style={{ color: '#666', fontSize: 13 }}>暂无数据</div>}
+                {memTop5.length === 0 && <div style={{ color: '#666', fontSize: 13 }}>{t('noData', '暂无数据')}</div>}
               </div>
             </div>
           </div>
@@ -504,36 +508,36 @@ export default function MonitorCenter() {
           {/* 磁盘使用率 */}
           <div style={cardStyle}>
             <div style={titleStyle}>
-              磁盘（分区）使用率
+              {t('diskPartitionUsage', '磁盘（分区）使用率')}
               <span style={{
                 fontSize: 11, padding: '2px 8px', borderRadius: 10,
                 background: diskWarnCount > 0 ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)',
                 color: diskWarnCount > 0 ? '#ef4444' : '#22c55e',
-              }}>{diskWarnCount > 0 ? `${diskWarnCount} 台 > 90%` : '全部正常'}</span>
+              }}>{diskWarnCount > 0 ? t('machinesOver90', '{{count}} 台 > 90%', { count: diskWarnCount }) : t('allNormal', '全部正常')}</span>
             </div>
             {diskTop6.map(s => renderDiskItem(s))}
-            {diskTop6.length === 0 && <div style={{ color: '#666', fontSize: 13 }}>暂无数据</div>}
+            {diskTop6.length === 0 && <div style={{ color: '#666', fontSize: 13 }}>{t('noData', '暂无数据')}</div>}
           </div>
 
           {/* 系统负载 */}
           <div style={cardStyle}>
             <div style={titleStyle}>
-              系统负载（5分钟）
+              {t('systemLoad5min', '系统负载（5分钟）')}
               <span style={{
                 fontSize: 11, padding: '2px 8px', borderRadius: 10,
                 background: 'rgba(24,144,255,0.2)', color: '#1890ff',
-              }}>均值 {loadAvg.toFixed(2)}</span>
+              }}>{t('averageLabel', '均值')} {loadAvg.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
               {/* 负载仪表盘 - 用相对于核数的百分比 */}
               {(() => {
                 const avgCores = avg(serverStatuses.map(s => s.cpuCores))
                 const loadPct = avgCores > 0 ? Math.min((loadAvg / avgCores) * 100, 100) : 0
-                return renderGauge(loadPct, '负载/核数')
+                return renderGauge(loadPct, t('loadPerCore', '负载/核数'))
               })()}
               <div style={{ flex: 1 }}>
                 {loadTop5.map(s => renderTopItem(s.name, s.load5 ?? 0, ''))}
-                {loadTop5.length === 0 && <div style={{ color: '#666', fontSize: 13 }}>暂无数据</div>}
+                {loadTop5.length === 0 && <div style={{ color: '#666', fontSize: 13 }}>{t('noData', '暂无数据')}</div>}
               </div>
             </div>
           </div>
@@ -555,7 +559,7 @@ export default function MonitorCenter() {
     <div>
       {/* 服务器资源总览表（从 Prometheus 获取，与 Grafana 一致） */}
       <Card
-        title={`服务器资源总览【主机总数：${serverStatuses.length}】`}
+        title={t('serverOverview', '服务器资源总览【主机总数：{{count}}】', { count: serverStatuses.length })}
         size="small"
         style={{ marginBottom: 16 }}
         extra={
@@ -564,14 +568,14 @@ export default function MonitorCenter() {
             icon={<ReloadOutlined spin={serversLoading} />}
             onClick={fetchServerStatuses}
           >
-            刷新
+            {tc('refresh', '刷新')}
           </Button>
         }
       >
         <Table
           columns={[
             {
-              title: '名称',
+              title: t('name', '名称'),
               dataIndex: 'name',
               key: 'name',
               width: 145,
@@ -580,7 +584,7 @@ export default function MonitorCenter() {
               render: (name: string) => <span style={{ fontWeight: 500 }}>{name}</span>,
             },
             {
-              title: 'IP',
+              title: t('ip', 'IP'),
               dataIndex: 'ip',
               key: 'ip',
               width: 130,
@@ -590,7 +594,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: '启动(天)',
+              title: t('uptimeDays', '启动(天)'),
               dataIndex: 'uptimeDays',
               key: 'uptimeDays',
               width: 80,
@@ -598,7 +602,7 @@ export default function MonitorCenter() {
               render: (days: number | undefined) => days !== undefined ? days.toFixed(1) : '-',
             },
             {
-              title: '内存',
+              title: t('memory', '内存'),
               dataIndex: 'memTotal',
               key: 'memTotal',
               width: 80,
@@ -609,7 +613,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: 'CPU',
+              title: t('cpu', 'CPU'),
               dataIndex: 'cpuCores',
               key: 'cpuCores',
               width: 55,
@@ -620,7 +624,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: '负载',
+              title: t('load', '负载'),
               dataIndex: 'load5',
               key: 'load5',
               width: 70,
@@ -628,7 +632,7 @@ export default function MonitorCenter() {
               render: (load: number | undefined) => load !== undefined ? load.toFixed(2) : '-',
             },
             {
-              title: 'CPU使用率',
+              title: t('cpuUsageCol', 'CPU使用率'),
               dataIndex: 'cpuUsage',
               key: 'cpuUsage',
               width: 110,
@@ -647,7 +651,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: '内存使用率',
+              title: t('memoryUsageCol', '内存使用率'),
               dataIndex: 'memUsage',
               key: 'memUsage',
               width: 110,
@@ -666,7 +670,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: 'IOutil使用率*',
+              title: t('ioUtilUsage', 'IOutil使用率*'),
               dataIndex: 'ioUtil',
               key: 'ioUtil',
               width: 110,
@@ -685,7 +689,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: '分区使用率*',
+              title: t('diskUsageCol', '分区使用率*'),
               dataIndex: 'diskUsage',
               key: 'diskUsage',
               width: 120,
@@ -704,7 +708,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: '磁盘读取*',
+              title: t('diskRead', '磁盘读取*'),
               dataIndex: 'diskRead',
               key: 'diskRead',
               width: 100,
@@ -727,7 +731,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: '磁盘写入*',
+              title: t('diskWrite', '磁盘写入*'),
               dataIndex: 'diskWrite',
               key: 'diskWrite',
               width: 100,
@@ -750,7 +754,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: '下载带宽*',
+              title: t('downloadBandwidth', '下载带宽*'),
               dataIndex: 'netDown',
               key: 'netDown',
               width: 100,
@@ -773,7 +777,7 @@ export default function MonitorCenter() {
               },
             },
             {
-              title: '上传带宽*',
+              title: t('uploadBandwidth', '上传带宽*'),
               dataIndex: 'netUp',
               key: 'netUp',
               width: 100,
@@ -803,7 +807,7 @@ export default function MonitorCenter() {
             defaultPageSize: 20,
             showSizeChanger: true,
             pageSizeOptions: ['10', '20', '50', '100'],
-            showTotal: (total) => `共 ${total} 台`,
+            showTotal: (total) => t('totalMachines', '共 {{count}} 台', { count: total }),
             showQuickJumper: true,
           }}
           size="small"
@@ -822,13 +826,13 @@ export default function MonitorCenter() {
           icon={<LinkOutlined />}
           onClick={() => openGrafana('/dashboards')}
         >
-          在 Grafana 中查看全部
+          {t('viewAllInGrafana', '在 Grafana 中查看全部')}
         </Button>
       </div>
       <Table
         columns={[
           {
-            title: '仪表盘名称',
+            title: t('dashboardName', '仪表盘名称'),
             dataIndex: 'title',
             key: 'title',
             render: (title: string, record: GrafanaDashboard) => (
@@ -839,7 +843,7 @@ export default function MonitorCenter() {
             ),
           },
           {
-            title: '标签',
+            title: t('tags', '标签'),
             dataIndex: 'tags',
             key: 'tags',
             width: 250,
@@ -851,7 +855,7 @@ export default function MonitorCenter() {
             ),
           },
           {
-            title: '操作',
+            title: tc('action', '操作'),
             key: 'action',
             width: 180,
             render: (_: unknown, record: GrafanaDashboard) => (
@@ -861,7 +865,7 @@ export default function MonitorCenter() {
                   size="small"
                   onClick={() => handleDashboardClick(record.uid)}
                 >
-                  嵌入查看
+                  {t('embedView', '嵌入查看')}
                 </Button>
                 <Button
                   type="link"
@@ -869,7 +873,7 @@ export default function MonitorCenter() {
                   icon={<ExpandOutlined />}
                   onClick={() => openGrafana(record.url)}
                 >
-                  新窗口
+                  {t('newWindow', '新窗口')}
                 </Button>
               </Space>
             ),
@@ -892,17 +896,17 @@ export default function MonitorCenter() {
       <div>
         <Space style={{ marginBottom: 16 }}>
           <Button icon={<ArrowLeftOutlined />} onClick={() => setActiveTab('dashboards')}>
-            返回列表
+            {t('backToList', '返回列表')}
           </Button>
           <Button
             type="primary"
             icon={<ExpandOutlined />}
             onClick={() => openGrafana(`/d/${selectedDashboard}`)}
           >
-            在 Grafana 中打开
+            {t('openInGrafana', '在 Grafana 中打开')}
           </Button>
         </Space>
-        <Card title={dashboard?.title || '仪表盘'} size="small">
+        <Card title={dashboard?.title || t('dashboard', '仪表盘')} size="small">
           <iframe
             src={`${proxyBase}/d/${selectedDashboard}?orgId=1&kiosk`}
             width="100%"
@@ -919,13 +923,13 @@ export default function MonitorCenter() {
     <div>
       {error && (
         <Alert
-          message="监控数据获取失败"
+          message={t('monitorDataFetchFailed', '监控数据获取失败')}
           description={error}
           type="error"
           showIcon
           closable
           style={{ marginBottom: 16 }}
-          action={<Button size="small" onClick={() => { fetchGrafanaData(); fetchServerStatuses(); }}>重试</Button>}
+          action={<Button size="small" onClick={() => { fetchGrafanaData(); fetchServerStatuses(); }}>{tc('retry', '重试')}</Button>}
         />
       )}
 
@@ -937,23 +941,23 @@ export default function MonitorCenter() {
           items={[
             {
               key: 'bigscreen',
-              label: <span><FundProjectionScreenOutlined /> 监控大屏</span>,
+              label: <span><FundProjectionScreenOutlined />{' '}{t('bigScreenTitle', '监控大屏')}</span>,
               children: renderBigScreen(),
             },
             {
               key: 'overview',
-              label: <span><LineChartOutlined /> 监控概览</span>,
+              label: <span><LineChartOutlined />{' '}{t('monitorOverview', '监控概览')}</span>,
               children: renderOverview(),
             },
             {
               key: 'dashboards',
-              label: <span><DashboardOutlined /> Grafana仪表盘</span>,
+              label: <span><DashboardOutlined />{' '}{t('grafanaDashboards', 'Grafana仪表盘')}</span>,
               children: renderDashboards(),
             },
-            
+
             ...(selectedDashboard ? [{
               key: 'dashboard-detail',
-              label: <span><ExpandOutlined /> 仪表盘详情</span>,
+              label: <span><ExpandOutlined />{' '}{t('dashboardDetail', '仪表盘详情')}</span>,
               children: renderDashboardDetail(),
             }] : []),
           ]}

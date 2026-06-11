@@ -17,6 +17,7 @@ import {
 } from '@ant-design/icons'
 import { securityAPI, SecurityStatistics, SecurityVulnerability, PaginatedResponse } from '../../api/security'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const { Title, Text } = Typography
 
@@ -51,6 +52,7 @@ interface SyncTask {
 
 export default function SecurityOverview() {
   const navigate = useNavigate()
+  const { t } = useTranslation('security')
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<SecurityStatistics>({
     total_tasks: 0,
@@ -132,9 +134,9 @@ export default function SecurityOverview() {
         <div>
           <Title level={3} style={{ margin: 0, color: theme.text, display: 'flex', alignItems: 'center', gap: 12 }}>
             <SafetyOutlined style={{ color: theme.primary }} />
-            安全运营中心
+            {t('securityOperationsCenter', '安全运营中心')}
           </Title>
-          <Text style={{ color: theme.textSecondary }}>实时监控企业安全态势</Text>
+          <Text style={{ color: theme.textSecondary }}>{t('realTimeMonitorSecurityPosture', '实时监控企业安全态势')}</Text>
         </div>
         <Space>
           <Button
@@ -142,7 +144,7 @@ export default function SecurityOverview() {
             size="large"
             onClick={() => navigate('/security/assets')}
           >
-            资产发现
+            {t('assetDiscovery', '资产发现')}
           </Button>
           <Button
             type="primary"
@@ -151,7 +153,7 @@ export default function SecurityOverview() {
             onClick={() => navigate('/security/tasks')}
             style={{ background: theme.primary, borderColor: theme.primary }}
           >
-            立即漏洞扫描
+            {t('immediateVulnerabilityScan', '立即漏洞扫描')}
           </Button>
         </Space>
       </div>
@@ -188,18 +190,18 @@ export default function SecurityOverview() {
                   <div style={{ fontSize: 32, fontWeight: 'bold', color: getScoreColor(securityScore) }}>
                     {securityScore}
                   </div>
-                  <div style={{ fontSize: 12, color: theme.textSecondary }}>安全评分</div>
+                  <div style={{ fontSize: 12, color: theme.textSecondary }}>{t('securityScore', '安全评分')}</div>
                 </div>
               </div>
               <div>
                 <div style={{ fontSize: 18, fontWeight: 600, color: theme.text, marginBottom: 8 }}>
-                  {securityScore >= 80 ? '安全状态良好' : securityScore >= 60 ? '需要注意' : '存在风险'}
+                  {securityScore >= 80 ? t('securityStatusGood', '安全状态良好') : securityScore >= 60 ? t('needsAttention', '需要注意') : t('hasRisk', '存在风险')}
                 </div>
                 <div style={{ color: theme.textSecondary, fontSize: 13 }}>
-                  今日扫描 {stats.completed_tasks} 次
+                  {t('todayScan', '今日扫描')} {stats.completed_tasks} {t('scanTimes', '次')}
                 </div>
                 <div style={{ color: theme.textSecondary, fontSize: 13 }}>
-                  发现 {stats.total_vulnerabilities} 个漏洞
+                  {t('found', '发现')} {stats.total_vulnerabilities} {t('vulnerability', '个漏洞')}
                 </div>
               </div>
             </div>
@@ -218,42 +220,42 @@ export default function SecurityOverview() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <Title level={5} style={{ margin: 0, color: theme.text }}>
                 <BugOutlined style={{ marginRight: 8, color: theme.primary }} />
-                漏洞分布
+                {t('vulnerabilityDistribution', '漏洞分布')}
               </Title>
               <Tag color="blue" style={{ cursor: 'pointer' }} onClick={() => navigate('/security/vuln-db')}>
-                漏洞库 <ArrowRightOutlined />
+                {t('vulnerabilityDatabase', '漏洞库')} <ArrowRightOutlined />
               </Tag>
             </div>
             <Row gutter={16}>
               <Col span={6}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 32, fontWeight: 'bold', color: theme.critical }}>{vulnStats.critical}</div>
-                  <div style={{ color: theme.textSecondary, fontSize: 12 }}>严重</div>
+                  <div style={{ color: theme.textSecondary, fontSize: 12 }}>{t('severity.critical', '严重')}</div>
                 </div>
               </Col>
               <Col span={6}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 32, fontWeight: 'bold', color: theme.high }}>{vulnStats.high}</div>
-                  <div style={{ color: theme.textSecondary, fontSize: 12 }}>高危</div>
+                  <div style={{ color: theme.textSecondary, fontSize: 12 }}>{t('severity.high', '高危')}</div>
                 </div>
               </Col>
               <Col span={6}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 32, fontWeight: 'bold', color: theme.medium }}>{vulnStats.medium}</div>
-                  <div style={{ color: theme.textSecondary, fontSize: 12 }}>中危</div>
+                  <div style={{ color: theme.textSecondary, fontSize: 12 }}>{t('severity.medium', '中危')}</div>
                 </div>
               </Col>
               <Col span={6}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 32, fontWeight: 'bold', color: theme.low }}>{vulnStats.low}</div>
-                  <div style={{ color: theme.textSecondary, fontSize: 12 }}>低危</div>
+                  <div style={{ color: theme.textSecondary, fontSize: 12 }}>{t('severity.low', '低危')}</div>
                 </div>
               </Col>
             </Row>
             <div style={{ marginTop: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <Text style={{ color: theme.textSecondary }}>漏洞库覆盖率</Text>
-                <Text style={{ color: theme.primary }}>{vulnStats.total.toLocaleString()} 条 CVE</Text>
+                <Text style={{ color: theme.textSecondary }}>{t('vulnDBCoverage', '漏洞库覆盖率')}</Text>
+                <Text style={{ color: theme.primary }}>{vulnStats.total.toLocaleString()} {t('cveCount', '条 CVE')}</Text>
               </div>
               <Progress
                 percent={Math.min(100, (vulnStats.total / 200000) * 100)}
@@ -262,7 +264,7 @@ export default function SecurityOverview() {
                 showInfo={false}
               />
               <Text style={{ color: theme.textSecondary, fontSize: 12 }}>
-                本周新增 {vulnStats.this_week} 条漏洞数据
+                {t('newThisWeek', '本周新增')} {vulnStats.this_week} {t('vulnDataCount', '条漏洞数据')}
               </Text>
             </div>
           </div>
@@ -289,7 +291,7 @@ export default function SecurityOverview() {
               </div>
               <div>
                 <div style={{ fontSize: 24, fontWeight: 'bold', color: theme.text }}>{stats.total_tasks}</div>
-                <div style={{ color: theme.textSecondary, fontSize: 12 }}>扫描任务</div>
+                <div style={{ color: theme.textSecondary, fontSize: 12 }}>{t('scanTasks', '扫描任务')}</div>
               </div>
             </div>
           </div>
@@ -312,7 +314,7 @@ export default function SecurityOverview() {
               </div>
               <div>
                 <div style={{ fontSize: 24, fontWeight: 'bold', color: theme.text }}>{stats.completed_tasks}</div>
-                <div style={{ color: theme.textSecondary, fontSize: 12 }}>已完成</div>
+                <div style={{ color: theme.textSecondary, fontSize: 12 }}>{t('completed', '已完成')}</div>
               </div>
             </div>
           </div>
@@ -335,7 +337,7 @@ export default function SecurityOverview() {
               </div>
               <div>
                 <div style={{ fontSize: 24, fontWeight: 'bold', color: theme.text }}>{stats.total_assets}</div>
-                <div style={{ color: theme.textSecondary, fontSize: 12 }}>资产发现</div>
+                <div style={{ color: theme.textSecondary, fontSize: 12 }}>{t('assetDiscovery', '资产发现')}</div>
               </div>
             </div>
           </div>
@@ -358,7 +360,7 @@ export default function SecurityOverview() {
               </div>
               <div>
                 <div style={{ fontSize: 24, fontWeight: 'bold', color: theme.text }}>{stats.running_tasks}</div>
-                <div style={{ color: theme.textSecondary, fontSize: 12 }}>进行中</div>
+                <div style={{ color: theme.textSecondary, fontSize: 12 }}>{t('inProgress', '进行中')}</div>
               </div>
             </div>
           </div>
@@ -377,10 +379,10 @@ export default function SecurityOverview() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <Title level={5} style={{ margin: 0, color: theme.text }}>
                 <AlertOutlined style={{ marginRight: 8, color: theme.critical }} />
-                最新漏洞
+                {t('latestVulnerabilities', '最新漏洞')}
               </Title>
               <Button type="link" onClick={() => navigate('/security/vulnerabilities')} style={{ color: theme.primary }}>
-                查看全部 <ArrowRightOutlined />
+                {t('viewAll', '查看全部')} <ArrowRightOutlined />
               </Button>
             </div>
             <List
@@ -406,7 +408,7 @@ export default function SecurityOverview() {
                   </div>
                 </List.Item>
               )}
-              locale={{ emptyText: '暂无漏洞数据' }}
+              locale={{ emptyText: t('noVulnerabilityData', '暂无漏洞数据') }}
             />
           </div>
         </Col>

@@ -15,71 +15,50 @@ import TaskDetail from './TaskDetail'
 import { canEdit } from '../../utils/menuAccess'
 import { useSearchParams } from 'react-router-dom'
 import WebScanPrecheckCard from './WebScanPrecheck'
+import { useTranslation } from 'react-i18next'
+import i18next from '../../i18n'
+import { getDateLocale, formatDateTime } from '../../utils/dateFormat'
 
 const { Title, Text } = Typography
 
 // 预设目标（仅用于提示参考）
 const PRESET_TARGETS = [
-  { value: '192.168.1.100', label: '192.168.1.100', type: 'ip_list', description: '单台主机' },
-  { value: '10.0.0.10,10.0.0.20', label: '10.0.0.10,10.0.0.20', type: 'ip_list', description: '多台服务器' },
+  { value: '192.168.1.100', label: '192.168.1.100', type: 'ip_list', description: i18next.t('security:presetSingleHost', { defaultValue: '单台主机' }) },
+  { value: '10.0.0.10,10.0.0.20', label: '10.0.0.10,10.0.0.20', type: 'ip_list', description: i18next.t('security:presetMultipleHosts', { defaultValue: '多台服务器' }) },
 ]
 
 const WEB_PRESET_TARGETS = [
-  { value: 'http://192.168.1.100:8080', label: 'http://192.168.1.100:8080', description: '单个 Web 站点' },
-  { value: 'http://10.0.0.10:8080\nhttp://10.0.0.20:8080', label: 'http://10.0.0.10:8080 / http://10.0.0.20:8080', description: '多个 Web 入口' },
+  { value: 'http://192.168.1.100:8080', label: 'http://192.168.1.100:8080', description: i18next.t('security:presetSingleSite', { defaultValue: '单个 Web 站点' }) },
+  { value: 'http://10.0.0.10:8080\nhttp://10.0.0.20:8080', label: 'http://10.0.0.10:8080 / http://10.0.0.20:8080', description: i18next.t('security:presetMultipleSites', { defaultValue: '多个 Web 入口' }) },
 ]
 
-const webScanOptionConfigs = [
-  { value: 'sql-injection', label: 'SQL 注入' },
-  { value: 'xss', label: 'XSS 跨站脚本' },
-  { value: 'ssrf', label: 'SSRF 服务端请求伪造' },
-  { value: 'csrf', label: 'CSRF 跨站请求伪造' },
-  { value: 'rce', label: '远程代码执行' },
-  { value: 'information-disclosure', label: '信息泄露' },
-  { value: 'broken-access', label: '越权访问' },
-  { value: 'file-inclusion', label: '文件包含' },
-  { value: 'header-injection', label: '响应头注入' },
-]
-
-const webScanModeConfigs = [
-  {
-    value: 'standard',
-    title: '标准扫描',
-    desc: '适合首轮排查，使用推荐的 Web 通用模板与规则集。',
-  },
-  {
-    value: 'special',
-    title: '专项扫描',
-    desc: '按选中类别做更积极的专项验证，默认使用更深预算。',
-  },
-]
-
-function getScanTypeLabel(scanType: 'port' | 'host-vuln' | 'web' | 'all') {
+function getScanTypeLabelKey(scanType: 'port' | 'host-vuln' | 'web' | 'all') {
   switch (scanType) {
     case 'web':
-      return 'Web漏洞扫描'
+      return 'webVulnScan'
     case 'host-vuln':
-      return '主机漏洞扫描'
+      return 'hostVulnScan'
     case 'port':
-      return '资产发现'
+      return 'portScan'
     default:
-      return '安全扫描'
+      return 'securityScan'
   }
 }
 
-function buildDefaultTaskName(scanType: 'port' | 'host-vuln' | 'web' | 'all') {
-  const timestamp = new Date().toLocaleString('zh-CN', {
+function buildDefaultTaskName(scanType: 'port' | 'host-vuln' | 'web' | 'all', t: (key: string, fallback: string) => string) {
+  const timestamp = new Date().toLocaleString(getDateLocale(), {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
   }).replace(/\//g, '-')
-  return `${getScanTypeLabel(scanType)}-${timestamp}`
+  return `${t(getScanTypeLabelKey(scanType), '安全扫描')}-${timestamp}`
 }
 
 export default function TaskList() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t } = useTranslation('security')
   const [tasks, setTasks] = useState<SecurityScanTask[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
@@ -124,7 +103,7 @@ export default function TaskList() {
       setTasks(data.data || [])
       setTotal(data.total || 0)
     } catch (error) {
-      message.error('获取任务列表失败')
+      message.error(t('taskListLoadFailed', '获取任务列表失败'))
     } finally {
       setLoading(false)
     }
@@ -150,7 +129,7 @@ export default function TaskList() {
       let target = values.target
       let targetType = values.target_type || 'ip_list'
       let authFlow: Record<string, unknown> | undefined
-      const taskName = values.name?.trim() || buildDefaultTaskName(scanType)
+      const taskName = values.name?.trim() || buildDefaultTaskName(scanType, t)
 
       // Web 漏洞扫描：目标类型为 URL
       if (scanType === 'web') {
@@ -191,7 +170,7 @@ export default function TaskList() {
 
         const entryTarget = target.split(',').map(item => item.trim()).find(Boolean)
         if (!entryTarget) {
-          message.error('请先填写有效的 Web 目标地址')
+          message.error(t('emptyWebTargetError', '请先填写有效的 Web 目标地址'))
           return
         }
         const generated = await securityAPI.generateAuthFlow({
@@ -214,23 +193,23 @@ export default function TaskList() {
         target,
         ...requestData,
       } as Parameters<typeof securityAPI.createTask>[0])
-      message.success('任务创建成功，扫描已开始')
+      message.success(t('taskCreated', '任务创建成功，扫描已开始'))
       setCreateModalOpen(false)
       form.resetFields()
       setPage(1)
       fetchTasks()
     } catch (error) {
-      message.error('创建任务失败')
+      message.error(t('createTaskFailed', '创建任务失败'))
     }
   }
 
   const handleDeleteTask = async (id: number) => {
     try {
       await securityAPI.deleteTask(id)
-      message.success('任务删除成功')
+      message.success(t('taskDeleteSuccess', '任务删除成功'))
       fetchTasks()
     } catch (error) {
-      message.error('删除任务失败')
+      message.error(t('taskDeleteFailed', '删除任务失败'))
     }
   }
 
@@ -243,66 +222,82 @@ export default function TaskList() {
     failed: 'error',
   }
 
-  const statusLabels: Record<string, string> = {
-    pending: '等待中',
-    running: '运行中',
-    paused: '已请求暂停',
-    cancelled: '已请求取消',
-    completed: '已完成',
-    failed: '失败',
-  }
+  const webScanOptionConfigs = [
+    { value: 'sql-injection', label: t('sqlInjection', 'SQL 注入') },
+    { value: 'xss', label: t('xss', 'XSS 跨站脚本') },
+    { value: 'ssrf', label: t('ssrf', 'SSRF 服务端请求伪造') },
+    { value: 'csrf', label: t('csrf', 'CSRF 跨站请求伪造') },
+    { value: 'rce', label: t('rce', '远程代码执行') },
+    { value: 'information-disclosure', label: t('informationDisclosure', '信息泄露') },
+    { value: 'broken-access', label: t('brokenAccess', '越权访问') },
+    { value: 'file-inclusion', label: t('fileInclusion', '文件包含') },
+    { value: 'header-injection', label: t('headerInjection', '响应头注入') },
+  ]
+
+  const webScanModeConfigs = [
+    {
+      value: 'standard',
+      title: t('standardScan', '标准扫描'),
+      desc: t('standardScanDesc', '适合首轮排查，使用推荐的 Web 通用模板与规则集。'),
+    },
+    {
+      value: 'special',
+      title: t('specialScan', '专项扫描'),
+      desc: t('specialScanDesc', '按选中类别做更积极的专项验证，默认使用更深预算。'),
+    },
+  ]
 
   const columns = [
     {
-      title: '任务名称',
+      title: t('taskName', '任务名称'),
       dataIndex: 'name',
       key: 'name',
       width: 200,
     },
     {
-      title: '目标类型',
+      title: t('targetType', '目标类型'),
       dataIndex: 'target_type',
       key: 'target_type',
       width: 100,
       render: (type: string) => (
-        <Tag>{type === 'url' ? 'URL' : 'IP列表'}</Tag>
+        <Tag>{type === 'url' ? 'URL' : t('ipList', 'IP列表')}</Tag>
       ),
     },
     {
-      title: '扫描目标',
+      title: t('scanTarget', '扫描目标'),
       dataIndex: 'target',
       key: 'target',
       ellipsis: true,
     },
     {
-      title: '扫描类型',
+      title: t('scanType', '扫描类型'),
       dataIndex: 'scan_type',
       key: 'scan_type',
       width: 120,
       render: (type: string) => {
         const typeConfig: Record<string, { color: string; label: string }> = {
-          'port': { color: 'blue', label: '资产发现' },
-          'host-vuln': { color: 'orange', label: '主机漏洞' },
-          'web': { color: 'green', label: 'Web漏洞' },
-          'host': { color: 'blue', label: '资产发现' }, // 兼容旧数据
+          'port': { color: 'blue', label: t('portScan', '资产发现') },
+          'host-vuln': { color: 'orange', label: t('hostVulnScan', '主机漏洞') },
+          'web': { color: 'green', label: t('webScan', 'Web漏洞') },
+          'host': { color: 'blue', label: t('portScan', '资产发现') },
         }
         const config = typeConfig[type] || { color: 'default', label: type }
         return <Tag color={config.color}>{config.label}</Tag>
       },
     },
     {
-      title: '状态',
+      title: t('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
       render: (status: string) => (
         <Tag color={statusColors[status]}>
-          {statusLabels[status] || status}
+          {t(`status.${status}`, status)}
         </Tag>
       ),
     },
     {
-      title: '已确认高/中/低',
+      title: t('confirmedHighMediumLow', '已确认高/中/低'),
       key: 'risk',
       width: 150,
       render: (_: unknown, record: SecurityScanTask) => (
@@ -314,21 +309,21 @@ export default function TaskList() {
       ),
     },
     {
-      title: '创建时间',
+      title: t('createTime', '创建时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 160,
-      render: (time: string) => (time ? new Date(time).toLocaleString('zh-CN') : '-'),
+      render: (time: string) => (time ? formatDateTime(time) : '-'),
     },
     {
-      title: '完成时间',
+      title: t('completeTime', '完成时间'),
       dataIndex: 'completed_at',
       key: 'completed_at',
       width: 160,
-      render: (time: string | undefined) => (time ? new Date(time).toLocaleString('zh-CN') : '-'),
+      render: (time: string | undefined) => (time ? formatDateTime(time) : '-'),
     },
     {
-      title: '操作',
+      title: t('action', '操作'),
       key: 'actions',
       width: 200,
       render: (_: unknown, record: SecurityScanTask) => (
@@ -340,15 +335,15 @@ export default function TaskList() {
               icon={<EyeOutlined />}
               onClick={() => setDetailTask(record)}
             >
-              详情
+              {t('detail', '详情')}
             </Button>
           )}
           {canEdit() && <Popconfirm
-            title="确定删除此任务？"
+            title={t('confirmDeleteTask', '确定删除此任务？')}
             onConfirm={() => handleDeleteTask(record.id)}
           >
             <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              删除
+              {t('delete', '删除')}
             </Button>
           </Popconfirm>}
         </Space>
@@ -359,23 +354,23 @@ export default function TaskList() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <Title level={4} style={{ margin: 0 }}>扫描任务</Title>
+        <Title level={4} style={{ margin: 0 }}>{t('scanTaskTitle', '扫描任务')}</Title>
         <Space>
           <Button icon={<ReloadOutlined />} onClick={() => fetchTasks()}>
-            刷新
+            {t('refresh', '刷新')}
           </Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
-            新建漏洞扫描
+            {t('newVulnScan', '新建漏洞扫描')}
           </Button>
         </Space>
       </div>
 
       <AssistantQuickActions
-        description="复用右侧运维小助手，基于当前安全任务列表发起查询"
+        description={t('scanTaskAssistantQuickActionsDesc', '复用右侧运维小助手，基于当前安全任务列表发起查询')}
         actions={[
-          { label: '最近有哪些失败扫描任务', query: '最近有哪些失败扫描任务' },
-          { label: '当前还有哪些扫描任务在运行', query: '当前还有哪些扫描任务在运行' },
-          { label: '最近扫描异常集中在哪些目标', query: '最近扫描异常集中在哪些目标' },
+          { label: t('scanHelp.recentFailedScans', '最近有哪些失败扫描任务'), query: '最近有哪些失败扫描任务' },
+          { label: t('scanHelp.runningScans', '当前还有哪些扫描任务在运行'), query: '当前还有哪些扫描任务在运行' },
+          { label: t('scanHelp.scanAbnormalTarget', '最近扫描异常集中在哪些目标'), query: '最近扫描异常集中在哪些目标' },
         ]}
       />
 
@@ -387,33 +382,33 @@ export default function TaskList() {
               style={{ width: 160 }}
               onChange={(value: string) => updateTaskFilters({ task_group: value })}
               options={[
-                { value: 'vuln', label: '漏洞扫描' },
-                { value: 'discovery', label: '资产发现' },
-                { value: 'all', label: '全部任务' },
+                { value: 'vuln', label: t('taskGroup.vuln', '漏洞扫描') },
+                { value: 'discovery', label: t('taskGroup.discovery', '资产发现') },
+                { value: 'all', label: t('taskGroup.all', '全部任务') },
               ]}
             />
             <Select
-              placeholder="状态"
+              placeholder={t('status', '状态')}
               allowClear
               value={statusFilter || undefined}
               style={{ width: 140 }}
               onChange={(value?: string) => updateTaskFilters({ status: value || '' })}
               options={[
-                { value: 'pending', label: '等待中' },
-                { value: 'running', label: '运行中' },
-                { value: 'paused', label: '已请求暂停' },
-                { value: 'cancelled', label: '已请求取消' },
-                { value: 'completed', label: '已完成' },
-                { value: 'failed', label: '失败' },
+                { value: 'pending', label: t('status.pending', '等待中') },
+                { value: 'running', label: t('status.running', '运行中') },
+                { value: 'paused', label: t('status.paused', '已请求暂停') },
+                { value: 'cancelled', label: t('status.cancelled', '已请求取消') },
+                { value: 'completed', label: t('status.completed', '已完成') },
+                { value: 'failed', label: t('status.failed', '失败') },
               ]}
             />
           </Space>
           <Text type="secondary">
             {taskGroupFilter === 'discovery'
-              ? '当前仅展示资产发现任务'
+              ? t('currentlyShowingDiscovery', '当前仅展示资产发现任务')
               : taskGroupFilter === 'all'
-                ? '当前展示全部任务'
-              : '当前仅展示漏洞扫描任务'}
+                ? t('currentlyShowingAll', '当前展示全部任务')
+              : t('currentlyShowingVuln', '当前仅展示漏洞扫描任务')}
           </Text>
         </div>
         {(taskGroupFilter === 'vuln' || taskGroupFilter === 'all') && (
@@ -421,8 +416,8 @@ export default function TaskList() {
             style={{ marginBottom: 16 }}
             type="info"
             showIcon
-            message="漏洞计数口径已收紧"
-            description="扫描任务的高/中/低危汇总会排除资产识别和全部待验证结果。待验证结果主要来自目标服务版本与漏洞知识库自动比对后的风险线索。若某环境尚未执行历史回填，旧任务短期内可能仍保留旧口径；详情页会按明细结果拆分展示正式结果、待验证和资产信息。"
+            message={t('vulnCountNarrowed', '漏洞计数口径已收紧')}
+            description={t('vulnCountNarrowedDesc', '扫描任务的高/中/低危汇总会排除资产识别和全部待验证结果。待验证结果主要来自目标服务版本与漏洞知识库自动比对后的风险线索。若某环境尚未执行历史回填，旧任务短期内可能仍保留旧口径；详情页会按明细结果拆分展示正式结果、待验证和资产信息。')}
           />
         )}
         <Table
@@ -446,13 +441,13 @@ export default function TaskList() {
               setPage(nextPage)
             },
           }}
-          locale={{ emptyText: '暂无扫描任务' }}
+          locale={{ emptyText: t('noScanTasks', '暂无扫描任务') }}
         />
       </Card>
 
       {/* 创建任务弹窗 */}
       <Modal
-        title="新建漏洞扫描"
+        title={t('newVulnScanModalTitle', '新建漏洞扫描')}
         open={createModalOpen}
         onCancel={() => setCreateModalOpen(false)}
         footer={null}
@@ -471,22 +466,22 @@ export default function TaskList() {
         >
           <Form.Item
             name="name"
-            label="任务名称"
-            tooltip="可选，不填会自动生成任务名"
+            label={t('taskName', '任务名称')}
+            tooltip={t('taskNameTooltip', '可选，不填会自动生成任务名')}
           >
-            <Input placeholder="例如：核心系统周扫（可留空自动生成）" />
+            <Input placeholder={t('taskNamePlaceholder', '例如：核心系统周扫（可留空自动生成）')} />
           </Form.Item>
 
           <Form.Item
             name="scan_type"
-            label="扫描类型"
-            rules={[{ required: true, message: '请选择扫描类型' }]}
+            label={t('scanType', '扫描类型')}
+            rules={[{ required: true, message: t('scanTypeRequired', '请选择扫描类型') }]}
             initialValue="web"
-            tooltip="新建扫描任务只提供网站漏洞和主机漏洞两类入口"
+            tooltip={t('scanTypeTooltip', '新建扫描任务只提供网站漏洞和主机漏洞两类入口')}
           >
             <Radio.Group>
-              <Radio.Button value="web">网站漏洞</Radio.Button>
-              <Radio.Button value="host-vuln">主机漏洞</Radio.Button>
+              <Radio.Button value="web">{t('webVuln', '网站漏洞')}</Radio.Button>
+              <Radio.Button value="host-vuln">{t('hostVuln', '主机漏洞')}</Radio.Button>
             </Radio.Group>
           </Form.Item>
 
@@ -504,10 +499,10 @@ export default function TaskList() {
               if (scanType === 'web') {
                 return (
                   <>
-                    <Form.Item label="推荐方式">
+                    <Form.Item label={t('recommendedMethod', '推荐方式')}>
                       <Alert
-                        message="Web 扫描只支持登录后扫描"
-                        description="请填写业务入口 URL 和可登录测试账号。默认使用标准扫描；切到专项扫描时，会按你保留的类别同时约束模板和内置规则，并自动使用更深预算。"
+                        message={t('webScanOnlyLogin', 'Web 扫描只支持登录后扫描')}
+                        description={t('webScanOnlyLoginDesc', '请填写业务入口 URL 和可登录测试账号。默认使用标准扫描；切到专项扫描时，会按你保留的类别同时约束模板和内置规则，并自动使用更深预算。')}
                         type="info"
                         showIcon
                       />
@@ -515,9 +510,9 @@ export default function TaskList() {
 
                     <Form.Item
                       name="target"
-                      label="扫描目标"
+                      label={t('scanTarget', '扫描目标')}
                       rules={[
-                        { required: true, message: '请输入扫描 URL' },
+                        { required: true, message: t('scanTargetRequired', '请输入扫描 URL') },
                         {
                           validator: (_, value) => {
                             const raw = String(value || '').trim()
@@ -540,24 +535,24 @@ export default function TaskList() {
                             })
 
                             if (invalid) {
-                              return Promise.reject(new Error(`URL 格式无效：${invalid}`))
+                              return Promise.reject(new Error(t('urlFormatInvalid', 'URL 格式无效：{{invalid}}', { invalid })))
                             }
 
                             return Promise.resolve()
                           },
                         },
                       ]}
-                      extra="支持 http:// 或 https:// 的 URL 地址，每行一个"
+                      extra={t('scanTargetHint', '支持 http:// 或 https:// 的 URL 地址，每行一个')}
                     >
                       <Input.TextArea
                         rows={3}
-                        placeholder="例如：http://192.168.1.1:8080&#10;https://www.example.com&#10;http://10.0.0.5:9000"
+                        placeholder={t('targetUrlPlaceholder', 'https://example.com\\nhttps://api.example.com')}
                       />
                     </Form.Item>
 
                     <Form.Item
                       name="web_scan_mode"
-                      label="模板策略"
+                      label={t('templateStrategy', '模板策略')}
                       initialValue="standard"
                     >
                       <Radio.Group>
@@ -580,13 +575,13 @@ export default function TaskList() {
                           style={{ marginBottom: 16 }}
                           message={
                             getFieldValue('web_scan_mode') === 'special'
-                              ? '专项扫描'
-                              : '标准扫描'
+                              ? t('specialScan', '专项扫描')
+                              : t('standardScan', '标准扫描')
                           }
                           description={
                             getFieldValue('web_scan_mode') === 'special'
-                              ? '会按你勾选的漏洞类别执行模板和内置规则，并自动使用更积极的验证预算。'
-                              : '使用推荐的通用模板与规则集，适合首轮扫描和常规巡检。'
+                              ? t('specialScanDesc', '会按你勾选的漏洞类别执行模板和内置规则，并自动使用更积极的验证预算。')
+                              : t('standardScanDesc', '使用推荐的通用模板与规则集，适合首轮扫描和常规巡检。')
                           }
                           type={getFieldValue('web_scan_mode') === 'standard' ? 'info' : 'warning'}
                           showIcon
@@ -603,10 +598,10 @@ export default function TaskList() {
                       {({ getFieldValue }) => (
                         <Form.Item
                           name="web_scan_options"
-                          label="漏洞类别"
-                          tooltip="专项扫描只会执行选中的漏洞类别，模板和对应内置规则会一起收敛"
+                          label={t('vulnCategory', '漏洞类别')}
+                          tooltip={t('vulnCategoryTooltip', '专项扫描只会执行选中的漏洞类别，模板和对应内置规则会一起收敛')}
                           hidden={getFieldValue('web_scan_mode') !== 'special'}
-                          extra="默认已全选。通常只需要取消你暂时不关注的类别。"
+                          extra={t('vulnCategoryExtra', '默认已全选。通常只需要取消你暂时不关注的类别。')}
                         >
                           <Checkbox.Group>
                             <Row gutter={[12, 12]}>
@@ -625,29 +620,29 @@ export default function TaskList() {
 
                     <Row gutter={16}>
                       <Col span={12}>
-                        <Form.Item name="username" label="登录账号" rules={[{ required: true, message: '请输入账号' }]}>
-                          <Input placeholder="例如：admin" />
+                        <Form.Item name="username" label={t('loginAccount', '登录账号')} rules={[{ required: true, message: t('loginAccountRequired', '请输入账号') }]}>
+                          <Input placeholder={t('loginAccountPlaceholder', '例如：default')} />
                         </Form.Item>
                       </Col>
                       <Col span={12}>
-                        <Form.Item name="password" label="登录密码" rules={[{ required: true, message: '请输入密码' }]}>
-                          <Input.Password placeholder="请输入密码" />
+                        <Form.Item name="password" label={t('loginPassword', '登录密码')} rules={[{ required: true, message: t('loginPasswordRequired', '请输入密码') }]}>
+                          <Input.Password placeholder={t('samplePlaceholder', '请输入密码')} />
                         </Form.Item>
                       </Col>
                     </Row>
                     <Form.Item
                       name="login_url"
-                      label="登录接口 URL（可选）"
-                      extra="不填则默认使用目标 URL 推断登录入口"
+                      label={t('loginUrlOptional', '登录接口 URL（可选）')}
+                      extra={t('loginUrlHint', '不填则默认使用目标 URL 推断登录入口')}
                     >
-                      <Input placeholder="例如：https://example.com/api/login" />
+                      <Input placeholder={t('loginUrlPlaceholder', '例如：http://target/api/login')} />
                     </Form.Item>
 
                     <WebScanPrecheckCard form={form} compact />
 
                     <Alert
-                      message="使用建议"
-                      description="常规场景只需：选择扫描类型 -> 填目标 -> 填登录账号密码 -> 创建任务。模板和认证流程都会自动按默认策略处理。"
+                      message={t('usageTip', '使用建议')}
+                      description={t('usageTipDesc', '常规场景只需：选择扫描类型 -> 填目标 -> 填登录账号密码 -> 创建任务。模板和认证流程都会自动按默认策略处理。')}
                       type="info"
                       showIcon
                     />
@@ -659,10 +654,10 @@ export default function TaskList() {
               return (
                 <>
                   {scanType === 'port' && (
-                    <Form.Item label="用途说明">
+                    <Form.Item label={t('usageDescription', '用途说明')}>
                       <Alert
-                        message="资产发现只做端口和服务识别"
-                        description="适合用于主机盘点、开放端口摸底和服务版本识别，不会执行漏洞检测。"
+                        message={t('assetDiscoveryOnly', '资产发现只做端口和服务识别')}
+                        description={t('assetDiscoveryOnlyDesc', '适合用于主机盘点、开放端口摸底和服务版本识别，不会执行漏洞检测。')}
                         type="info"
                         showIcon
                       />
@@ -671,24 +666,24 @@ export default function TaskList() {
 
                   <Form.Item
                     name="target_type"
-                    label="目标类型"
-                    rules={[{ required: true, message: '请选择目标类型' }]}
+                    label={t('targetType', '目标类型')}
+                    rules={[{ required: true, message: t('targetTypeRequired', '请选择目标类型') }]}
                     initialValue="ip_list"
                   >
                     <Radio.Group>
-                      <Radio.Button value="ip_list">IP 列表</Radio.Button>
+                      <Radio.Button value="ip_list">{t('ipList', 'IP 列表')}</Radio.Button>
                     </Radio.Group>
                   </Form.Item>
 
                   <Form.Item
                     name="target"
-                    label="IP 地址"
-                    rules={[{ required: true, message: '请输入 IP 地址' }]}
-                    extra={<Text type="secondary">支持多个 IP，逗号或换行分隔</Text>}
+                    label={t('ipAddressField', 'IP 地址')}
+                    rules={[{ required: true, message: t('ipAddressRequired', '请输入 IP 地址') }]}
+                    extra={<Text type="secondary">{t('ipAddressHint', '支持多个 IP，逗号或换行分隔')}</Text>}
                   >
                     <Input.TextArea
                       rows={4}
-                      placeholder="例如：192.168.1.10&#10;192.168.1.11&#10;10.0.0.5"
+                      placeholder={t('targetIpPlaceholder', '192.168.1.1\\n192.168.1.2\\n192.168.1.10-192.168.1.20')}
                     />
                   </Form.Item>
                 </>
@@ -702,7 +697,7 @@ export default function TaskList() {
             shouldUpdate={(prevValues, currentValues) => prevValues.scan_type !== currentValues.scan_type}
           >
             {({ getFieldValue }) => (
-              <Form.Item label="预设参考">
+              <Form.Item label={t('presetReference', '预设参考')}>
                 <div style={{ fontSize: 12, color: '#999' }}>
                   <ul style={{ margin: 0, paddingLeft: 16 }}>
                     {(getFieldValue('scan_type') === 'web' ? WEB_PRESET_TARGETS : PRESET_TARGETS).map(t => (
@@ -716,10 +711,10 @@ export default function TaskList() {
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Button onClick={() => setCreateModalOpen(false)} style={{ marginRight: 8 }}>
-              取消
+              {t('cancel', '取消')}
             </Button>
             <Button type="primary" htmlType="submit">
-              创建并开始扫描
+              {t('createAndStartScan', '创建并开始扫描')}
             </Button>
           </Form.Item>
         </Form>

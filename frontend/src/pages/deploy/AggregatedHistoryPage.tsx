@@ -4,13 +4,17 @@
 import { useState, useEffect } from 'react';
 import { Card, Table, Tag, Space, Button, Select, DatePicker, message, Modal, Input, List, Typography, Progress, Popconfirm } from 'antd';
 import { SearchOutlined, DownloadOutlined, FileZipOutlined, LinkOutlined, SyncOutlined, FileTextOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { aggregatedHistoryAPI, AggregatedHistory, AggregatedHistoryFile } from '../../api/aggregated-history';
 import AssistantQuickActions from '../../components/AssistantQuickActions';
-import useAssistantPageContext from '../../components/useAssistantPageContext';
+import useAssistantPageContext from '../../components/useAssistantPageContext'
+import { formatDate } from '../../utils/dateFormat';
 
 const { RangePicker } = DatePicker;
 
 export default function AggregatedHistoryPage() {
+  const { t } = useTranslation('deploy');
+  const { t: tc } = useTranslation('common');
   const [histories, setHistories] = useState<AggregatedHistory[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshingId, setRefreshingId] = useState<number | null>(null);
@@ -26,7 +30,7 @@ export default function AggregatedHistoryPage() {
   const [currentFiles, setCurrentFiles] = useState<AggregatedHistoryFile[]>([]);
   const [currentTimestamp, setCurrentTimestamp] = useState('');
   const [loadingFiles, setLoadingFiles] = useState(false);
-  const [fileEmptyMessage, setFileEmptyMessage] = useState('未找到聚合文件');
+  const [fileEmptyMessage, setFileEmptyMessage] = useState(t('noAggregatedFiles', '未找到聚合文件'));
   const [logModalVisible, setLogModalVisible] = useState(false);
   const [consoleLog, setConsoleLog] = useState('');
   const [loadingLog, setLoadingLog] = useState(false);
@@ -95,11 +99,11 @@ export default function AggregatedHistoryPage() {
   // 复制下载链接
   const copyDownloadLink = (url: string) => {
     if (!url) {
-      message.warning('下载链接不可用');
+      message.warning(t('copyLinkUnavailable', '下载链接不可用'));
       return;
     }
     navigator.clipboard.writeText(url);
-    message.success('下载链接已复制到剪贴板');
+    message.success(t('copyLinkSuccess', '下载链接已复制到剪贴板'));
   };
 
   // 查看归档文件列表
@@ -107,16 +111,16 @@ export default function AggregatedHistoryPage() {
     setFileModalVisible(true);
     setCurrentFiles([]);
     setLoadingFiles(true);
-    setFileEmptyMessage('未找到聚合文件');
+    setFileEmptyMessage(t('noAggregatedFiles', '未找到聚合文件'));
 
     try {
       const resp = await aggregatedHistoryAPI.getFiles(record.id);
       setCurrentFiles(resp.files || []);
       setCurrentTimestamp(resp.timestamp || record.end_time || record.start_time || record.created_at || '');
-      setFileEmptyMessage(resp.message || '未找到聚合文件');
+      setFileEmptyMessage(resp.message || t('noAggregatedFiles', '未找到聚合文件'));
     } catch (error) {
       console.error('获取文件列表失败:', error);
-      message.error('获取文件列表失败');
+      message.error(t('getFilesFailed', '获取文件列表失败'));
       setCurrentTimestamp(record.end_time || record.start_time || record.created_at || '');
     } finally {
       setLoadingFiles(false);
@@ -161,13 +165,13 @@ export default function AggregatedHistoryPage() {
 
   // 状态映射：归档中、完成、归档失败
   const statusMap: Record<string, { color: string; text: string }> = {
-    pending: { color: 'default', text: '待执行' },
-    queued: { color: 'processing', text: '排队中' },
-    running: { color: 'processing', text: '归档中' },
-    archiving: { color: 'processing', text: '归档中' },
-    success: { color: 'success', text: '完成' },
-    completed: { color: 'success', text: '完成' },
-    failed: { color: 'error', text: '归档失败' },
+    pending: { color: 'default', text: t('statusPending', '待执行') },
+    queued: { color: 'processing', text: t('statusQueued', '排队中') },
+    running: { color: 'processing', text: t('statusArchiving', '归档中') },
+    archiving: { color: 'processing', text: t('statusArchiving', '归档中') },
+    success: { color: 'success', text: t('statusCompleted', '完成') },
+    completed: { color: 'success', text: t('statusCompleted', '完成') },
+    failed: { color: 'error', text: t('archiveFailed', '归档失败') },
   };
 
   // 查看控制台日志
@@ -178,11 +182,11 @@ export default function AggregatedHistoryPage() {
 
     try {
       const resp = await aggregatedHistoryAPI.getConsoleLog(record.id);
-      setConsoleLog(resp.console_log || '暂无日志');
+      setConsoleLog(resp.console_log || t('noLog', '暂无日志'));
     } catch (error) {
       console.error('获取控制台日志失败:', error);
-      message.error('获取控制台日志失败');
-      setConsoleLog('获取日志失败');
+      message.error(t('getConsoleLogFailed', '获取控制台日志失败'));
+      setConsoleLog(t('getLogFailed', '获取日志失败'));
     } finally {
       setLoadingLog(false);
     }
@@ -192,11 +196,11 @@ export default function AggregatedHistoryPage() {
   const deleteHistory = async (id: number) => {
     try {
       await aggregatedHistoryAPI.deleteHistory(id);
-      message.success('删除成功');
+      message.success(tc('deleteSuccess', '删除成功'));
       fetchHistories();
     } catch (error) {
       console.error('删除失败:', error);
-      message.error('删除失败');
+      message.error(tc('deleteFailed', '删除失败'));
     }
   };
 
@@ -213,7 +217,7 @@ export default function AggregatedHistoryPage() {
             loading={refreshingId === record.id}
             icon={<SyncOutlined />}
           >
-            刷新
+            {tc('refresh', '刷新')}
           </Button>
         )}
         <Button
@@ -230,13 +234,13 @@ export default function AggregatedHistoryPage() {
             }
           }}
         >
-          查看日志
+          {t('viewLogs', '查看日志')}
         </Button>
         <Popconfirm
-          title="确定要删除此记录吗？"
+          title={t('confirmDeleteAggregated', '确定要删除此记录吗？')}
           onConfirm={() => deleteHistory(record.id)}
-          okText="确定"
-          cancelText="取消"
+          okText={tc('confirm', '确认')}
+          cancelText={tc('cancel', '取消')}
         >
           <Button
             type="link"
@@ -244,7 +248,7 @@ export default function AggregatedHistoryPage() {
             danger
             icon={<DeleteOutlined />}
           >
-            删除
+            {tc('delete', '删除')}
           </Button>
         </Popconfirm>
       </Space>
@@ -253,13 +257,13 @@ export default function AggregatedHistoryPage() {
 
   const columns = [
     {
-      title: '项目名称',
+      title: t('colProjectName', '项目名称'),
       dataIndex: 'project_name',
       key: 'project_name',
       width: 200,
     },
     {
-      title: 'Tag名称',
+      title: t('colTagName', 'Tag名称'),
       dataIndex: 'environment',
       key: 'environment',
       width: 150,
@@ -270,7 +274,7 @@ export default function AggregatedHistoryPage() {
       ),
     },
     {
-      title: '状态',
+      title: tc('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 120,
@@ -280,7 +284,7 @@ export default function AggregatedHistoryPage() {
       },
     },
     {
-      title: '进度',
+      title: t('colProgress', '进度'),
       dataIndex: 'progress',
       key: 'progress',
       width: 150,
@@ -288,7 +292,7 @@ export default function AggregatedHistoryPage() {
         const isActive = ['archiving', 'running', 'queued', 'pending'].includes(record.status);
         const percent = progress || 0;
         let status: 'success' | 'exception' | 'normal' | 'active' = 'normal';
-        
+
         if (record.status === 'completed') {
           status = 'success';
         } else if (record.status === 'failed') {
@@ -296,11 +300,11 @@ export default function AggregatedHistoryPage() {
         } else if (isActive) {
           status = 'active';
         }
-        
+
         return (
-          <Progress 
-            percent={percent} 
-            size="small" 
+          <Progress
+            percent={percent}
+            size="small"
             status={status}
             format={(p) => `${p}%`}
           />
@@ -308,21 +312,21 @@ export default function AggregatedHistoryPage() {
       },
     },
     {
-      title: '归档开始时间',
+      title: t('colArchiveStartTime', '归档开始时间'),
       dataIndex: 'start_time',
       key: 'start_time',
       width: 160,
       render: (time: string) => formatDateTime(time),
     },
     {
-      title: '归档结束时间',
+      title: t('colArchiveEndTime', '归档结束时间'),
       dataIndex: 'end_time',
       key: 'end_time',
       width: 160,
       render: (time: string) => formatDateTime(time),
     },
     {
-      title: '下载地址',
+      title: t('colDownloadUrl', '下载地址'),
       dataIndex: 'download_url',
       key: 'download_url',
       width: 300,
@@ -343,14 +347,14 @@ export default function AggregatedHistoryPage() {
                   icon={<FileZipOutlined />}
                   onClick={() => viewArchiveFiles(record)}
                 >
-                  查看文件
+                  {t('viewFiles', '查看文件')}
                 </Button>
                 <Button
                   size="small"
                   icon={<LinkOutlined />}
                   onClick={() => copyDownloadLink(url)}
                 >
-                  复制链接
+                  {t('copyLink', '复制链接')}
                 </Button>
               </Space>
             )}
@@ -359,14 +363,14 @@ export default function AggregatedHistoryPage() {
       },
     },
     {
-      title: '操作人',
+      title: tc('operator', '操作人'),
       dataIndex: 'operator_name',
       key: 'operator_name',
       width: 100,
-      render: (name: string) => name || '系统',
+      render: (name: string) => name || t('systemLabel', '系统'),
     },
     {
-      title: '操作',
+      title: tc('action', '操作'),
       key: 'action',
       width: 200,
       render: (_: unknown, record: AggregatedHistory) => getOperationMenu(record),
@@ -380,7 +384,7 @@ export default function AggregatedHistoryPage() {
         <div style={{ marginBottom: 8 }}>
           <Space wrap>
             <Input
-              placeholder="项目名称"
+              placeholder={t('projectNamePlaceholder', '项目名称')}
               value={filters.projectName}
               onChange={e => setFilters({ ...filters, projectName: e.target.value })}
               allowClear
@@ -388,7 +392,7 @@ export default function AggregatedHistoryPage() {
               onPressEnter={fetchHistories}
             />
             <Input
-              placeholder="Tag名称"
+              placeholder={t('tagNamePlaceholderInput', 'Tag名称')}
               value={filters.environment}
               onChange={e => setFilters({ ...filters, environment: e.target.value })}
               allowClear
@@ -396,21 +400,21 @@ export default function AggregatedHistoryPage() {
               onPressEnter={fetchHistories}
             />
             <Select
-              placeholder="状态"
+              placeholder={tc('status', '状态')}
               value={filters.status}
               onChange={val => setFilters({ ...filters, status: val })}
               allowClear
               style={{ width: 120 }}
               options={[
-                { label: '待执行', value: 'pending' },
-                { label: '排队中', value: 'queued' },
-                { label: '归档中', value: 'archiving' },
-                { label: '完成', value: 'completed' },
-                { label: '归档失败', value: 'failed' },
+                { label: t('statusPending', '待执行'), value: 'pending' },
+                { label: t('statusQueued', '排队中'), value: 'queued' },
+                { label: t('statusArchiving', '归档中'), value: 'archiving' },
+                { label: t('statusCompleted', '完成'), value: 'completed' },
+                { label: t('archiveFailed', '归档失败'), value: 'failed' },
               ]}
             />
             <Input
-              placeholder="操作人"
+              placeholder={t('operatorPlaceholder', '操作人')}
               value={filters.operator}
               onChange={e => setFilters({ ...filters, operator: e.target.value })}
               allowClear
@@ -437,7 +441,7 @@ export default function AggregatedHistoryPage() {
                 }
               }}
               style={{ width: 340 }}
-              placeholder={['开始时间', '结束时间']}
+              placeholder={[t('startTimePlaceholder', '开始时间'), t('endTimePlaceholder', '结束时间')]}
             />
           </Space>
         </div>
@@ -445,21 +449,21 @@ export default function AggregatedHistoryPage() {
         <div>
           <Space>
             <Button type="primary" icon={<SearchOutlined />} onClick={fetchHistories}>
-              搜索
+              {tc('search', '搜索')}
             </Button>
             <Button icon={<SyncOutlined />} onClick={resetFilters}>
-              重置
+              {tc('reset', '重置')}
             </Button>
           </Space>
         </div>
       </Card>
 
       <AssistantQuickActions
-        description="复用右侧运维小助手，基于当前聚合历史页面上下文发起查询"
+        description={t('assistantAggregatedDesc', '复用右侧运维小助手，基于当前聚合历史页面上下文发起查询')}
         actions={[
-          { label: '最近有哪些聚合失败', query: '最近有哪些聚合失败' },
-          { label: '最近聚合是否正常完成', query: '最近聚合是否正常完成' },
-          { label: '如何从下载地址下载聚合包', query: '如何从下载地址下载聚合包' },
+          { label: t('assistantAggregatedRecentFailed', '最近有哪些聚合失败'), query: t('assistantAggregatedRecentFailed', '最近有哪些聚合失败') },
+          { label: t('assistantAggregatedNormal', '最近聚合是否正常完成'), query: t('assistantAggregatedNormal', '最近聚合是否正常完成') },
+          { label: t('assistantAggregatedDownloadHelp', '如何从下载地址下载聚合包'), query: t('assistantAggregatedDownloadHelp', '如何从下载地址下载聚合包') },
         ]}
       />
 
@@ -473,24 +477,24 @@ export default function AggregatedHistoryPage() {
             defaultPageSize: 20,
             showSizeChanger: true,
             pageSizeOptions: ['10', '20', '50', '100'],
-            showTotal: (total: number) => `共 ${total} 条`,
+            showTotal: (total: number) => `${tc('total', '共 {{count}} 条', { count: total })}`,
             showQuickJumper: true
           }}
           scroll={{ x: 1400 }}
-          locale={{ emptyText: '暂无聚合历史记录' }}
+          locale={{ emptyText: t('noAggregatedHistory', '暂无聚合历史记录') }}
         />
       </Card>
 
       {/* 文件列表弹窗 */}
       <Modal
-        title={currentTimestamp ? `聚合文件列表 - ${formatTimestampToLocalTime(currentTimestamp)}` : '聚合文件列表'}
+        title={currentTimestamp ? t('aggregateFileListTitle', '聚合文件列表 - {{time}}', { time: formatTimestampToLocalTime(currentTimestamp) }) : t('aggregateFileList', '聚合文件列表')}
         open={fileModalVisible}
         onCancel={() => setFileModalVisible(false)}
         footer={null}
         width={600}
       >
         {loadingFiles ? (
-          <div style={{ textAlign: 'center', padding: 40 }}>加载中...</div>
+          <div style={{ textAlign: 'center', padding: 40 }}>{tc('loading', '加载中...')}</div>
         ) : currentFiles.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
             {fileEmptyMessage}
@@ -506,7 +510,7 @@ export default function AggregatedHistoryPage() {
                     icon={<LinkOutlined />}
                     onClick={() => navigator.clipboard.writeText(file.url)}
                   >
-                    复制链接
+                    {t('copyLink', '复制链接')}
                   </Button>,
                   <Button
                     type="link"
@@ -514,7 +518,7 @@ export default function AggregatedHistoryPage() {
                     href={file.url}
                     target="_blank"
                   >
-                    下载
+                    {t('download', '下载')}
                   </Button>,
                 ]}
               >
@@ -523,7 +527,7 @@ export default function AggregatedHistoryPage() {
                   title={file.name}
                   description={
                     <Typography.Text type="secondary">
-                      更新时间: {formatTimestampToLocalTime(file.timestamp)} | 大小: {formatFileSize(file.size)}
+                      {t('updateTime', '更新时间')}: {formatTimestampToLocalTime(file.timestamp)} | {t('fileSize', '大小')}: {formatFileSize(file.size, tc('unknown', '未知'))}
                     </Typography.Text>
                   }
                 />
@@ -535,14 +539,14 @@ export default function AggregatedHistoryPage() {
 
       {/* 控制台日志弹窗 */}
       <Modal
-        title="Jenkins 构建日志"
+        title={t('jenkinsBuildLog', 'Jenkins 构建日志')}
         open={logModalVisible}
         onCancel={() => setLogModalVisible(false)}
         footer={null}
         width={900}
       >
         {loadingLog ? (
-          <div style={{ textAlign: 'center', padding: 40 }}>加载中...</div>
+          <div style={{ textAlign: 'center', padding: 40 }}>{tc('loading', '加载中...')}</div>
         ) : (
           <pre style={{
             backgroundColor: '#1e1e1e',
@@ -582,15 +586,14 @@ function formatDateTime(time: string | undefined | null): string {
 }
 
 // 格式化文件大小
-function formatFileSize(bytes: number | undefined | null): string {
-  if (bytes === undefined || bytes === null || bytes <= 0) return '未知';
+function formatFileSize(bytes: number | undefined | null, unknownLabel = '未知'): string {
+  if (bytes === undefined || bytes === null || bytes <= 0) return unknownLabel;
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// 格式化时间戳为北京时间（UTC+8）- 支持多种格式
 // 格式化时间戳为北京时间（UTC+8）- 支持多种格式
 function formatTimestampToLocalTime(timestamp: string): string {
   if (!timestamp) return '-';
@@ -620,7 +623,7 @@ function formatTimestampToLocalTime(timestamp: string): string {
 
       // 加8小时转换为北京时间
       date.setTime(date.getTime() + 8 * 60 * 60 * 1000);
-      return date.toLocaleString('zh-CN');
+      return formatDate(date);
     }
 
     // 如果是 "YYYY-MM-DD HH:mm:ss" 格式（后端返回的 UTC 时间），加 8 小时转为北京时间
@@ -631,7 +634,7 @@ function formatTimestampToLocalTime(timestamp: string): string {
         return timestamp;
       }
       date.setTime(date.getTime() + 8 * 60 * 60 * 1000);
-      return date.toLocaleString('zh-CN');
+      return formatDate(date);
     }
 
     // 如果是 ISO 格式（带时区），转换为北京时间
@@ -640,7 +643,7 @@ function formatTimestampToLocalTime(timestamp: string): string {
       if (!isNaN(date.getTime())) {
         // 转换为北京时间
         date.setTime(date.getTime() + 8 * 60 * 60 * 1000);
-        return date.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+        return formatDate(date);
       }
     }
 

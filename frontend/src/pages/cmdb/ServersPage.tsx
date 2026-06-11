@@ -4,25 +4,18 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Table, Button, Modal, Form, Input, Select, message, Tag, Popconfirm } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { cmdbAPI, Server, Project, Environment } from '../../api/cmdb'
 import { monitorAPI, ServerStatus } from '../../api/monitor'
 import AssistantQuickActions from '../../components/AssistantQuickActions'
+import { formatDateTime } from '../../utils/dateFormat'
 import SearchBar, { SearchField } from '../../components/SearchBar'
 import { canEdit } from '../../utils/menuAccess'
 
-// 搜索字段配置
-const searchFields: SearchField[] = [
-  { name: 'hostname', label: '主机名', type: 'text' },
-  { name: 'ip', label: 'IP地址', type: 'text' },
-  { name: 'os', label: '操作系统', type: 'text' },
-  { name: 'arch', label: '架构', type: 'select', options: [
-    { value: 'x86_64', label: 'x86_64' },
-    { value: 'arm64', label: 'arm64' },
-  ]},
-  { name: 'env_id', label: '环境', type: 'select' },
-]
-
 export default function ServersPage() {
+  const { t } = useTranslation('cmdb')
+  const { t: tc } = useTranslation('common')
+
   const [servers, setServers] = useState<Server[]>([])
   const [serverStatus, setServerStatus] = useState<Map<number, ServerStatus>>(new Map())
   const [projects, setProjects] = useState<Project[]>([])
@@ -33,6 +26,18 @@ export default function ServersPage() {
   const [checking, setChecking] = useState(false)
   const [searchValues, setSearchValues] = useState<Record<string, string>>({})
   const [form] = Form.useForm()
+
+  // 搜索字段配置
+  const searchFields: SearchField[] = [
+    { name: 'hostname', label: t('hostname', '主机名'), type: 'text' },
+    { name: 'ip', label: t('ipAddress', 'IP地址'), type: 'text' },
+    { name: 'os', label: t('os', '操作系统'), type: 'text' },
+    { name: 'arch', label: t('arch', '架构'), type: 'select', options: [
+      { value: 'x86_64', label: 'x86_64' },
+      { value: 'arm64', label: 'arm64' },
+    ]},
+    { name: 'env_id', label: t('belongEnv', '环境'), type: 'select' },
+  ]
 
   const fetchData = async () => {
     setLoading(true)
@@ -58,7 +63,7 @@ export default function ServersPage() {
         // 忽略状态获取错误
       }
     } catch (error) {
-      message.error('加载数据失败')
+      message.error(tc('loadFailed', '加载数据失败'))
     } finally {
       setLoading(false)
     }
@@ -74,9 +79,11 @@ export default function ServersPage() {
         statusMap.set(s.server_id, s)
       }
       setServerStatus(statusMap)
-      message.success(`检测完成，在线 ${statusResp.data?.filter(s => s.online).length || 0}/${statusResp.data?.length || 0} 台服务器`)
+      const onlineCount = statusResp.data?.filter(s => s.online).length || 0
+      const totalCount = statusResp.data?.length || 0
+      message.success(t('checkComplete', '检测完成，在线 {{online}}/{{total}} 台服务器', { online: onlineCount, total: totalCount }))
     } catch (error) {
-      message.error('检测失败')
+      message.error(t('checkFailed', '检测失败'))
     } finally {
       setChecking(false)
     }
@@ -146,10 +153,10 @@ export default function ServersPage() {
   const handleDelete = async (id: number) => {
     try {
       await cmdbAPI.deleteServer(id)
-      message.success('删除成功')
+      message.success(tc('deleteSuccess', '删除成功'))
       fetchData()
     } catch (error) {
-      message.error('删除失败')
+      message.error(tc('deleteFailed', '删除失败'))
     }
   }
 
@@ -166,7 +173,7 @@ export default function ServersPage() {
           project_ids: values.project_ids,
           env_ids: values.env_ids,
         })
-        message.success('更新成功')
+        message.success(tc('updateSuccess', '更新成功'))
       } else {
         await cmdbAPI.createServer({
           hostname: values.hostname,
@@ -177,32 +184,32 @@ export default function ServersPage() {
           project_ids: values.project_ids,
           env_ids: values.env_ids,
         })
-        message.success('创建成功')
+        message.success(tc('createSuccess', '创建成功'))
       }
       setModalVisible(false)
       fetchData()
     } catch (error) {
-      message.error('操作失败')
+      message.error(tc('operationFailed', '操作失败'))
     }
   }
 
   const columns = [
-    { title: '主机名', dataIndex: 'hostname', key: 'hostname' },
-    { title: 'IP 地址', dataIndex: 'ip', key: 'ip' },
-    { title: '操作系统', dataIndex: 'os', key: 'os' },
-    { title: '架构', dataIndex: 'arch', key: 'arch', width: 120 },
+    { title: t('colHostname', '主机名'), dataIndex: 'hostname', key: 'hostname' },
+    { title: t('colIpAddress', 'IP 地址'), dataIndex: 'ip', key: 'ip' },
+    { title: t('colOS', '操作系统'), dataIndex: 'os', key: 'os' },
+    { title: t('colArch', '架构'), dataIndex: 'arch', key: 'arch', width: 120 },
     {
-      title: '状态',
+      title: tc('status', '状态'),
       key: 'status',
       width: 100,
       render: (_: unknown, record: Server) => {
         const status = serverStatus.get(record.id)
         const isOnline = status?.online ?? (record.status === 'online')
-        return <Tag color={isOnline ? 'green' : 'red'}>{isOnline ? '在线' : '离线'}</Tag>
+        return <Tag color={isOnline ? 'green' : 'red'}>{isOnline ? t('statusOnline', '在线') : t('statusOffline', '离线')}</Tag>
       },
     },
     {
-      title: '延迟',
+      title: t('colLatency', '延迟'),
       key: 'latency',
       width: 80,
       render: (_: unknown, record: Server) => {
@@ -215,7 +222,7 @@ export default function ServersPage() {
       },
     },
     {
-      title: '项目',
+      title: t('colProject', '项目'),
       dataIndex: 'projects',
       key: 'projects',
       width: 180,
@@ -234,7 +241,7 @@ export default function ServersPage() {
       ),
     },
     {
-      title: '环境',
+      title: t('colEnv', '环境'),
       dataIndex: 'env_ids',
       key: 'env_ids',
       width: 180,
@@ -249,15 +256,15 @@ export default function ServersPage() {
       },
     },
     {
-      title: '最后心跳',
+      title: t('colLastHeartbeat', '最后心跳'),
       dataIndex: 'last_heartbeat',
       key: 'last_heartbeat',
       width: 180,
-      render: (time: string) => time ? new Date(time).toLocaleString('zh-CN') : '-',
+      render: (time: string) => time ? formatDateTime(time) : '-',
     },
-    { title: 'SSH 端口', dataIndex: 'ssh_port', key: 'ssh_port', width: 100 },
+    { title: t('colSshPort', 'SSH 端口'), dataIndex: 'ssh_port', key: 'ssh_port', width: 100 },
     {
-      title: '操作',
+      title: tc('action', '操作'),
       key: 'action',
       width: 160,
       fixed: 'right' as 'right',
@@ -265,9 +272,9 @@ export default function ServersPage() {
         if (!canEdit()) return '-'
         return (
           <div style={{ whiteSpace: 'nowrap' }}>
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} style={{ padding: '4px 8px' }}>编辑</Button>
-            <Popconfirm title="确定要删除此服务器吗？" onConfirm={() => handleDelete(record.id)}>
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} style={{ padding: '4px 8px' }}>删除</Button>
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} style={{ padding: '4px 8px' }}>{tc('edit', '编辑')}</Button>
+            <Popconfirm title={t('deleteServerConfirm', '确定要删除此服务器吗？')} onConfirm={() => handleDelete(record.id)}>
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} style={{ padding: '4px 8px' }}>{tc('delete', '删除')}</Button>
             </Popconfirm>
           </div>
         )
@@ -290,19 +297,19 @@ export default function ServersPage() {
       <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
         {canEdit() && (
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            新增服务器
+            {t('addServer', '新增服务器')}
           </Button>
         )}
         <Button icon={<ReloadOutlined />} onClick={handleCheck} loading={checking}>
-          刷新状态
+          {t('refreshStatus', '刷新状态')}
         </Button>
       </div>
       <AssistantQuickActions
-        description="复用右侧运维小助手，基于当前主机管理页面上下文发起查询"
+        description={t('assistantServerDesc', '复用右侧运维小助手，基于当前主机管理页面上下文发起查询')}
         actions={[
-          { label: '当前主机分布情况', query: '当前主机分布情况' },
-          { label: '当前离线主机有哪些', query: '当前离线主机有哪些' },
-          { label: '主机异常主要集中在哪个环境', query: '主机异常主要集中在哪个环境' },
+          { label: t('assistantDistQuery', '当前主机分布情况'), query: t('assistantDistQuery', '当前主机分布情况') },
+          { label: t('assistantOfflineQuery', '当前离线主机有哪些'), query: t('assistantOfflineQuery', '当前离线主机有哪些') },
+          { label: t('assistantAnomalyQuery', '主机异常主要集中在哪个环境'), query: t('assistantAnomalyQuery', '主机异常主要集中在哪个环境') },
         ]}
       />
       <Table
@@ -311,10 +318,10 @@ export default function ServersPage() {
         rowKey="id"
         loading={loading}
         scroll={{ x: 1500 }}
-        pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total) => `共 ${total} 条`, showQuickJumper: true }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total) => tc('total', '共 {{count}} 条', { count: total }), showQuickJumper: true }}
       />
       <Modal
-        title={editingServer ? '编辑服务器' : '新增服务器'}
+        title={editingServer ? t('editServer', '编辑服务器') : t('addServer', '新增服务器')}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
@@ -323,40 +330,40 @@ export default function ServersPage() {
         <Form form={form} layout="vertical">
           <Form.Item
             name="hostname"
-            label="主机名"
-            rules={[{ required: true, message: '请输入主机名' }]}
+            label={t('colHostname', '主机名')}
+            rules={[{ required: true, message: t('hostnameRequired', '请输入主机名') }]}
           >
-            <Input placeholder="请输入主机名" />
+            <Input placeholder={t('hostnamePlaceholder', '请输入主机名')} />
           </Form.Item>
           <Form.Item
             name="ip"
-            label="IP 地址"
-            rules={[{ required: true, message: '请输入IP地址' }]}
+            label={t('colIpAddress', 'IP 地址')}
+            rules={[{ required: true, message: t('ipRequired', '请输入IP地址') }]}
           >
-            <Input placeholder="请输入IP地址" />
+            <Input placeholder={t('ipPlaceholder', '请输入IP地址')} />
           </Form.Item>
-          <Form.Item name="os" label="操作系统">
-            <Input placeholder="例如: Ubuntu 22.04" />
+          <Form.Item name="os" label={t('colOS', '操作系统')}>
+            <Input placeholder={t('osPlaceholder', '例如: Ubuntu 22.04')} />
           </Form.Item>
-          <Form.Item name="arch" label="架构">
-            <Select placeholder="请选择架构">
+          <Form.Item name="arch" label={t('colArch', '架构')}>
+            <Select placeholder={t('archPlaceholder', '请选择架构')}>
               <Select.Option value="x86_64">x86_64</Select.Option>
               <Select.Option value="arm64">arm64</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item
             name="ssh_port"
-            label="SSH 端口"
-            rules={[{ required: true, message: '请输入SSH端口' }]}
+            label={t('colSshPort', 'SSH 端口')}
+            rules={[{ required: true, message: t('sshPortRequired', '请输入SSH端口') }]}
           >
-            <Input type="number" placeholder="默认22" />
+            <Input type="number" placeholder={t('sshPortPlaceholder', '默认22')} />
           </Form.Item>
           <Form.Item
             name="project_ids"
-            label="所属项目"
-            rules={[{ required: true, message: '请选择项目' }]}
+            label={t('belongProject', '所属项目')}
+            rules={[{ required: true, message: t('projectRequired', '请选择项目') }]}
           >
-            <Select mode="multiple" placeholder="请选择项目">
+            <Select mode="multiple" placeholder={t('projectPlaceholder', '请选择项目')}>
               {projects.map((p) => (
                 <Select.Option key={p.id} value={p.id}>{p.name}</Select.Option>
               ))}
@@ -364,10 +371,10 @@ export default function ServersPage() {
           </Form.Item>
           <Form.Item
             name="env_ids"
-            label="所属环境"
-            rules={[{ required: true, message: '请选择环境' }]}
+            label={t('belongEnv', '所属环境')}
+            rules={[{ required: true, message: t('envRequired', '请选择环境') }]}
           >
-            <Select mode="multiple" placeholder="请选择环境">
+            <Select mode="multiple" placeholder={t('envPlaceholder', '请选择环境')}>
               {environments.map((e) => (
                 <Select.Option key={e.id} value={e.id}>{e.name}</Select.Option>
               ))}

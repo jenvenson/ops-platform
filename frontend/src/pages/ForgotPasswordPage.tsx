@@ -5,11 +5,13 @@ import { useState } from 'react'
 import { Form, Input, Button, message, Typography, Card, Result } from 'antd'
 import { Link } from 'react-router-dom'
 import { UserOutlined, ArrowLeftOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 
 const { Title, Text } = Typography
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation('login')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{ token: string; expires_at: string } | null>(null)
 
@@ -22,12 +24,12 @@ export default function ForgotPasswordPage() {
       )
       if (res.token) {
         setResult({ token: res.token, expires_at: res.expires_at || '' })
-        message.success('重置令牌已生成')
+        message.success(t('tokenGenerated', '重置令牌已生成'))
       } else {
-        message.info(res.message || '如果用户存在，重置令牌已生成')
+        message.info(res.message || t('tokenGeneratedHint', '如果用户存在，重置令牌已生成'))
       }
     } catch {
-      message.error('请求失败，请稍后重试')
+      message.error(t('requestFailed', '请求失败，请稍后重试'))
     } finally {
       setLoading(false)
     }
@@ -39,10 +41,10 @@ export default function ForgotPasswordPage() {
         <Card style={styles.card} styles={{ body: { padding: '48px 40px' } }}>
           <Result
             status="success"
-            title="重置令牌已生成"
+            title={t('tokenGenerated', '重置令牌已生成')}
             subTitle={
               <div style={{ textAlign: 'left', marginTop: 16 }}>
-                <Text>请复制以下令牌，用于重置密码（有效期 1 小时）：</Text>
+                <Text>{t('resetTokenGeneratedDesc', '请复制以下令牌，用于重置密码（有效期 1 小时）：')}</Text>
                 <div style={{
                   background: '#f6f8fa',
                   border: '1px solid #e1e4e8',
@@ -57,7 +59,7 @@ export default function ForgotPasswordPage() {
                 </div>
                 <Link to={`/reset-password?token=${result.token}`}>
                   <Button type="primary" block size="large">
-                    前往重置密码
+                    {t('goToResetPassword', '前往重置密码')}
                   </Button>
                 </Link>
               </div>
@@ -75,29 +77,29 @@ export default function ForgotPasswordPage() {
           <div style={styles.logo}>
             <span style={styles.logoText}>OPS</span>
           </div>
-          <Title level={3} style={{ marginTop: 16 }}>忘记密码</Title>
-          <Text type="secondary">输入用户名获取重置令牌</Text>
+          <Title level={3} style={{ marginTop: 16 }}>{t('forgotPasswordTitle', '忘记密码')}</Title>
+          <Text type="secondary">{t('forgotPasswordSubtitle', '输入用户名获取重置令牌')}</Text>
         </div>
         <Form onFinish={onSubmit}>
           <Form.Item
             name="username"
-            rules={[{ required: true, message: '请输入用户名' }]}
+            rules={[{ required: true, message: t('usernameRequired', '请输入用户名') }]}
           >
             <Input
-              placeholder="用户名"
+              placeholder={t('username', '用户名')}
               prefix={<UserOutlined />}
               size="large"
             />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block size="large">
-              获取重置令牌
+              {t('getResetToken', '获取重置令牌')}
             </Button>
           </Form.Item>
         </Form>
         <div style={{ textAlign: 'center' }}>
           <Link to="/login">
-            <ArrowLeftOutlined /> 返回登录
+            <ArrowLeftOutlined /> {t('backToLogin', '返回登录')}
           </Link>
         </div>
       </Card>

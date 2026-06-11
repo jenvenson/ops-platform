@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import { Card, Col, Row, Space, Tag, Typography } from 'antd'
+import { useTranslation } from 'react-i18next'
 import manualData from '../data/user_manual.json'
 
 const { Paragraph, Title } = Typography
@@ -20,14 +21,16 @@ const data = manualData as ManualData
 const sections = Object.values(data.manual_contents)
 
 export default function UserManualPage() {
+  const { t } = useTranslation('admin')
+
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <Card>
         <Title level={3} style={{ marginTop: 0, marginBottom: 8 }}>
-          用户手册
+          {t('userManual', '用户手册')}
         </Title>
         <Paragraph type="secondary" style={{ marginBottom: 0 }}>
-          这里汇总了平台主要模块的使用说明、常见操作路径和故障排查信息，内容与当前菜单命名保持一致。
+          {t('userManualDesc', '这里汇总了平台主要模块的使用说明、常见操作路径和故障排查信息，内容与当前菜单命名保持一致。')}
         </Paragraph>
       </Card>
 

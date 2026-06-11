@@ -8,10 +8,13 @@ import {
 import {
   EyeOutlined, ClockCircleOutlined, DeleteOutlined
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { consulAPI, CopyOperation } from '../../api/consul'
 import dayjs from 'dayjs'
 
 export default function OperationHistoryPage() {
+  const { t } = useTranslation('platform')
+  const { t: tc } = useTranslation('common')
   const [operations, setOperations] = useState<CopyOperation[]>([])
   const [loading, setLoading] = useState(false)
   const [detailModalVisible, setDetailModalVisible] = useState(false)
@@ -22,8 +25,8 @@ export default function OperationHistoryPage() {
     try {
       const data = await consulAPI.getOperations({ limit: 50 })
       setOperations(data)
-    } catch (error) {
-      message.error('获取操作历史失败')
+    } catch {
+      message.error(t('getOperationHistoryFailed', '获取操作历史失败'))
     } finally {
       setLoading(false)
     }
@@ -37,21 +40,21 @@ export default function OperationHistoryPage() {
   const handleDelete = async (id: number) => {
     try {
       await consulAPI.deleteOperation(id)
-      message.success('删除成功')
+      message.success(t('deleteSuccessFromCommon', '删除成功'))
       fetchOperations()
-    } catch (error) {
-      message.error('删除失败')
+    } catch {
+      message.error(t('deleteFailedFromCommon', '删除失败'))
     }
   }
 
   const getStatusInfo = (record: CopyOperation) => {
     if (record.status === 'failed') {
-      return { color: 'red', text: '失败' }
+      return { color: 'red', text: tc('failed', '失败') }
     }
     if (record.created_at) {
-      return { color: 'green', text: '成功' }
+      return { color: 'green', text: tc('success', '成功') }
     }
-    return { color: 'orange', text: '待处理' }
+    return { color: 'orange', text: t('pending', '待处理') }
   }
 
   useEffect(() => {
@@ -66,19 +69,19 @@ export default function OperationHistoryPage() {
       width: 60,
     },
     {
-      title: '源键',
+      title: t('sourceKey', '源键'),
       dataIndex: 'source_key',
       key: 'source_key',
       ellipsis: true,
     },
     {
-      title: '目标键',
+      title: t('targetKey', '目标键'),
       dataIndex: 'target_key',
       key: 'target_key',
       ellipsis: true,
     },
     {
-      title: '状态',
+      title: tc('status', '状态'),
       key: 'status',
       width: 80,
       render: (_: any, record: CopyOperation) => {
@@ -87,21 +90,21 @@ export default function OperationHistoryPage() {
       },
     },
     {
-      title: '操作人',
+      title: tc('operator', '操作人'),
       dataIndex: 'operator',
       key: 'operator',
       width: 100,
       render: (val: string) => val || '-',
     },
     {
-      title: '创建时间',
+      title: t('createdAt', '创建时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
       render: (date: string) => date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
-      title: '操作',
+      title: tc('action', '操作'),
       key: 'action',
       width: 140,
       render: (_: any, record: CopyOperation) => (
@@ -111,20 +114,20 @@ export default function OperationHistoryPage() {
             icon={<EyeOutlined />}
             onClick={() => showOperationDetails(record)}
           >
-            详情
+            {t('details', '详情')}
           </Button>
           <Popconfirm
-            title="确定删除此条记录？"
+            title={t('deleteRecordConfirm', '确定删除此条记录？')}
             onConfirm={() => handleDelete(record.id)}
-            okText="确定"
-            cancelText="取消"
+            okText={tc('confirm', '确定')}
+            cancelText={tc('cancel', '取消')}
           >
             <Button
               size="small"
               danger
               icon={<DeleteOutlined />}
             >
-              删除
+              {tc('delete', '删除')}
             </Button>
           </Popconfirm>
         </Space>
@@ -138,13 +141,13 @@ export default function OperationHistoryPage() {
         title={
           <Space>
             <ClockCircleOutlined />
-            <span>配置操作记录</span>
+            <span>{t('configOperations', '配置操作记录')}</span>
           </Space>
         }
         size="small"
         extra={
           <Button onClick={fetchOperations}>
-            刷新
+            {tc('refresh', '刷新')}
           </Button>
         }
       >
@@ -159,7 +162,7 @@ export default function OperationHistoryPage() {
       </Card>
 
       <Modal
-        title="操作详情"
+        title={t('operationDetails', '操作详情')}
         open={detailModalVisible}
         onCancel={() => {
           setDetailModalVisible(false)
@@ -171,18 +174,18 @@ export default function OperationHistoryPage() {
         {selectedOperation && (
           <Descriptions bordered column={1}>
             <Descriptions.Item label="ID">{selectedOperation.id}</Descriptions.Item>
-            <Descriptions.Item label="源键">{selectedOperation.source_key}</Descriptions.Item>
-            <Descriptions.Item label="目标键">{selectedOperation.target_key}</Descriptions.Item>
-            <Descriptions.Item label="应用的规则">{selectedOperation.rules_applied || '无'}</Descriptions.Item>
-            <Descriptions.Item label="状态">
+            <Descriptions.Item label={t('sourceKey', '源键')}>{selectedOperation.source_key}</Descriptions.Item>
+            <Descriptions.Item label={t('targetKey', '目标键')}>{selectedOperation.target_key}</Descriptions.Item>
+            <Descriptions.Item label={t('appliedRules', '应用的规则')}>{selectedOperation.rules_applied || t('none', '无')}</Descriptions.Item>
+            <Descriptions.Item label={tc('status', '状态')}>
               {(() => {
                 const info = getStatusInfo(selectedOperation)
                 return <Tag color={info.color}>{info.text}</Tag>
               })()}
             </Descriptions.Item>
-            <Descriptions.Item label="消息">{selectedOperation.message || '无'}</Descriptions.Item>
-            <Descriptions.Item label="操作人">{selectedOperation.operator || '-'}</Descriptions.Item>
-            <Descriptions.Item label="创建时间">
+            <Descriptions.Item label={t('message', '消息')}>{selectedOperation.message || t('none', '无')}</Descriptions.Item>
+            <Descriptions.Item label={tc('operator', '操作人')}>{selectedOperation.operator || '-'}</Descriptions.Item>
+            <Descriptions.Item label={t('createdAt', '创建时间')}>
               {selectedOperation.created_at ? dayjs(selectedOperation.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
             </Descriptions.Item>
           </Descriptions>

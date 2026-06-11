@@ -1,6 +1,8 @@
 // Copyright (c) 2026 OPS Platform Contributors.
 // SPDX-License-Identifier: MIT
 
+import i18next from '../i18n'
+
 interface ErrorPayload {
   message?: string
   error?: string
@@ -34,35 +36,36 @@ export function getErrorMessage(error: unknown, fallback: string): string {
 }
 
 function mapFIMErrorMessage(raw: string): string {
+  const t = (key: string, fallback: string) => i18next.t(`security:fim.error.${key}`, { defaultValue: fallback })
   const text = raw.trim()
   const lower = text.toLowerCase()
 
   if (lower.includes('fim execution already running')) {
-    return '当前策略与主机已有执行任务进行中，请稍后重试'
+    return t('executionAlreadyRunning', '当前策略与主机已有执行任务进行中，请稍后重试')
   }
   if (lower.includes('fim target not found')) {
-    return '当前主机不在策略绑定范围内或绑定已失效'
+    return t('targetNotFound', '当前主机不在策略绑定范围内或绑定已失效')
   }
   if (lower.includes('has no watch paths configured')) {
-    return '当前策略尚未配置巡检目录，请先完成目录配置'
+    return t('noWatchPathsConfigured', '当前策略尚未配置巡检目录，请先完成目录配置')
   }
   if (lower.includes('record not found')) {
-    return '相关策略或主机记录不存在，请刷新后重试'
+    return t('recordNotFound', '相关策略或主机记录不存在，请刷新后重试')
   }
   if (lower.includes('invalid request')) {
-    return '请求参数不合法，请检查后重试'
+    return t('invalidRequest', '请求参数不合法，请检查后重试')
   }
   if (lower.includes('invalid policy id') || lower.includes('invalid snapshot id')) {
-    return '请求对象无效，请刷新页面后重试'
+    return t('invalidPolicyOrSnapshot', '请求对象无效，请刷新页面后重试')
   }
   if (lower.includes('ssh dial') || lower.includes('ssh command failed') || lower.includes('missing fim_ssh')) {
-    return 'SSH 执行失败，请检查主机连通性和 FIM SSH 配置'
+    return t('sshExecutionFailed', 'SSH 执行失败，请检查主机连通性和 FIM SSH 配置')
   }
   if (lower.includes('failed to run fim scan')) {
-    return '执行巡检失败，请稍后重试'
+    return t('scanFailed', '执行巡检失败，请稍后重试')
   }
   if (lower.includes('failed to build fim baseline')) {
-    return '构建基线失败，请稍后重试'
+    return t('buildBaselineFailed', '构建基线失败，请稍后重试')
   }
   return text
 }

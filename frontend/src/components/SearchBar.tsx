@@ -3,6 +3,7 @@
 
 import { Form, Input, Select, Button, Space } from 'antd'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 
 export interface SearchField {
   name: string
@@ -19,6 +20,7 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ fields, onSearch, onReset, style }: SearchBarProps) {
+  const { t: tc } = useTranslation('common')
   const [form] = Form.useForm()
 
   // 默认字段
@@ -62,10 +64,10 @@ export default function SearchBar({ fields, onSearch, onReset, style }: SearchBa
       <Form.Item style={{ marginBottom: 0 }}>
         <Space>
           <Button type="primary" icon={<SearchOutlined />} onClick={() => onSearch(form.getFieldsValue())}>
-            搜索
+            {tc('search', '搜索')}
           </Button>
           <Button icon={<ReloadOutlined />} onClick={handleReset}>
-            重置
+            {tc('reset', '重置')}
           </Button>
         </Space>
       </Form.Item>

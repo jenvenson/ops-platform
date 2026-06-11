@@ -8,6 +8,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { securityFIMAPI, type FIMDiffEvent, type FIMPolicy } from '../../api/security-fim'
 import { cmdbAPI, type Server } from '../../api/cmdb'
 import { canEdit } from '../../utils/menuAccess'
+import { useTranslation } from 'react-i18next'
 
 const { Paragraph, Title, Text } = Typography
 
@@ -20,15 +21,6 @@ const severityColorMap: Record<string, string> = {
   info: 'blue',
 }
 
-const severityLabelMap: Record<string, string> = {
-  critical: '严重',
-  high: '高',
-  warning: '警告',
-  medium: '中',
-  low: '低',
-  info: '提示',
-}
-
 const eventTypeColorMap: Record<string, string> = {
   create: 'green',
   delete: 'red',
@@ -38,17 +30,9 @@ const eventTypeColorMap: Record<string, string> = {
   rename: 'blue',
 }
 
-const eventTypeLabelMap: Record<string, string> = {
-  create: '新增',
-  delete: '删除',
-  modify: '修改',
-  chmod: '权限变更',
-  chown: '属主变更',
-  rename: '重命名',
-}
-
 export default function FIMEventsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t } = useTranslation('security')
   const [items, setItems] = useState<FIMDiffEvent[]>([])
   const [policies, setPolicies] = useState<FIMPolicy[]>([])
   const [servers, setServers] = useState<Server[]>([])
@@ -87,7 +71,7 @@ export default function FIMEventsPage() {
       setItems([])
       setPolicies([])
       setServers([])
-      message.error('加载文件变更事件失败')
+      message.error(t('fimEvents.loadEventsFailed', '加载文件变更事件失败'))
     } finally {
       setLoading(false)
     }
@@ -101,10 +85,10 @@ export default function FIMEventsPage() {
     try {
       setActionLoadingId(id)
       await securityFIMAPI.deleteEvent(id)
-      message.success('事件已删除')
+      message.success(t('fimEvents.eventDeleted', '事件已删除'))
       await fetchData()
     } catch {
-      message.error('删除事件失败')
+      message.error(t('fimEvents.eventDeleteFailed', '删除事件失败'))
     } finally {
       setActionLoadingId(null)
     }
@@ -143,7 +127,7 @@ export default function FIMEventsPage() {
 
   const columns: ColumnsType<FIMDiffEvent> = [
     {
-      title: '策略 / 主机',
+      title: `${t('fim.policyName', '策略')} / ${t('fim.targetHost', '主机')}`,
       key: 'policy_server',
       width: 220,
       render: (_value, record) => {
@@ -151,60 +135,60 @@ export default function FIMEventsPage() {
         const server = serverMap.get(record.server_id)
         return (
           <Space direction="vertical" size={0}>
-            <Text>{record.policy_name || policy?.name || `策略 #${record.policy_id}`}</Text>
+            <Text>{record.policy_name || policy?.name || `${t('fim.policyName', '策略')} #${record.policy_id}`}</Text>
             <Text type="secondary">
               {record.server_name && record.server_ip
                 ? `${record.server_name} (${record.server_ip})`
-                : server ? `${server.hostname} (${server.ip})` : `主机 #${record.server_id}`}
+                : server ? `${server.hostname} (${server.ip})` : `${t('fim.targetHost', '主机')} #${record.server_id}`}
             </Text>
           </Space>
         )
       },
     },
     {
-      title: '路径',
+      title: t('fim.inspectionDir', '路径'),
       dataIndex: 'path',
       key: 'path',
       width: 420,
       render: (value: string) => <Text code>{value}</Text>,
     },
     {
-      title: '事件类型',
+      title: t('fimEvents.eventType.create', '事件类型'),
       dataIndex: 'event_type',
       key: 'event_type',
       width: 120,
-      render: (value: string) => <Tag color={eventTypeColorMap[value] || 'default'}>{eventTypeLabelMap[value] || value}</Tag>,
+      render: (value: string) => <Tag color={eventTypeColorMap[value] || 'default'}>{t(`fimEvents.eventType.${value}`, value)}</Tag>,
     },
     {
-      title: '级别',
+      title: t('severityLevel', '级别'),
       dataIndex: 'severity',
       key: 'severity',
       width: 100,
-      render: (value: string) => <Tag color={severityColorMap[value] || 'default'}>{severityLabelMap[value] || value}</Tag>,
+      render: (value: string) => <Tag color={severityColorMap[value] || 'default'}>{t(`severity.${value}`, value)}</Tag>,
     },
     {
-      title: '发生时间',
+      title: t('discoveryTime', '发生时间'),
       dataIndex: 'occurred_at',
       key: 'occurred_at',
       width: 180,
       render: (value: string) => formatDateTime(value),
     },
     {
-      title: '操作',
+      title: t('action', '操作'),
       key: 'actions',
       width: 120,
       render: (_value, record) => (
         canEdit() ? (
           <Popconfirm
-            title="确认删除该事件？"
-            description="删除事件时会同步删除其关联告警。"
+            title={t('fimEvents.confirmDeleteEvent', '确认删除该事件？')}
+            description={t('fimEvents.confirmDeleteEventDesc', '删除事件时会同步删除其关联告警。')}
             onConfirm={() => void handleDeleteEvent(record.id)}
-            okText="删除"
-            cancelText="取消"
+            okText={t('delete', '删除')}
+            cancelText={t('cancel', '取消')}
             okButtonProps={{ danger: true, loading: actionLoadingId === record.id }}
           >
             <Button type="link" danger loading={actionLoadingId === record.id}>
-              删除
+              {t('delete', '删除')}
             </Button>
           </Popconfirm>
         ) : '-'
@@ -216,18 +200,18 @@ export default function FIMEventsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Card>
         <Space direction="vertical" size={4}>
-          <Title level={4} style={{ margin: 0 }}>文件变更事件</Title>
+          <Title level={4} style={{ margin: 0 }}>{t('fimEvents.title', '文件变更事件')}</Title>
           <Paragraph type="secondary" style={{ margin: 0 }}>
-            展示基线与当前巡检快照的差异结果，便于排查具体发生了什么变化。
+            {t('fimEvents.description', '展示基线与当前巡检快照的差异结果，便于排查具体发生了什么变化。')}
           </Paragraph>
         </Space>
       </Card>
 
-      <Card title="筛选条件">
+      <Card title={t('fim.executions.filterCondition', '筛选条件')}>
         <Space wrap size={12}>
           <Select
             allowClear
-            placeholder="按策略筛选"
+            placeholder={t('fimEvents.filterByPolicy', '按策略筛选')}
             style={{ width: 220 }}
             value={filters.policyId}
             onChange={(value) => setFilters((current) => ({ ...current, policyId: value }))}
@@ -235,7 +219,7 @@ export default function FIMEventsPage() {
           />
           <Select
             allowClear
-            placeholder="按主机筛选"
+            placeholder={t('fimEvents.filterByHost', '按主机筛选')}
             style={{ width: 240 }}
             value={filters.serverId}
             onChange={(value) => setFilters((current) => ({ ...current, serverId: value }))}
@@ -246,29 +230,29 @@ export default function FIMEventsPage() {
           />
           <Select
             allowClear
-            placeholder="按事件类型筛选"
+            placeholder={t('fimEvents.filterByEventType', '按事件类型筛选')}
             style={{ width: 180 }}
             value={filters.eventType}
             onChange={(value) => setFilters((current) => ({ ...current, eventType: value }))}
             options={['create', 'delete', 'modify', 'chmod', 'chown', 'rename'].map((value) => ({
               value,
-              label: eventTypeLabelMap[value] || value,
+              label: t(`fimEvents.eventType.${value}`, value),
             }))}
           />
           <Select
             allowClear
-            placeholder="按级别筛选"
+            placeholder={t('fimEvents.filterBySeverity', '按级别筛选')}
             style={{ width: 160 }}
             value={filters.severity}
             onChange={(value) => setFilters((current) => ({ ...current, severity: value }))}
             options={['critical', 'high', 'warning', 'medium', 'low', 'info'].map((value) => ({
               value,
-              label: severityLabelMap[value] || value,
+              label: t(`severity.${value}`, value),
             }))}
           />
           <Input
             allowClear
-            placeholder="搜索路径 / 策略 / 主机"
+            placeholder={t('fimEvents.searchHint', '搜索路径 / 策略 / 主机')}
             style={{ width: 260 }}
             value={filters.keyword}
             onChange={(event) => setFilters((current) => ({ ...current, keyword: event.target.value }))}
@@ -276,14 +260,14 @@ export default function FIMEventsPage() {
         </Space>
       </Card>
 
-      <Card title={`最近差异事件 (${filteredItems.length})`}>
+      <Card title={t('fimEvents.recentDiffEvents', '最近差异事件 ({{count}})', { count: filteredItems.length })}>
         <Table
           rowKey="id"
           loading={loading}
           columns={columns}
           dataSource={filteredItems}
           pagination={{ pageSize: 20, showSizeChanger: false }}
-          locale={{ emptyText: '当前没有文件变更事件' }}
+          locale={{ emptyText: t('fimEvents.noEvents', '当前没有文件变更事件') }}
           scroll={{ x: 1240 }}
         />
       </Card>

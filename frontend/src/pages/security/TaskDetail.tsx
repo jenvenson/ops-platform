@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal, Card, Descriptions, Table, Tag, Space, Button, Progress, Typography, Tabs, message, Dropdown, Row, Col, Statistic, Drawer, Select, Alert, Empty, Input, Spin } from 'antd'
 import { ExportOutlined, ReloadOutlined, FileTextOutlined, FileOutlined, DownOutlined, SafetyOutlined, CloudServerOutlined, WarningOutlined, InfoCircleOutlined, TableOutlined, EyeOutlined } from '@ant-design/icons'
 import { securityAPI, SecurityScanTask, SecurityAsset, SecurityVulnerability, SecurityScanTarget, SecurityVulnerabilityDetailResponse, SecurityScanFindingOccurrence, SecurityScanEvidence } from '../../api/security'
-import { getConfidenceTag, getConfidenceValue, getFindingSourceTag, getFindingSourceValue, getMatchModeValue, getPrimaryCVE, getRiskCategory, getVerificationNoteValue, getVerificationStatusTag, getVerificationStatusValue, getVerifiedAtValue, hasKnowledgeLink, isCandidateFinding, isInventoryFinding } from './vulnerabilityPresentation'
+import { getConfidenceTag, getConfidenceValue, getFindingSourceTag, getFindingSourceValue, getMatchModeValue, getPrimaryCVE, getRiskCategory, getScanMethodLabel, getVerificationNoteValue, getVerificationStatusTag, getVerificationStatusValue, getVerifiedAtValue, hasKnowledgeLink, isCandidateFinding, isInventoryFinding } from './vulnerabilityPresentation'
+import i18next from '../../i18n'
+import { formatDateTime } from '../../utils/dateFormat'
 
 const { Text, Paragraph, Link } = Typography
 const { Option } = Select
@@ -23,9 +26,9 @@ function getServiceStatusLabel(name: string) {
   }
   const normalized = name.slice(0, -1).toLowerCase()
   if (normalized === 'https') {
-    return '开放但握手失败'
+    return i18next.t('security:openButHandshakeFailed', '开放但握手失败')
   }
-  return '协议未确认'
+  return i18next.t('security:protocolNotConfirmed', '协议未确认')
 }
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
@@ -53,11 +56,11 @@ function getSnapshotWarnings(snapshot: Record<string, unknown> | undefined): Arr
 function formatDiscoveryMode(mode?: string) {
   switch (mode) {
     case 'browser':
-      return '浏览器发现'
+      return i18next.t('security:browserDiscovery', '浏览器发现')
     case 'http':
-      return 'HTTP 发现'
+      return i18next.t('security:httpDiscovery', 'HTTP 发现')
     case 'none':
-      return '不自动发现'
+      return i18next.t('security:noAutoDiscovery', '不自动发现')
     default:
       return mode || '-'
   }
@@ -66,9 +69,9 @@ function formatDiscoveryMode(mode?: string) {
 function formatScanProfile(profile?: string) {
   switch (profile) {
     case 'deep':
-      return '专项扫描'
+      return i18next.t('security:specialScan', '专项扫描')
     case 'standard':
-      return '标准扫描'
+      return i18next.t('security:standardScan', '标准扫描')
     default:
       return profile || '-'
   }
@@ -84,11 +87,10 @@ function getMetadataString(metadata: Record<string, unknown> | undefined, key: s
   return typeof value === 'string' && value.trim() ? value : undefined
 }
 
-function formatOccurrenceTime(value?: string) {
-  return value ? new Date(value).toLocaleString('zh-CN') : '-'
-}
-
 export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps) {
+  const { t } = useTranslation('security')
+  const { t: tc } = useTranslation('common')
+
   const [taskDetail, setTaskDetail] = useState<SecurityScanTask>(task)
   const [assets, setAssets] = useState<SecurityAsset[]>([])
   const [scanTargets, setScanTargets] = useState<SecurityScanTarget[]>([])
@@ -123,7 +125,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       setScanTargets(targetsData)
       setVulnerabilities(vulnsData)
     } catch (error) {
-      message.error('获取任务详情失败')
+      message.error(t('loadTaskDetailFailed', '获取任务详情失败'))
     } finally {
       setLoading(false)
     }
@@ -174,9 +176,9 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
         })
       }
       await fetchData()
-      message.success(reviewStatus === 'confirmed' ? '验证成功，已转入正式结果' : '验证状态已更新')
+      message.success(reviewStatus === 'confirmed' ? t('verificationReviewSuccess', '验证成功，已转入正式结果') : t('verifyStatusUpdated', '验证状态已更新'))
     } catch {
-      message.error('更新验证状态失败')
+      message.error(t('verificationReviewFailed', '更新验证状态失败'))
     } finally {
       setCandidateReviewLoadingId(null)
     }
@@ -192,7 +194,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       setSelectedVuln(detail.vulnerability)
       setSelectedVulnDetail(detail)
     } catch {
-      message.error('获取漏洞详情失败')
+      message.error(t('vulnDetailLoadFailed', '获取漏洞详情失败'))
     } finally {
       setDetailLoading(false)
     }
@@ -231,26 +233,26 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
         json: 'JSON',
         csv: 'CSV',
       }
-      message.error(`导出${formatLabels[format] || format}报告失败`)
+      message.error(t('exportReportFailed', '导出{{format}}报告失败', { format: formatLabels[format] || format }))
     }
   }
 
   const exportItems = [
     {
       key: 'html',
-      label: 'HTML 报告',
+      label: t('htmlReport', 'HTML 报告'),
       icon: <FileOutlined />,
       onClick: () => handleExportReport('html'),
     },
     {
       key: 'json',
-      label: 'JSON 数据',
+      label: t('jsonData', 'JSON 数据'),
       icon: <FileTextOutlined />,
       onClick: () => handleExportReport('json'),
     },
     {
       key: 'csv',
-      label: 'CSV 详细报告（漏洞明细）',
+      label: t('csvDetailReport', 'CSV 详细报告（漏洞明细）'),
       icon: <TableOutlined />,
       onClick: () => handleExportReport('csv'),
     },
@@ -266,12 +268,12 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
   }
 
   const statusLabels: Record<string, string> = {
-    pending: '等待中',
-    running: '运行中',
-    paused: '已请求暂停',
-    cancelled: '已请求取消',
-    completed: '已完成',
-    failed: '失败',
+    pending: t('status.pending', '等待中'),
+    running: t('status.running', '运行中'),
+    paused: t('status.paused', '已请求暂停'),
+    cancelled: t('status.cancelled', '已请求取消'),
+    completed: t('status.completed', '已完成'),
+    failed: t('status.failed', '失败'),
   }
 
   const inventoryFindings = vulnerabilities.filter(isInventoryFinding)
@@ -295,9 +297,9 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
   const totalVulns = vulnStats.high + vulnStats.medium + vulnStats.low + vulnStats.info
   const riskCategoryStats = confirmedVulnerabilities.reduce(
     (acc, vuln) => {
-      const category = getRiskCategory(vuln).text
-      if (category === 'CVE 风险') acc.cve += 1
-      else if (category === '配置风险') acc.config += 1
+      const code = getRiskCategory(vuln).code
+      if (code === 'cve_risk') acc.cve += 1
+      else if (code === 'config_risk') acc.config += 1
       else acc.generic += 1
       return acc
     },
@@ -320,7 +322,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
     ? Math.round((vulnStats.high * 10 + vulnStats.medium * 5 + vulnStats.low * 2) / totalVulns * 10)
     : 0
   const matchesVulnerabilityFilters = (vuln: SecurityVulnerability) => {
-    if (vulnFilters.riskCategory && getRiskCategory(vuln).text !== vulnFilters.riskCategory) {
+    if (vulnFilters.riskCategory && getRiskCategory(vuln).code !== vulnFilters.riskCategory) {
       return false
     }
     if (vulnFilters.findingSource && getFindingSourceValue(vuln) !== vulnFilters.findingSource) {
@@ -351,24 +353,24 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
   const resultComparisonRows = [
     {
       key: 'confirmed',
-      category: '正式结果',
+      category: t('confirmedResults', '正式结果'),
       count: confirmedVulnerabilities.length,
-      metric: `${vulnStats.high} 高 / ${vulnStats.medium} 中 / ${vulnStats.low + vulnStats.info} 低`,
-      guidance: '进入风险统计、处置和导出主结论',
+      metric: `${vulnStats.high} ${t('highLabel', '高')} / ${vulnStats.medium} ${t('mediumLabel', '中')} / ${vulnStats.low + vulnStats.info} ${t('lowLabel', '低')}`,
+      guidance: t('confirmedGuidance', '进入风险统计、处置和导出主结论'),
     },
     {
       key: 'verification',
-      category: '待验证',
+      category: t('pendingVerification', '待验证'),
       count: candidateVulnerabilities.length,
-      metric: '线索核验',
-      guidance: '默认不进入正式风险，建议结合版本、配置和人工验证确认',
+      metric: t('candidateMetric', '线索核验'),
+      guidance: t('candidateGuidance', '默认不进入正式风险，建议结合版本、配置和人工验证确认'),
     },
     {
       key: 'inventory',
-      category: '资产信息',
+      category: t('assetInfo', '资产信息'),
       count: inventoryFindings.length,
-      metric: '不计风险',
-      guidance: '用于资产盘点和后续扫描路由',
+      metric: t('inventoryMetric', '不计风险'),
+      guidance: t('inventoryGuidance', '用于资产盘点和后续扫描路由'),
     },
   ]
 
@@ -414,8 +416,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
     scanned: webScannedCount,
     skipped: webSkippedCount,
     ruleOnly: webRuleOnlyCount,
-    mode: taskData.status === 'completed' ? '已完成' : statusLabels[taskData.status] || taskData.status,
-    auth: authMode === 'advanced' ? '自动生成认证流程' : (authMode || '按任务配置执行'),
+    mode: taskData.status === 'completed' ? t('status.completed', '已完成') : statusLabels[taskData.status] || taskData.status,
+    auth: authMode === 'advanced' ? t('autoAuthFlow', '自动生成认证流程') : (authMode || t('execByTaskConfig', '按任务配置执行')),
     strategy: formatScanProfile(scanProfile),
     discoveryMode: formatDiscoveryMode(discoveryMode),
     fallback: browserFallbackCount,
@@ -527,15 +529,15 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
   const scanEntryCount = hasTargetTree ? scanTargets.length : scanEntryRows.length
   const showWebFollowupHint = isWebScan && totalVulns === 0
   const webFollowupHint = webSummary.discovered > 1
-    ? '本次已自动发现并扫描多个入口，但未命中模板规则。可优先对当前入口继续做专项扫描，或针对重点接口复测认证、参数和权限差异。'
-    : '本次未命中模板规则。若当前目标只是单一入口，可改为自动发现后扫描，或补充更具体的业务 URL / API URL 再复测。'
+    ? t('webFollowupMultiHint', '本次已自动发现并扫描多个入口，但未命中模板规则。可优先对当前入口继续做专项扫描，或针对重点接口复测认证、参数和权限差异。')
+    : t('webFollowupSingleHint', '本次未命中模板规则。若当前目标只是单一入口，可改为自动发现后扫描，或补充更具体的业务 URL / API URL 再复测。')
   const discoverySummary = {
     targets: targetEntries.length,
     hosts: uniqueIPs,
     ports: assets.length,
     services: uniqueServices,
   }
-  const progressUnit = isWebScan ? '入口' : isDiscoveryTask ? '目标' : 'IP'
+  const progressUnit = isWebScan ? t('entryUnit', '入口') : isDiscoveryTask ? t('targetUnit', '目标') : 'IP'
 
   // 按IP统计漏洞数量
   const ipVulnCount: Record<string, { high: number; medium: number; low: number }> = {}
@@ -552,26 +554,26 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
 
   const assetColumns = [
     {
-      title: isWebScan ? '解析主机' : 'IP',
+      title: isWebScan ? t('resolvedHost', '解析主机') : t('ipAddress', 'IP'),
       dataIndex: 'ip',
       key: 'ip',
       width: 180,
     },
     {
-      title: '端口',
+      title: t('port', '端口'),
       dataIndex: 'port',
       key: 'port',
       width: 80,
       render: (port: number) => port || '-',
     },
     {
-      title: '协议',
+      title: t('protocol', '协议'),
       dataIndex: 'protocol',
       key: 'protocol',
       width: 80,
     },
     {
-      title: '服务',
+      title: t('service', '服务'),
       dataIndex: 'service_name',
       key: 'service',
       width: 100,
@@ -589,7 +591,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       },
     },
     {
-      title: '版本',
+      title: t('version', '版本'),
       dataIndex: 'version',
       key: 'version',
       width: 200,
@@ -603,21 +605,21 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
 
   const scanEntryColumns = [
     {
-      title: '扫描入口',
+      title: t('scanEntry', '扫描入口'),
       dataIndex: 'entry',
       key: 'entry',
       ellipsis: true,
       render: (value: string) => <Text copyable>{value}</Text>,
     },
     {
-      title: '类型',
+      title: t('kindType', '类型'),
       dataIndex: 'kind',
       key: 'kind',
       width: 90,
       render: (value: string) => <Tag color={value === 'api' ? 'blue' : value === 'page' ? 'green' : 'default'}>{value || '-'}</Tag>,
     },
     {
-      title: '来源',
+      title: t('source', '来源'),
       dataIndex: 'source',
       key: 'source',
       width: 110,
@@ -635,37 +637,37 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       },
     },
     {
-      title: '深度',
+      title: t('depth', '深度'),
       dataIndex: 'depth',
       key: 'depth',
       width: 70,
     },
     {
-      title: '主机',
+      title: t('host', '主机'),
       dataIndex: 'host',
       key: 'host',
       width: 140,
     },
     {
-      title: '端口',
+      title: t('port', '端口'),
       dataIndex: 'port',
       key: 'port',
       width: 80,
     },
     {
-      title: '协议',
+      title: t('protocol', '协议'),
       dataIndex: 'protocol',
       key: 'protocol',
       width: 80,
     },
     {
-      title: '服务',
+      title: t('service', '服务'),
       dataIndex: 'service',
       key: 'service',
       width: 100,
     },
     {
-      title: '状态',
+      title: tc('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
@@ -678,40 +680,40 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
 
   const occurrenceColumns = [
     {
-      title: '目标',
+      title: t('target', '目标'),
       key: 'target',
       render: (_: unknown, record: SecurityScanFindingOccurrence) => record.target?.target_url || getMetadataString(record.metadata, 'vuln_url') || '-',
     },
     {
-      title: '来源',
+      title: t('source', '来源'),
       dataIndex: 'finding_source',
       key: 'finding_source',
       width: 110,
       render: (value: string) => <Tag color={value === 'web-rule' ? 'gold' : value === 'web-template' ? 'blue' : 'default'}>{value || '-'}</Tag>,
     },
     {
-      title: '匹配',
+      title: t('match', '匹配'),
       dataIndex: 'match_mode',
       key: 'match_mode',
       width: 100,
       render: (value: string) => value || '-',
     },
     {
-      title: '首次命中',
+      title: t('firstHit', '首次命中'),
       dataIndex: 'first_seen_at',
       key: 'first_seen_at',
       width: 160,
-      render: (value?: string) => formatOccurrenceTime(value),
+      render: (value?: string) => formatDateTime(value),
     },
     {
-      title: '最近命中',
+      title: t('lastHit', '最近命中'),
       dataIndex: 'last_seen_at',
       key: 'last_seen_at',
       width: 160,
-      render: (value?: string) => formatOccurrenceTime(value),
+      render: (value?: string) => formatDateTime(value),
     },
     {
-      title: '证据',
+      title: t('evidence', '证据'),
       dataIndex: 'evidence_count',
       key: 'evidence_count',
       width: 70,
@@ -721,7 +723,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
 
   const vulnColumns = [
     {
-      title: '严重程度',
+      title: t('severityLevel', '严重程度'),
       dataIndex: 'severity',
       key: 'severity',
       width: 90,
@@ -732,7 +734,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       ),
     },
     {
-      title: '漏洞标题',
+      title: t('vulnTitle', '漏洞标题'),
       dataIndex: 'title',
       key: 'title',
       width: 240,
@@ -740,27 +742,27 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       render: (title: string) => title || '-',
     },
     {
-      title: 'CVE',
+      title: t('cve', 'CVE'),
       dataIndex: 'primary_cve_id',
       key: 'cve_id',
       width: 140,
       render: (_: string, record: SecurityVulnerability) => getPrimaryCVE(record) || '-',
     },
     {
-      title: '目标',
+      title: t('target', '目标'),
       key: 'target',
       width: 140,
       render: (_: unknown, record: SecurityVulnerability) => `${record.ip}:${record.port}`,
     },
     {
-      title: 'CVSS',
+      title: t('cvss', 'CVSS'),
       dataIndex: 'cvss_score',
       key: 'cvss_score',
       width: 70,
       render: (score: number) => score?.toFixed(1) || '-',
     },
     {
-      title: '风险类别',
+      title: t('riskCategory', '风险类别'),
       key: 'risk_category',
       width: 110,
       render: (_: unknown, record: SecurityVulnerability) => {
@@ -769,7 +771,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       },
     },
     {
-      title: '结果来源',
+      title: t('findingSource', '结果来源'),
       key: 'finding_source',
       width: 110,
       render: (_: unknown, record: SecurityVulnerability) => {
@@ -778,7 +780,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       },
     },
     {
-      title: '置信度',
+      title: t('confidence', '置信度'),
       key: 'confidence',
       width: 90,
       render: (_: unknown, record: SecurityVulnerability) => {
@@ -787,7 +789,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       },
     },
     {
-      title: '状态',
+      title: tc('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
@@ -799,16 +801,16 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
           ignored: 'default',
         }
         const labels: Record<string, string> = {
-          open: '待处理',
-          acknowledged: '已确认',
-          fixed: '已修复',
-          ignored: '已忽略',
+          open: t('statusLabel.open', '待处理'),
+          acknowledged: t('statusLabel.acknowledged', '已确认'),
+          fixed: t('statusLabel.fixed', '已修复'),
+          ignored: t('statusLabel.ignored', '已忽略'),
         }
         return <Tag color={colors[status]}>{labels[status] || status}</Tag>
       },
     },
     {
-      title: '验证状态',
+      title: t('verificationStatus', '验证状态'),
       key: 'verification_status',
       width: 110,
       render: (_: unknown, record: SecurityVulnerability) => {
@@ -820,7 +822,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       },
     },
     {
-      title: '操作',
+      title: t('action', '操作'),
       key: 'action',
       width: 190,
       render: (_: unknown, record: SecurityVulnerability) => (
@@ -833,7 +835,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               openVulnerabilityDetail(record)
             }}
           >
-            详情
+            {t('detail', '详情')}
           </Button>
           {isCandidateFinding(record) && (
             <Select
@@ -843,10 +845,10 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               loading={candidateReviewLoadingId === record.id}
               onChange={(val) => handleCandidateReview(record, val as 'pending' | 'needs-test' | 'confirmed' | 'rejected')}
               options={[
-                { value: 'pending', label: '未验证' },
-                { value: 'needs-test', label: '复测中' },
-                { value: 'confirmed', label: '验证成功' },
-                { value: 'rejected', label: '验证失败' },
+                { value: 'pending', label: t('unverified', '未验证') },
+                { value: 'needs-test', label: t('retesting', '复测中') },
+                { value: 'confirmed', label: t('verified', '验证成功') },
+                { value: 'rejected', label: t('verificationFailed', '验证失败') },
               ]}
             />
           )}
@@ -860,7 +862,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       title={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <SafetyOutlined />
-          <span>扫描任务详情 - {taskData.name}</span>
+          <span>{t('scanTaskDetail', '扫描任务详情')} - {taskData.name}</span>
           <Tag color={statusColors[taskData.status]}>{statusLabels[taskData.status]}</Tag>
         </div>
       }
@@ -870,14 +872,14 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button icon={<ReloadOutlined />} onClick={() => { fetchData(); onRefresh(); }}>
-            刷新
+            {tc('refresh', '刷新')}
           </Button>
           <Space>
-            <Button onClick={onClose}>关闭</Button>
+            <Button onClick={onClose}>{tc('close', '关闭')}</Button>
             {taskData.status === 'completed' && (
               <Dropdown menu={{ items: exportItems }} trigger={['click']}>
                 <Button type="primary" icon={<ExportOutlined />}>
-                  导出报告 <DownOutlined />
+                  {t('exportReport', '导出报告')} <DownOutlined />
                 </Button>
               </Dropdown>
             )}
@@ -888,92 +890,92 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       {/* 任务基本信息 */}
       <Card size="small" style={{ marginBottom: 16 }}>
         <Descriptions column={4} size="small">
-          <Descriptions.Item label="任务名称">{taskData.name}</Descriptions.Item>
-          <Descriptions.Item label="任务类型">
-            {isDiscoveryTask ? <Tag color="blue">资产发现</Tag> : isWebScan ? <Tag color="green">网站漏洞</Tag> : <Tag color="orange">主机漏洞</Tag>}
+          <Descriptions.Item label={t('taskName', '任务名称')}>{taskData.name}</Descriptions.Item>
+          <Descriptions.Item label={t('taskType', '任务类型')}>
+            {isDiscoveryTask ? <Tag color="blue">{t('portScan', '资产发现')}</Tag> : isWebScan ? <Tag color="green">{t('webVuln', '网站漏洞')}</Tag> : <Tag color="orange">{t('hostVuln', '主机漏洞')}</Tag>}
           </Descriptions.Item>
-          <Descriptions.Item label="扫描目标">
+          <Descriptions.Item label={t('scanTarget', '扫描目标')}>
             <Text copyable>{taskData.target}</Text>
           </Descriptions.Item>
-          <Descriptions.Item label="创建时间">
-            {taskData.created_at ? new Date(taskData.created_at).toLocaleString('zh-CN') : '-'}
+          <Descriptions.Item label={t('createTime', '创建时间')}>
+            {taskData.created_at ? formatDateTime(taskData.created_at) : '-'}
           </Descriptions.Item>
-          <Descriptions.Item label="完成时间">
-            {taskData.completed_at ? new Date(taskData.completed_at).toLocaleString('zh-CN') : '-'}
+          <Descriptions.Item label={t('completeTime', '完成时间')}>
+            {taskData.completed_at ? formatDateTime(taskData.completed_at) : '-'}
           </Descriptions.Item>
         </Descriptions>
       </Card>
 
       {isDiscoveryTask && (
-        <Card size="small" style={{ marginBottom: 16 }} title="资产发现摘要">
+        <Card size="small" style={{ marginBottom: 16 }} title={t('assetDiscoverySummary', '资产发现摘要')}>
           <Row gutter={16}>
             <Col span={6}>
-              <Statistic title="扫描目标" value={discoverySummary.targets} suffix="个" />
+              <Statistic title={t('discoveryScanTargets', '扫描目标')} value={discoverySummary.targets} suffix={t('targetUnitSuffix', '个')} />
             </Col>
             <Col span={6}>
-              <Statistic title="识别主机" value={discoverySummary.hosts} suffix="台" />
+              <Statistic title={t('identifiedHosts', '识别主机')} value={discoverySummary.hosts} suffix={t('hostUnitSuffix', '台')} />
             </Col>
             <Col span={6}>
-              <Statistic title="开放端口" value={discoverySummary.ports} suffix="个" />
+              <Statistic title={t('openPorts', '开放端口')} value={discoverySummary.ports} suffix={t('portUnitSuffix', '个')} />
             </Col>
             <Col span={6}>
-              <Statistic title="服务类型" value={discoverySummary.services} suffix="种" />
+              <Statistic title={t('serviceTypes', '服务类型')} value={discoverySummary.services} suffix={t('serviceTypeUnitSuffix', '种')} />
             </Col>
           </Row>
           <Alert
             style={{ marginTop: 16 }}
             type="info"
             showIcon
-            message="任务说明"
-            description="资产发现任务仅执行开放端口探测和服务识别，用于资产盘点，不包含漏洞检测。可从结果中挑选重点主机，再发起主机漏洞或网站漏洞扫描。"
+            message={t('taskNoteHeader', '任务说明')}
+            description={t('discoverySummaryDesc', '资产发现任务仅执行开放端口探测和服务识别，用于资产盘点，不包含漏洞检测。可从结果中挑选重点主机，再发起主机漏洞或网站漏洞扫描。')}
           />
         </Card>
       )}
 
       {isWebScan && (
-        <Card size="small" style={{ marginBottom: 16 }} title="Web 扫描摘要">
+        <Card size="small" style={{ marginBottom: 16 }} title={t('webScanSummary', 'Web 扫描摘要')}>
           <Row gutter={16}>
             <Col span={4}>
-              <Statistic title="输入入口" value={webSummary.entries} suffix="个" />
+              <Statistic title={t('inputEntries', '输入入口')} value={webSummary.entries} suffix={t('entryUnitSuffix', '个')} />
             </Col>
             <Col span={4}>
-              <Statistic title="发现目标" value={webSummary.discovered} suffix="个" />
+              <Statistic title={t('discoveredTargets', '发现目标')} value={webSummary.discovered} suffix={t('targetUnitSuffix', '个')} />
             </Col>
             <Col span={4}>
-              <Statistic title="实际扫描" value={webSummary.scanned} suffix="个" />
+              <Statistic title={t('actualScanned', '实际扫描')} value={webSummary.scanned} suffix={t('targetUnitSuffix', '个')} />
             </Col>
             <Col span={4}>
-              <Statistic title="规则检测" value={webSummary.ruleOnly} suffix="个" />
+              <Statistic title={t('ruleDetection', '规则检测')} value={webSummary.ruleOnly} suffix={t('targetUnitSuffix', '个')} />
             </Col>
             <Col span={4}>
-              <Statistic title="预算跳过" value={webSummary.skipped} suffix="个" />
+              <Statistic title={t('budgetSkipped', '预算跳过')} value={webSummary.skipped} suffix={t('targetUnitSuffix', '个')} />
             </Col>
             <Col span={4}>
-              <Statistic title="任务状态" value={webSummary.mode} />
+              <Statistic title={t('taskStatus', '任务状态')} value={webSummary.mode} />
             </Col>
           </Row>
           <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
             <Tag color="blue">{webSummary.strategy}</Tag>
             <Tag color="cyan">{webSummary.discoveryMode}</Tag>
             <Tag color="geekblue">{webSummary.auth}</Tag>
-            {typeof verificationTargetBudget === 'number' && <Tag color="gold">验证预算 {verificationTargetBudget} 目标</Tag>}
-            {typeof discoveryBudget === 'number' && <Tag>发现预算 {discoveryBudget} URL</Tag>}
-            {webSummary.fallback > 0 && <Tag color="orange">回退 {webSummary.fallback} 次</Tag>}
+            {typeof verificationTargetBudget === 'number' && <Tag color="gold">{t('verificationBudgetTargets', '验证预算 {{count}} 目标', { count: verificationTargetBudget })}</Tag>}
+            {typeof discoveryBudget === 'number' && <Tag>{t('discoveryBudgetUrls', '发现预算 {{count}} URL', { count: discoveryBudget })}</Tag>}
+            {webSummary.fallback > 0 && <Tag color="orange">{t('fallbackCount', '回退 {{count}} 次', { count: webSummary.fallback })}</Tag>}
           </div>
           <Alert
             style={{ marginTop: 16 }}
             type="info"
             showIcon
-            message="扫描方式说明"
-            description="当前详情优先展示运行期摘要。它会区分输入入口、发现目标、实际扫描目标、仅规则检测目标以及因预算跳过的目标，便于判断覆盖边界。"
+            message={t('scanModeExplanation', '扫描方式说明')}
+            description={t('scanModeExplanationDesc', '当前详情优先展示运行期摘要。它会区分输入入口、发现目标、实际扫描目标、仅规则检测目标以及因预算跳过的目标，便于判断覆盖边界。')}
           />
           {webSummary.ruleOnly > 0 && (
             <Alert
               style={{ marginTop: 12 }}
               type="warning"
               showIcon
-              message="部分目标只执行了规则检测"
-              description={`当前任务有 ${webSummary.ruleOnly} 个低价值目标未跑 full Nuclei，只做了内置规则检测。这是标准扫描的预算控制，不等同于漏扫失败。`}
+              message={t('partialTargetsOnlyRule', '部分目标只执行了规则检测')}
+              description={t('partialTargetsOnlyRuleDesc', '当前任务有 {{ruleOnly}} 个低价值目标未跑 full Nuclei，只做了内置规则检测。这是标准扫描的预算控制，不等同于漏扫失败。', { ruleOnly: webSummary.ruleOnly })}
             />
           )}
           {webSummary.skipped > 0 && (
@@ -981,8 +983,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               style={{ marginTop: 12 }}
               type="warning"
               showIcon
-              message="部分发现目标因预算被跳过"
-              description={`当前任务有 ${webSummary.skipped} 个低优先级目标未进入验证阶段。若这些目标属于重点接口，建议改用专项扫描复测。`}
+              message={t('targetsSkippedByBudget', '部分发现目标因预算被跳过')}
+              description={t('targetsSkippedByBudgetDesc', '当前任务有 {{skipped}} 个低优先级目标未进入验证阶段。若这些目标属于重点接口，建议改用专项扫描复测。', { skipped: webSummary.skipped })}
             />
           )}
           {webSummary.fallback > 0 && (
@@ -990,8 +992,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               style={{ marginTop: 12 }}
               type="warning"
               showIcon
-              message="浏览器发现发生回退"
-              description={`本次有 ${webSummary.fallback} 个入口因 browser helper 不可达或失败回退为 HTTP discovery，扫描链路可用，但覆盖面通常会比浏览器态更窄。`}
+              message={t('browserFallbackOccurred', '浏览器发现发生回退')}
+              description={t('browserFallbackOccurredDesc', '本次有 {{fallback}} 个入口因 browser helper 不可达或失败回退为 HTTP discovery，扫描链路可用，但覆盖面通常会比浏览器态更窄。', { fallback: webSummary.fallback })}
             />
           )}
         </Card>
@@ -1002,8 +1004,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
           style={{ marginBottom: 16 }}
           type="warning"
           showIcon
-          message={taskData.status === 'paused' ? '暂停请求为阶段性生效' : '取消请求为阶段性生效'}
-          description={taskData.message || '当前任务会在现有步骤结束后停止。若需继续执行，请重新创建任务。'}
+          message={taskData.status === 'paused' ? t('pauseRequestNote', '暂停请求为阶段性生效') : t('cancelRequestNote', '取消请求为阶段性生效')}
+          description={taskData.message || t('taskStopNoteDesc', '当前任务会在现有步骤结束后停止。若需继续执行，请重新创建任务。')}
         />
       )}
 
@@ -1021,7 +1023,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               style={{ flex: 1 }}
             />
             <Text type="secondary">
-              {taskData.message || '扫描中...'} ({taskData.scanned_ips}/{taskData.total_ips} {progressUnit})
+              {taskData.message || t('scanning', '扫描中...')} ({taskData.scanned_ips}/{taskData.total_ips} {progressUnit})
             </Text>
           </div>
         </Card>
@@ -1031,94 +1033,94 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
       {taskData.status === 'completed' && !isDiscoveryTask && (
         <>
           {/* 风险概览卡片 */}
-          <Card size="small" style={{ marginBottom: 16 }} title="风险概览">
+          <Card size="small" style={{ marginBottom: 16 }} title={t('riskOverview', '风险概览')}>
             <Row gutter={16}>
               <Col span={3}>
                 <Statistic
-                  title={isWebScan ? '实际扫描' : '扫描主机'}
+                  title={isWebScan ? t('actualScanLabel', '实际扫描') : t('scanHostLabel', '扫描主机')}
                   value={isWebScan ? webSummary.scanned : uniqueIPs}
                   prefix={<CloudServerOutlined style={{ color: '#1890ff' }} />}
-                  suffix={isWebScan ? '个' : '台'}
+                  suffix={isWebScan ? t('entryUnitSuffix', '个') : t('hostUnitSuffix', '台')}
                 />
               </Col>
               <Col span={3}>
                 <Statistic
-                  title={isWebScan ? '扫描资产' : '开放端口'}
+                  title={isWebScan ? t('scanAssetLabel', '扫描资产') : t('openPorts', '开放端口')}
                   value={assets.length}
                   prefix={<InfoCircleOutlined style={{ color: '#52c41a' }} />}
-                  suffix={isWebScan ? '条' : '个'}
+                  suffix={isWebScan ? t('assetUnitSuffix', '条') : t('portUnitSuffix', '个')}
                 />
               </Col>
               <Col span={3}>
                 <Statistic
-                  title="真实漏洞"
+                  title={t('realVulnerabilities', '真实漏洞')}
                   value={totalVulns}
                   prefix={<WarningOutlined style={{ color: '#faad14' }} />}
-                  suffix="个"
+                  suffix={t('vulnUnitSuffix', '个')}
                 />
               </Col>
               <Col span={3}>
                 <Statistic
-                  title="待验证"
+                  title={t('pendingVerification', '待验证')}
                   value={candidateVulnerabilities.length}
                   valueStyle={{ color: '#d48806' }}
                 />
               </Col>
               <Col span={3}>
                 <Statistic
-                  title="资产识别"
+                  title={t('assetIdentification', '资产识别')}
                   value={inventoryFindings.length}
                   valueStyle={{ color: '#1677ff' }}
                 />
               </Col>
               <Col span={3}>
                 <Statistic
-                  title="待处理"
+                  title={t('pending', '待处理')}
                   value={dispositionStats.open}
                   valueStyle={{ color: '#cf1322' }}
                 />
               </Col>
               <Col span={3}>
                 <Statistic
-                  title="已处置"
+                  title={t('handled', '已处置')}
                   value={handledCount}
                   valueStyle={{ color: '#389e0d' }}
                 />
               </Col>
               <Col span={3}>
                 <Statistic
-                  title="风险评分"
+                  title={t('riskScore', '风险评分')}
                   value={riskScore}
                   suffix="/100"
                 />
               </Col>
             </Row>
             <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              <Tag color="red">CVE 风险 {riskCategoryStats.cve}</Tag>
-              <Tag color="cyan">配置风险 {riskCategoryStats.config}</Tag>
-              <Tag>通用风险 {riskCategoryStats.generic}</Tag>
-              <Tag color="gold">已确认 {dispositionStats.acknowledged}</Tag>
-              <Tag color="green">已修复 {dispositionStats.fixed}</Tag>
-              <Tag color="default">已忽略 {dispositionStats.ignored}</Tag>
+              <Tag color="red">{t('cveRisk', 'CVE 风险')} {riskCategoryStats.cve}</Tag>
+              <Tag color="cyan">{t('configRisk', '配置风险')} {riskCategoryStats.config}</Tag>
+              <Tag>{t('genericRisk', '通用风险')} {riskCategoryStats.generic}</Tag>
+              <Tag color="gold">{t('acknowledgedLabel', '已确认')} {dispositionStats.acknowledged}</Tag>
+              <Tag color="green">{t('fixedLabel', '已修复')} {dispositionStats.fixed}</Tag>
+              <Tag color="default">{t('ignoredLabel', '已忽略')} {dispositionStats.ignored}</Tag>
             </div>
-            <Card size="small" style={{ marginTop: 16, background: '#fafafa' }} title="结果分层">
+            <Card size="small" style={{ marginTop: 16, background: '#fafafa' }} title={t('resultLayering', '结果分层')}>
               <Row gutter={16}>
                 <Col span={6}>
-                  <Statistic title="正式结果" value={confirmedVulnerabilities.length} valueStyle={{ color: '#cf1322' }} />
+                  <Statistic title={t('confirmedResults', '正式结果')} value={confirmedVulnerabilities.length} valueStyle={{ color: '#cf1322' }} />
                 </Col>
                 <Col span={6}>
-                  <Statistic title="待验证" value={candidateVulnerabilities.length} valueStyle={{ color: '#d48806' }} />
+                  <Statistic title={t('pendingVerification', '待验证')} value={candidateVulnerabilities.length} valueStyle={{ color: '#d48806' }} />
                 </Col>
                 <Col span={6}>
-                  <Statistic title="资产信息" value={inventoryFindings.length} valueStyle={{ color: '#1677ff' }} />
+                  <Statistic title={t('assetInfo', '资产信息')} value={inventoryFindings.length} valueStyle={{ color: '#1677ff' }} />
                 </Col>
               </Row>
               <Alert
                 style={{ marginTop: 16, marginBottom: 16 }}
                 type="info"
                 showIcon
-                message="结果解读"
-                description="正式结果才进入风险评分和主报表结论；待验证结果只作为核验线索；资产信息用于盘点和后续扫描，不计入风险。"
+                message={t('resultInterpretation', '结果解读')}
+                description={t('resultInterpretationDesc', '正式结果才进入风险评分和主报表结论；待验证结果只作为核验线索；资产信息用于盘点和后续扫描，不计入风险。')}
               />
               <Table
                 rowKey="key"
@@ -1126,10 +1128,10 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                 pagination={false}
                 dataSource={resultComparisonRows}
                 columns={[
-                  { title: '分类', dataIndex: 'category', key: 'category', width: 120 },
-                  { title: '数量', dataIndex: 'count', key: 'count', width: 80 },
-                  { title: '口径', dataIndex: 'metric', key: 'metric', width: 160 },
-                  { title: '建议动作', dataIndex: 'guidance', key: 'guidance' },
+                  { title: t('category', '分类'), dataIndex: 'category', key: 'category', width: 120 },
+                  { title: t('quantity', '数量'), dataIndex: 'count', key: 'count', width: 80 },
+                  { title: t('caliber', '口径'), dataIndex: 'metric', key: 'metric', width: 160 },
+                  { title: t('suggestedAction', '建议动作'), dataIndex: 'guidance', key: 'guidance' },
                 ]}
               />
             </Card>
@@ -1138,8 +1140,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               style={{ marginTop: 16 }}
               type="warning"
               showIcon
-              message="版本匹配结果已单独归入待验证"
-              description={`本次扫描中有 ${candidateVulnerabilities.length} 条结果是根据目标开放服务的产品名、版本号或 CPE 信息，与漏洞知识库自动比对后得到的风险线索。它们默认不计入风险评分和正式结果统计；验证成功后会额外派生正式结果。`}
+              message={t('versionMatchGroupedCandidate', '版本匹配结果已单独归入待验证')}
+              description={t('versionMatchGroupedCandidateDesc', '本次扫描中有 {{count}} 条结果是根据目标开放服务的产品名、版本号或 CPE 信息，与漏洞知识库自动比对后得到的风险线索。它们默认不计入风险评分和正式结果统计；验证成功后会额外派生正式结果。', { count: candidateVulnerabilities.length })}
             />
           )}
           {inventoryFindings.length > 0 && (
@@ -1147,20 +1149,20 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               style={{ marginTop: 16 }}
               type="info"
               showIcon
-              message="资产识别结果已单独展示"
-              description={`本次扫描还发现 ${inventoryFindings.length} 条服务识别/版本枚举结果，这些结果会保留用于资产盘点，但不计入风险评分和真实漏洞统计。`}
+              message={t('inventorySeparated', '资产识别结果已单独展示')}
+              description={t('inventorySeparatedDesc', '本次扫描还发现 {{count}} 条服务识别/版本枚举结果，这些结果会保留用于资产盘点，但不计入风险评分和真实漏洞统计。', { count: inventoryFindings.length })}
             />
           )}
         </Card>
 
           {/* 风险分布 */}
-          <Card size="small" style={{ marginBottom: 16 }} title="漏洞风险分布">
+          <Card size="small" style={{ marginBottom: 16 }} title={t('vulnRiskDistribution', '漏洞风险分布')}>
             <Row gutter={24}>
               <Col span={16}>
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text>高危漏洞</Text>
-                    <Text strong style={{ color: '#ff4d4f' }}>{vulnStats.high} 个</Text>
+                    <Text>{t('severityLabel.high', '高危漏洞')}</Text>
+                    <Text strong style={{ color: '#ff4d4f' }}>{vulnStats.high} {t('vulnUnitSuffix', '个')}</Text>
                   </div>
                   <Progress
                     percent={totalVulns > 0 ? Math.round(vulnStats.high / totalVulns * 100) : 0}
@@ -1171,8 +1173,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                 </div>
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text>中危漏洞</Text>
-                    <Text strong style={{ color: '#faad14' }}>{vulnStats.medium} 个</Text>
+                    <Text>{t('severityLabel.medium', '中危漏洞')}</Text>
+                    <Text strong style={{ color: '#faad14' }}>{vulnStats.medium} {t('vulnUnitSuffix', '个')}</Text>
                   </div>
                   <Progress
                     percent={totalVulns > 0 ? Math.round(vulnStats.medium / totalVulns * 100) : 0}
@@ -1183,8 +1185,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                 </div>
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text>低危漏洞</Text>
-                    <Text strong style={{ color: '#1890ff' }}>{vulnStats.low} 个</Text>
+                    <Text>{t('severityLabel.low', '低危漏洞')}</Text>
+                    <Text strong style={{ color: '#1890ff' }}>{vulnStats.low} {t('vulnUnitSuffix', '个')}</Text>
                   </div>
                   <Progress
                     percent={totalVulns > 0 ? Math.round(vulnStats.low / totalVulns * 100) : 0}
@@ -1195,8 +1197,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                 </div>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text>信息级</Text>
-                    <Text strong style={{ color: '#999' }}>{vulnStats.info} 个</Text>
+                    <Text>{t('infoLevel', '信息级')}</Text>
+                    <Text strong style={{ color: '#999' }}>{vulnStats.info} {t('vulnUnitSuffix', '个')}</Text>
                   </div>
                   <Progress
                     percent={totalVulns > 0 ? Math.round(vulnStats.info / totalVulns * 100) : 0}
@@ -1209,20 +1211,20 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               <Col span={8}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Tag color="red" style={{ margin: 0 }}>高危</Tag>
-                    <Text>{vulnStats.high} 个</Text>
+                    <Tag color="red" style={{ margin: 0 }}>{t('severityLabel.high', '高危')}</Tag>
+                    <Text>{vulnStats.high} {t('vulnUnitSuffix', '个')}</Text>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Tag color="orange" style={{ margin: 0 }}>中危</Tag>
-                    <Text>{vulnStats.medium} 个</Text>
+                    <Tag color="orange" style={{ margin: 0 }}>{t('severityLabel.medium', '中危')}</Tag>
+                    <Text>{vulnStats.medium} {t('vulnUnitSuffix', '个')}</Text>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Tag color="blue" style={{ margin: 0 }}>低危</Tag>
-                    <Text>{vulnStats.low} 个</Text>
+                    <Tag color="blue" style={{ margin: 0 }}>{t('severityLabel.low', '低危')}</Tag>
+                    <Text>{vulnStats.low} {t('vulnUnitSuffix', '个')}</Text>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Tag color="default" style={{ margin: 0 }}>信息</Tag>
-                    <Text>{vulnStats.info} 个</Text>
+                    <Tag color="default" style={{ margin: 0 }}>{t('vulnSeverityInfo', '信息')}</Tag>
+                    <Text>{vulnStats.info} {t('vulnUnitSuffix', '个')}</Text>
                   </div>
                 </div>
               </Col>
@@ -1231,7 +1233,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
 
           {/* 主机风险列表 */}
           {Object.keys(ipVulnCount).length > 0 && (
-            <Card size="small" style={{ marginBottom: 16 }} title="主机风险列表">
+            <Card size="small" style={{ marginBottom: 16 }} title={t('hostRiskList', '主机风险列表')}>
               <Table
                 dataSource={Object.entries(ipVulnCount).map(([ip, counts]) => ({
                   ip,
@@ -1244,30 +1246,30 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                 size="small"
                 pagination={false}
                 columns={[
-                  { title: 'IP 地址', dataIndex: 'ip', key: 'ip' },
+                  { title: t('ipAddrLabel', 'IP 地址'), dataIndex: 'ip', key: 'ip' },
                   {
-                    title: '高危',
+                    title: t('severityLabel.high', '高危'),
                     dataIndex: 'high',
                     key: 'high',
                     width: 80,
                     render: (v: number) => v > 0 ? <Text type="danger" strong>{v}</Text> : '-',
                   },
                   {
-                    title: '中危',
+                    title: t('severityLabel.medium', '中危'),
                     dataIndex: 'medium',
                     key: 'medium',
                     width: 80,
                     render: (v: number) => v > 0 ? <Text type="warning">{v}</Text> : '-',
                   },
                   {
-                    title: '低危',
+                    title: t('severityLabel.low', '低危'),
                     dataIndex: 'low',
                     key: 'low',
                     width: 80,
                     render: (v: number) => v > 0 ? <Text style={{ color: '#1890ff' }}>{v}</Text> : '-',
                   },
                   {
-                    title: '总计',
+                    title: t('totalLabel', '总计'),
                     dataIndex: 'total',
                     key: 'total',
                     width: 80,
@@ -1280,7 +1282,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
 
           {/* 版本信息 */}
           {(taskData.nuclei_version || taskData.template_version) && (
-            <Card size="small" style={{ marginBottom: 16 }} title="扫描引擎">
+            <Card size="small" style={{ marginBottom: 16 }} title={t('scanEngineInfo', '扫描引擎')}>
               <Space size="large">
                 {taskData.nuclei_version && (
                   <div>
@@ -1290,7 +1292,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                 )}
                 {taskData.template_version && (
                   <div>
-                    <Text type="secondary">模板版本</Text>
+                    <Text type="secondary">{t('templateVersion', '模板版本')}</Text>
                     <div><Text code>{taskData.template_version}</Text></div>
                   </div>
                 )}
@@ -1307,12 +1309,12 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
         items={[
           ...(isDiscoveryTask ? [{
             key: 'summary',
-            label: `发现结果 (${assets.length})`,
+            label: `${t('discoveryResults', '发现结果')} (${assets.length})`,
             children: (
               <>
                 <div style={{ marginBottom: 8 }}>
                   <Text type="secondary">
-                    共识别到 {assets.length} 条端口和服务记录，覆盖 {uniqueIPs} 台主机。
+                    {t('discoveryResultsSummary', '共识别到 {{assetCount}} 条端口和服务记录，覆盖 {{hostCount}} 台主机。', { assetCount: assets.length, hostCount: uniqueIPs })}
                   </Text>
                 </div>
                 <Table
@@ -1325,11 +1327,11 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                   locale={{
                     emptyText: (
                       <Empty
-                        description="未发现开放端口"
+                        description={t('noOpenPorts', '未发现开放端口')}
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
                       >
                         <Text type="secondary">
-                          当前目标未识别到开放端口或服务响应，可检查目标 IP 是否可达、网段是否正确或稍后重试。
+                          {t('noOpenPortsDesc', '当前目标未识别到开放端口或服务响应，可检查目标 IP 是否可达、网段是否正确或稍后重试。')}
                         </Text>
                       </Empty>
                     ),
@@ -1339,7 +1341,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
             ),
           }] : [{
             key: 'summary',
-            label: `漏洞列表 (${filteredVulnerabilities.length})`,
+            label: `${t('vulnerabilityList', '漏洞列表')} (${filteredVulnerabilities.length})`,
             children: (
               <>
                 {candidateVulnerabilities.length > 0 && (
@@ -1347,71 +1349,71 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                   style={{ marginBottom: 12 }}
                   type="warning"
                   showIcon
-                    message="待验证结果已单独折叠"
-                    description={`本次有 ${candidateVulnerabilities.length} 条基于目标服务版本与漏洞知识库自动比对得到的风险线索，已移到“待验证”页签，默认不和正式结果混排。`}
+                    message={t('candidateResultsCollapsed', '待验证结果已单独折叠')}
+                    description={t('candidateResultsCollapsedDesc', '本次有 {{count}} 条基于目标服务版本与漏洞知识库自动比对得到的风险线索，已移到"待验证"页签，默认不和正式结果混排。', { count: candidateVulnerabilities.length })}
                   />
                 )}
                 <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'flex-end' }}>
                   <Space wrap>
                     <Select
-                      placeholder="风险类别"
+                      placeholder={t('filterByRiskCategory', '风险类别')}
                       allowClear
                       style={{ width: 140 }}
                       value={vulnFilters.riskCategory || undefined}
                       onChange={(val) => setVulnFilters({ ...vulnFilters, riskCategory: val || '' })}
                     >
-                      <Option value="CVE 风险">CVE 风险</Option>
-                      <Option value="配置风险">配置风险</Option>
-                      <Option value="通用风险">通用风险</Option>
+                      <Option value="cve_risk">{t('cveRisk', 'CVE 风险')}</Option>
+                      <Option value="config_risk">{t('configRisk', '配置风险')}</Option>
+                      <Option value="generic_risk">{t('genericRisk', '通用风险')}</Option>
                     </Select>
                     <Select
-                      placeholder="结果来源"
+                      placeholder={t('filterByFindingSource', '结果来源')}
                       allowClear
                       style={{ width: 140 }}
                       value={vulnFilters.findingSource || undefined}
                       onChange={(val) => setVulnFilters({ ...vulnFilters, findingSource: val || '' })}
                     >
-                      <Option value="web-template">Web 模板</Option>
-                      <Option value="web-rule">Web 规则</Option>
-                      <Option value="host-template">服务模板</Option>
-                      <Option value="host-version-match">版本匹配</Option>
-                      <Option value="host-manual-confirmed">人工确认</Option>
-                      <Option value="asset-inventory">资产识别</Option>
+                      <Option value="web-template">{t('webTemplate', 'Web 模板')}</Option>
+                      <Option value="web-rule">{t('webRule', 'Web 规则')}</Option>
+                      <Option value="host-template">{t('serviceTemplate', '服务模板')}</Option>
+                      <Option value="host-version-match">{t('versionMatch', '版本匹配')}</Option>
+                      <Option value="host-manual-confirmed">{t('manualConfirmed', '人工确认')}</Option>
+                      <Option value="asset-inventory">{t('assetInventory', '资产识别')}</Option>
                     </Select>
                     <Select
-                      placeholder="置信度"
+                      placeholder={t('filterByConfidence', '置信度')}
                       allowClear
                       style={{ width: 120 }}
                       value={vulnFilters.confidence || undefined}
                       onChange={(val) => setVulnFilters({ ...vulnFilters, confidence: val || '' })}
                     >
-                      <Option value="high">高</Option>
-                      <Option value="medium">中</Option>
-                      <Option value="low">低</Option>
+                      <Option value="high">{t('severityLevel.high', '高')}</Option>
+                      <Option value="medium">{t('severityLevel.medium', '中')}</Option>
+                      <Option value="low">{t('severityLevel.low', '低')}</Option>
                     </Select>
                     <Select
-                      placeholder="匹配模式"
+                      placeholder={t('filterByMatchMode', '匹配模式')}
                       allowClear
                       style={{ width: 140 }}
                       value={vulnFilters.matchMode || undefined}
                       onChange={(val) => setVulnFilters({ ...vulnFilters, matchMode: val || '' })}
                     >
-                      <Option value="template">模板命中</Option>
-                      <Option value="rule">规则匹配</Option>
-                      <Option value="version-range">版本区间</Option>
-                      <Option value="fuzzy-product">产品模糊匹配</Option>
-                      <Option value="manual-review">人工复核</Option>
-                      <Option value="inventory">资产识别</Option>
+                      <Option value="template">{t('templateMatch', '模板命中')}</Option>
+                      <Option value="rule">{t('ruleMatch', '规则匹配')}</Option>
+                      <Option value="version-range">{t('versionRange', '版本区间')}</Option>
+                      <Option value="fuzzy-product">{t('fuzzyProduct', '产品模糊匹配')}</Option>
+                      <Option value="manual-review">{t('manualReview', '人工复核')}</Option>
+                      <Option value="inventory">{t('inventory', '资产识别')}</Option>
                     </Select>
                     <Select
-                      placeholder="知识库关联"
+                      placeholder={t('filterByKnowledge', '知识库关联')}
                       allowClear
                       style={{ width: 140 }}
                       value={vulnFilters.hasKnowledge || undefined}
                       onChange={(val) => setVulnFilters({ ...vulnFilters, hasKnowledge: val || '' })}
                     >
-                      <Option value="true">已关联</Option>
-                      <Option value="false">未关联</Option>
+                      <Option value="true">{t('hasKnowledge', '已关联')}</Option>
+                      <Option value="false">{t('noKnowledge', '未关联')}</Option>
                     </Select>
                   </Space>
                 </div>
@@ -1426,14 +1428,14 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                   locale={{
                     emptyText: isWebScan ? (
                       <Empty
-                        description="本次未命中模板漏洞"
+                        description={t('noTemplateMatch', '本次未命中模板漏洞')}
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
                       >
                         <Text type="secondary">
-                          这通常表示当前目标 URL 未命中现有模板，不代表目标绝对安全。建议改扫真实业务 API、登录后入口，或切换为专项扫描。
+                          {t('noTemplateMatchDesc', '这通常表示当前目标 URL 未命中现有模板，不代表目标绝对安全。建议改扫真实业务 API、登录后入口，或切换为专项扫描。')}
                         </Text>
                       </Empty>
-                    ) : '暂无漏洞数据',
+                    ) : t('noVulnerabilityData', '暂无漏洞数据'),
                   }}
                 />
               </>
@@ -1441,15 +1443,15 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
           }]),
           ...(candidateVulnerabilities.length > 0 ? [{
             key: 'candidates',
-            label: `待验证 (${filteredCandidateVulnerabilities.length})`,
+            label: `${t('candidateTab', '待验证')} (${filteredCandidateVulnerabilities.length})`,
             children: (
               <>
                 <Alert
                   style={{ marginBottom: 12 }}
                   type="warning"
                   showIcon
-                  message="以下结果需要验证"
-                  description="这些结果是根据目标开放服务的产品名、版本号或 CPE 信息，与漏洞知识库自动比对后得到的风险线索。它们适合作为排查依据，不建议直接当作正式漏洞下发。"
+                  message={t('resultsNeedVerification', '以下结果需要验证')}
+                  description={t('resultsNeedVerificationDesc', '这些结果是根据目标开放服务的产品名、版本号或 CPE 信息，与漏洞知识库自动比对后得到的风险线索。它们适合作为排查依据，不建议直接当作正式漏洞下发。')}
                 />
                 <Table
                   columns={vulnColumns}
@@ -1459,22 +1461,22 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                   size="small"
                   scroll={{ x: 1400 }}
                   pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showQuickJumper: true }}
-                  locale={{ emptyText: '暂无待验证结果' }}
+                  locale={{ emptyText: t('noCandidateResults', '暂无待验证结果') }}
                 />
               </>
             ),
           }] : []),
           ...(inventoryFindings.length > 0 ? [{
             key: 'inventory',
-            label: `资产识别 (${filteredInventoryFindings.length})`,
+            label: `${t('inventoryTab', '资产识别')} (${filteredInventoryFindings.length})`,
             children: (
               <>
                 <Alert
                   style={{ marginBottom: 12 }}
                   type="info"
                   showIcon
-                  message="以下结果用于资产盘点"
-                  description="这类结果通常来自服务识别、版本枚举或信息探测，不代表已确认可利用漏洞。"
+                  message={t('resultsForInventory', '以下结果用于资产盘点')}
+                  description={t('resultsForInventoryDesc', '这类结果通常来自服务识别、版本枚举或信息探测，不代表已确认可利用漏洞。')}
                 />
                 <Table
                   columns={vulnColumns}
@@ -1484,21 +1486,21 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                   size="small"
                   scroll={{ x: 1400 }}
                   pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showQuickJumper: true }}
-                  locale={{ emptyText: '暂无资产识别结果' }}
+                  locale={{ emptyText: t('noInventoryResults', '暂无资产识别结果') }}
                 />
               </>
             ),
           }] : []),
           ...(!isDiscoveryTask ? [{
             key: 'assets',
-            label: isWebScan ? `扫描入口 (${scanEntryCount})` : `端口列表 (${assets.length})`,
+            label: isWebScan ? `${t('scanEntriesCount', '扫描入口')} (${scanEntryCount})` : `${t('portListCount', '端口列表')} (${assets.length})`,
             children: (
               <>
                 <div style={{ marginBottom: 8 }}>
                   <Text type="secondary">
                     {isWebScan
-                      ? `共展示 ${scanEntryCount} 个扫描入口；结果区优先读取新 targets 模型，展示父子关系、入口类型、来源以及已解析到的主机和服务信息。`
-                      : `共发现 ${assets.length} 个开放端口，分布在 ${uniqueIPs} 个主机上`}
+                      ? t('scanEntriesSummary', '共展示 {{count}} 个扫描入口；结果区优先读取新 targets 模型，展示父子关系、入口类型、来源以及已解析到的主机和服务信息。', { count: scanEntryCount })
+                      : t('openPortsSummary', '共发现 {{portCount}} 个开放端口，分布在 {{hostCount}} 个主机上', { portCount: assets.length, hostCount: uniqueIPs })}
                   </Text>
                 </div>
                 {isWebScan && hasTargetTree && (
@@ -1506,8 +1508,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                     style={{ marginBottom: 12 }}
                     type="info"
                     showIcon
-                    message="当前页签已切到新目标模型"
-                    description="这里优先读取 security_scan_targets，而不是旧 discoveries。父子层级更接近真实发现与验证链路。"
+                    message={t('newTargetModel', '当前页签已切到新目标模型')}
+                    description={t('newTargetModelDesc', '这里优先读取 security_scan_targets，而不是旧 discoveries。父子层级更接近真实发现与验证链路。')}
                   />
                 )}
                 {isWebScan && !hasTargetTree && (
@@ -1515,8 +1517,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                     style={{ marginBottom: 12 }}
                     type="warning"
                     showIcon
-                    message="该任务没有可用的新目标模型数据"
-                    description="当前页签只读取 security_scan_targets；如果这里为空，说明这条任务还没有完成新模型落库，或历史数据尚未迁移。"
+                    message={t('noTargetModelData', '该任务没有可用的新目标模型数据')}
+                    description={t('noTargetModelDataDesc', '当前页签只读取 security_scan_targets；如果这里为空，说明这条任务还没有完成新模型落库，或历史数据尚未迁移。')}
                   />
                 )}
                 {isWebScan && webSummary.ruleOnly > 0 && (
@@ -1524,8 +1526,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                     style={{ marginBottom: 12 }}
                     type="warning"
                     showIcon
-                    message="入口表并不代表全部都执行了 full Nuclei"
-                    description={`当前展示的入口里，有 ${webSummary.ruleOnly} 个目标只执行了规则检测；另有 ${webSummary.skipped} 个目标因预算被跳过。建议结合摘要卡判断真实覆盖面。`}
+                    message={t('entryTableNotFullNuclei', '入口表并不代表全部都执行了 full Nuclei')}
+                    description={t('entryTableNotFullNucleiDesc', '当前展示的入口里，有 {{ruleOnly}} 个目标只执行了规则检测；另有 {{skipped}} 个目标因预算被跳过。建议结合摘要卡判断真实覆盖面。', { ruleOnly: webSummary.ruleOnly, skipped: webSummary.skipped })}
                   />
                 )}
                 {isWebScan && webSummary.fallback > 0 && (
@@ -1533,10 +1535,10 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                     style={{ marginBottom: 12 }}
                     type="warning"
                     showIcon
-                    message="本次发现链路存在浏览器回退"
+                    message={t('discoveryChainBrowserFallback', '本次发现链路存在浏览器回退')}
                     description={discoveryWarnings[0] && typeof discoveryWarnings[0].reason === 'string'
-                      ? `当前任务至少有一次 browser discovery 回退到 HTTP discovery。最近一次原因：${discoveryWarnings[0].reason}`
-                      : '当前任务至少有一次 browser discovery 回退到 HTTP discovery，发现结果可能偏保守。'}
+                      ? t('discoveryChainBrowserFallbackDesc1', '当前任务至少有一次 browser discovery 回退到 HTTP discovery。最近一次原因：{{reason}}', { reason: String(discoveryWarnings[0].reason) })
+                      : t('discoveryChainBrowserFallbackDesc2', '当前任务至少有一次 browser discovery 回退到 HTTP discovery，发现结果可能偏保守。')}
                   />
                 )}
                 {isWebScan ? (
@@ -1548,7 +1550,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                     size="small"
                     pagination={false}
                     expandable={hasTargetTree ? { defaultExpandAllRows: true } : undefined}
-                    locale={{ emptyText: '暂无扫描入口数据' }}
+                    locale={{ emptyText: t('noScanEntryData', '暂无扫描入口数据') }}
                   />
                 ) : (
                   <Table
@@ -1558,7 +1560,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                     loading={loading}
                     size="small"
                     pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showQuickJumper: true }}
-                    locale={{ emptyText: '暂无资产数据' }}
+                    locale={{ emptyText: t('noAssetData', '暂无资产数据') }}
                   />
                 )}
                 {isWebScan && (
@@ -1567,7 +1569,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                       style={{ marginTop: 16 }}
                       type="info"
                       showIcon
-                      message="复测建议"
+                      message={t('retestSuggestion', '复测建议')}
                       description={webFollowupHint}
                     />
                   ) : null
@@ -1577,7 +1579,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
           }] : []),
           ...(isDiscoveryTask && filteredVulnerabilities.length > 0 ? [{
             key: 'vulns',
-            label: `关联漏洞 (${filteredVulnerabilities.length})`,
+            label: `${t('relatedVulnerabilities', '关联漏洞')} (${filteredVulnerabilities.length})`,
             children: (
               <>
                 {candidateVulnerabilities.length > 0 && (
@@ -1585,8 +1587,8 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                   style={{ marginBottom: 12 }}
                   type="warning"
                   showIcon
-                  message="待验证结果已单独折叠"
-                  description={`当前还有 ${candidateVulnerabilities.length} 条根据目标开放服务的产品名、版本号或 CPE 信息，与漏洞知识库自动比对后得到的风险线索，已移到“待验证”页签。`}
+                  message={t('candidateResultsCollapsed', '待验证结果已单独折叠')}
+                  description={t('associatedCandidateNote', '当前还有 {{count}} 条根据目标开放服务的产品名、版本号或 CPE 信息，与漏洞知识库自动比对后得到的风险线索，已移到"待验证"页签。', { count: candidateVulnerabilities.length })}
                 />
                 )}
                 <Table
@@ -1597,7 +1599,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                   size="small"
                   scroll={{ x: 1400 }}
                   pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showQuickJumper: true }}
-                  locale={{ emptyText: '暂无关联漏洞数据' }}
+                  locale={{ emptyText: t('noRelatedVulns', '暂无关联漏洞数据') }}
                 />
               </>
             ),
@@ -1607,7 +1609,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
 
       {/* 漏洞详情抽屉 */}
       <Drawer
-        title="漏洞详情"
+        title={t('vulnDetail', '漏洞详情')}
         placement="right"
         width={600}
         open={detailDrawerOpen}
@@ -1624,10 +1626,10 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               </div>
             )}
             <Descriptions column={1} bordered size="small">
-              <Descriptions.Item label="漏洞标题">
+              <Descriptions.Item label={t('vulnTitle', '漏洞标题')}>
                 <Text strong>{selectedVuln.title}</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="严重程度">
+              <Descriptions.Item label={t('severityLevel', '严重程度')}>
                 <Tag color={selectedVuln.severity === 'high' ? 'red' : selectedVuln.severity === 'medium' ? 'orange' : 'blue'}>
                   {selectedVuln.severity?.toUpperCase()}
                 </Tag>
@@ -1635,16 +1637,16 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                   <Text style={{ marginLeft: 8 }}>CVSS: {selectedVuln.cvss_score.toFixed(1)}</Text>
                 )}
               </Descriptions.Item>
-              <Descriptions.Item label="目标地址">{selectedVuln.vuln_url || `${selectedVuln.ip}:${selectedVuln.port}`}</Descriptions.Item>
-              <Descriptions.Item label="漏洞类型">{selectedVuln.vuln_type || '-'}</Descriptions.Item>
-              <Descriptions.Item label="风险类别">
+              <Descriptions.Item label={t('vulnUrl', '目标地址')}>{selectedVuln.vuln_url || `${selectedVuln.ip}:${selectedVuln.port}`}</Descriptions.Item>
+              <Descriptions.Item label={t('vulnType', '漏洞类型')}>{selectedVuln.vuln_type || '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('riskCategory', '风险类别')}>
                 {(() => {
                   const category = getRiskCategory(selectedVuln)
                   return <Tag color={category.color}>{category.text}</Tag>
                 })()}
               </Descriptions.Item>
               {isCandidateFinding(selectedVuln) && (
-                <Descriptions.Item label="验证状态">
+                <Descriptions.Item label={t('verificationStatus', '验证状态')}>
                   {(() => {
                     const review = getVerificationStatusTag(selectedVuln)
                     return <Tag color={review.color}>{review.text}</Tag>
@@ -1652,60 +1654,60 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                 </Descriptions.Item>
               )}
               {isCandidateFinding(selectedVuln) && selectedVuln.confirmed_vuln_id && (
-                <Descriptions.Item label="已转正式结果">#{selectedVuln.confirmed_vuln_id}</Descriptions.Item>
+                <Descriptions.Item label={t('confirmedToFormal', '已转正式结果')}>#{selectedVuln.confirmed_vuln_id}</Descriptions.Item>
               )}
               {!isCandidateFinding(selectedVuln) && selectedVuln.source_vuln_id && (
-                <Descriptions.Item label="来源待验证">#{selectedVuln.source_vuln_id}</Descriptions.Item>
+                <Descriptions.Item label={t('sourceCandidate', '来源待验证')}>#{selectedVuln.source_vuln_id}</Descriptions.Item>
               )}
               {selectedVuln.cve_id && (
-                <Descriptions.Item label="CVE 编号">{selectedVuln.cve_id}</Descriptions.Item>
+                <Descriptions.Item label={t('cveId', 'CVE 编号')}>{selectedVuln.cve_id}</Descriptions.Item>
               )}
               {getPrimaryCVE(selectedVuln) && (
-                <Descriptions.Item label="主 CVE">{getPrimaryCVE(selectedVuln)}</Descriptions.Item>
+                <Descriptions.Item label={t('primaryCve', '主 CVE')}>{getPrimaryCVE(selectedVuln)}</Descriptions.Item>
               )}
               {selectedVuln.cnvd_id && (
-                <Descriptions.Item label="CNVD 编号">{selectedVuln.cnvd_id}</Descriptions.Item>
+                <Descriptions.Item label={t('cnvdId', 'CNVD 编号')}>{selectedVuln.cnvd_id}</Descriptions.Item>
               )}
               {selectedVuln.cnnvd_id && (
-                <Descriptions.Item label="CNNVD 编号">{selectedVuln.cnnvd_id}</Descriptions.Item>
+                <Descriptions.Item label={t('cnnvdId', 'CNNVD 编号')}>{selectedVuln.cnnvd_id}</Descriptions.Item>
               )}
               {selectedVuln.cncve_id && (
-                <Descriptions.Item label="CNCVE 编号">{selectedVuln.cncve_id}</Descriptions.Item>
+                <Descriptions.Item label={t('cncveId', 'CNCVE 编号')}>{selectedVuln.cncve_id}</Descriptions.Item>
               )}
             </Descriptions>
 
-            <Card size="small" title="漏洞描述" style={{ marginTop: 16 }}>
+            <Card size="small" title={t('vulnDescription', '漏洞描述')} style={{ marginTop: 16 }}>
               <Paragraph>
-                {selectedVuln.description || '暂无漏洞描述信息'}
+                {selectedVuln.description || t('noVulnDescription', '暂无漏洞描述信息')}
               </Paragraph>
             </Card>
 
-            <Card size="small" title="修复方案" style={{ marginTop: 16 }}>
+            <Card size="small" title={t('fixSuggestion', '修复方案')} style={{ marginTop: 16 }}>
               <Paragraph>
-                {selectedVuln.solution || '暂无修复方案信息'}
+                {selectedVuln.solution || t('noFixSuggestion', '暂无修复方案信息')}
               </Paragraph>
             </Card>
 
             {isCandidateFinding(selectedVuln) && (
-              <Card size="small" title="验证状态" style={{ marginTop: 16 }}>
+              <Card size="small" title={t('verificationStatusSection', '验证状态')} style={{ marginTop: 16 }}>
                 <Space direction="vertical" style={{ width: '100%' }} size={12}>
                   <Alert
                     type="warning"
                     showIcon
-                    message="该结果属于待验证"
+                    message={t('candidateFindingInfo', '该结果属于待验证')}
                     description={selectedVuln.confirmed_vuln_id
-                      ? `系统已识别目标服务版本，并命中漏洞知识库中的受影响范围。由于这类结果主要基于版本信息推断，仍需结合实际补丁情况、配置状态或人工验证后再确认是否成立。当前结果已派生正式结果 #${selectedVuln.confirmed_vuln_id}。`
-                      : '系统已识别目标服务版本，并命中漏洞知识库中的受影响范围。由于这类结果主要基于版本信息推断，仍需结合实际补丁情况、配置状态或人工验证后再确认是否成立。'}
+                      ? t('candidateFindingDescDerived', '系统已识别目标服务版本，并命中漏洞知识库中的受影响范围。由于这类结果主要基于版本信息推断，仍需结合实际补丁情况、配置状态或人工验证后再确认是否成立。当前结果已派生正式结果 #{{id}}。', { id: selectedVuln.confirmed_vuln_id })
+                      : t('candidateFindingDesc', '系统已识别目标服务版本，并命中漏洞知识库中的受影响范围。由于这类结果主要基于版本信息推断，仍需结合实际补丁情况、配置状态或人工验证后再确认是否成立。')}
                   />
                   <Descriptions column={2} bordered size="small">
-                    <Descriptions.Item label="验证状态">
+                    <Descriptions.Item label={t('verificationStatus', '验证状态')}>
                       {(() => {
                         const review = getVerificationStatusTag(selectedVuln)
                         return <Tag color={review.color}>{review.text}</Tag>
                       })()}
                     </Descriptions.Item>
-                    <Descriptions.Item label="验证时间">
-                      {getVerifiedAtValue(selectedVuln) ? new Date(getVerifiedAtValue(selectedVuln)).toLocaleString('zh-CN') : '-'}
+                    <Descriptions.Item label={t('verificationTime', '验证时间')}>
+                      {getVerifiedAtValue(selectedVuln) ? formatDateTime(getVerifiedAtValue(selectedVuln)) : '-'}
                     </Descriptions.Item>
                   </Descriptions>
                   <Select
@@ -1713,16 +1715,16 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                     onChange={(val) => handleCandidateReview(selectedVuln, val as 'pending' | 'needs-test' | 'confirmed' | 'rejected')}
                     loading={candidateReviewLoadingId === selectedVuln.id}
                     options={[
-                      { value: 'pending', label: '未验证' },
-                      { value: 'needs-test', label: '复测中' },
-                      { value: 'confirmed', label: '验证成功' },
-                      { value: 'rejected', label: '验证失败' },
+                      { value: 'pending', label: t('unverified', '未验证') },
+                      { value: 'needs-test', label: t('retesting', '复测中') },
+                      { value: 'confirmed', label: t('verified', '验证成功') },
+                      { value: 'rejected', label: t('verificationFailed', '验证失败') },
                     ]}
                   />
                   <TextArea
                     rows={4}
                     value={candidateReviewNote}
-                    placeholder="记录验证依据，例如补丁版本、人工验证结果、复测命令或失败原因。"
+                    placeholder={t('verificationNotePlaceholder', '记录验证依据，例如补丁版本、人工验证结果、复测命令或失败原因。')}
                     onChange={(event) => setCandidateReviewNote(event.target.value)}
                   />
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -1731,7 +1733,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                       loading={candidateReviewLoadingId === selectedVuln.id}
                       onClick={() => handleCandidateReview(selectedVuln, getVerificationStatusValue(selectedVuln) as 'pending' | 'needs-test' | 'confirmed' | 'rejected')}
                     >
-                      保存验证备注
+                      {t('saveVerificationNote', '保存验证备注')}
                     </Button>
                   </div>
                 </Space>
@@ -1739,32 +1741,32 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
             )}
 
             {(selectedVuln.vuln_db_id || selectedVuln.knowledge || getPrimaryCVE(selectedVuln)) && (
-              <Card size="small" title="知识库关联" style={{ marginTop: 16 }}>
+              <Card size="small" title={t('knowledgeLink', '知识库关联')} style={{ marginTop: 16 }}>
                 <Descriptions column={1} bordered size="small">
-                  <Descriptions.Item label="漏洞库记录">
+                  <Descriptions.Item label={t('vulnDBRecord', '漏洞库记录')}>
                     {selectedVuln.vuln_db_id ? `#${selectedVuln.vuln_db_id}` : '-'}
                   </Descriptions.Item>
-                  <Descriptions.Item label="结果来源">
+                  <Descriptions.Item label={t('findingSource', '结果来源')}>
                     {(() => {
                       const source = getFindingSourceTag(selectedVuln)
                       return <Tag color={source.color}>{source.text}</Tag>
                     })()}
                   </Descriptions.Item>
-                  <Descriptions.Item label="置信度">
+                  <Descriptions.Item label={t('confidence', '置信度')}>
                     {(() => {
                       const confidence = getConfidenceTag(selectedVuln)
                       return <Tag color={confidence.color}>{confidence.text}</Tag>
                     })()}
                   </Descriptions.Item>
-                  <Descriptions.Item label="匹配模式">{getMatchModeValue(selectedVuln) || '-'}</Descriptions.Item>
-                  <Descriptions.Item label="主 CVE">{getPrimaryCVE(selectedVuln) || '-'}</Descriptions.Item>
-                  <Descriptions.Item label="漏洞库标题">{selectedVuln.knowledge?.title || '-'}</Descriptions.Item>
-                  <Descriptions.Item label="知识库严重度">{selectedVuln.knowledge?.severity || '-'}</Descriptions.Item>
-                  <Descriptions.Item label="知识库 CVSS">
+                  <Descriptions.Item label={t('matchMode', '匹配模式')}>{getMatchModeValue(selectedVuln) || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('primaryCve', '主 CVE')}>{getPrimaryCVE(selectedVuln) || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('vulnDBTitle', '漏洞库标题')}>{selectedVuln.knowledge?.title || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('knowledgeSeverity', '知识库严重度')}>{selectedVuln.knowledge?.severity || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('knowledgeCVSS', '知识库 CVSS')}>
                     {selectedVuln.knowledge?.cvss_score ? selectedVuln.knowledge.cvss_score.toFixed(1) : '-'}
                   </Descriptions.Item>
-                  <Descriptions.Item label="知识库 CNVD">{selectedVuln.knowledge?.cnvd_id || selectedVuln.cnvd_id || '-'}</Descriptions.Item>
-                  <Descriptions.Item label="知识库 CNNVD">{selectedVuln.knowledge?.cnnvd_id || selectedVuln.cnnvd_id || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('knowledgeCNVD', '知识库 CNVD')}>{selectedVuln.knowledge?.cnvd_id || selectedVuln.cnvd_id || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('knowledgeCNNVD', '知识库 CNNVD')}>{selectedVuln.knowledge?.cnnvd_id || selectedVuln.cnnvd_id || '-'}</Descriptions.Item>
                 </Descriptions>
               </Card>
             )}
@@ -1774,13 +1776,13 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                 style={{ marginTop: 16 }}
                 type="info"
                 showIcon
-                message="当前漏洞暂无新模型详情"
-                description="这条结果还没有 occurrence/evidence 数据，抽屉目前继续保留旧漏洞字段展示。"
+                message={t('noNewModelDetail', '当前漏洞暂无新模型详情')}
+                description={t('noNewModelDetailDesc', '这条结果还没有 occurrence/evidence 数据，抽屉目前继续保留旧漏洞字段展示。')}
               />
             )}
 
             {vulnOccurrences.length > 0 && (
-              <Card size="small" title="命中记录" style={{ marginTop: 16 }}>
+              <Card size="small" title={t('hitRecords', '命中记录')} style={{ marginTop: 16 }}>
                 <Table
                   rowKey="id"
                   size="small"
@@ -1793,7 +1795,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
             )}
 
             {vulnEvidences.length > 0 && (
-              <Card size="small" title="证据" style={{ marginTop: 16 }}>
+              <Card size="small" title={t('evidence', '证据')} style={{ marginTop: 16 }}>
                 <Space direction="vertical" style={{ width: '100%' }} size={12}>
                   {vulnEvidences.map((evidence: SecurityScanEvidence) => (
                     <Card
@@ -1803,23 +1805,23 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
                       extra={<Tag color={evidence.source_engine === 'rule' ? 'gold' : evidence.source_engine === 'nuclei' ? 'blue' : 'default'}>{evidence.source_engine || '-'}</Tag>}
                     >
                       <Descriptions size="small" column={1}>
-                        <Descriptions.Item label="Payload / URL">{evidence.payload_excerpt || '-'}</Descriptions.Item>
-                        <Descriptions.Item label="命中时间">{evidence.created_at ? new Date(evidence.created_at).toLocaleString('zh-CN') : '-'}</Descriptions.Item>
-                        <Descriptions.Item label="目标">
+                        <Descriptions.Item label={t('payloadUrl', 'Payload / URL')}>{evidence.payload_excerpt || '-'}</Descriptions.Item>
+                        <Descriptions.Item label={t('invItem', '命中时间')}>{evidence.created_at ? formatDateTime(evidence.created_at) : '-'}</Descriptions.Item>
+                        <Descriptions.Item label={t('target', '目标')}>
                           {getMetadataString(evidence.metadata, 'url')
                             || getMetadataString(evidence.metadata, 'matched_at')
                             || '-'}
                         </Descriptions.Item>
                       </Descriptions>
                       {evidence.request_excerpt && (
-                        <Card size="small" title="请求片段" style={{ marginTop: 12 }}>
+                        <Card size="small" title={t('requestSnippet', '请求片段')} style={{ marginTop: 12 }}>
                           <Paragraph copyable={{ text: evidence.request_excerpt }} style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
                             {evidence.request_excerpt}
                           </Paragraph>
                         </Card>
                       )}
                       {evidence.response_excerpt && (
-                        <Card size="small" title="响应片段" style={{ marginTop: 12 }}>
+                        <Card size="small" title={t('responseSnippet', '响应片段')} style={{ marginTop: 12 }}>
                           <Paragraph copyable={{ text: evidence.response_excerpt }} style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
                             {evidence.response_excerpt}
                           </Paragraph>
@@ -1832,7 +1834,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
             )}
 
             {selectedVuln.reference_url && (
-              <Card size="small" title="参考链接" style={{ marginTop: 16 }}>
+              <Card size="small" title={t('referenceLinks', '参考链接')} style={{ marginTop: 16 }}>
                 {selectedVuln.reference_url.split(',').map((url, index) => (
                   <div key={index} style={{ marginBottom: 8 }}>
                     <Link href={url.trim()} target="_blank">
@@ -1844,7 +1846,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
             )}
 
             {selectedVuln.payload && (
-              <Card size="small" title="测试 Payload" style={{ marginTop: 16 }}>
+              <Card size="small" title={t('testPayload', '测试 Payload')} style={{ marginTop: 16 }}>
                 <Paragraph copyable>
                   <code style={{ background: '#f5f5f5', padding: '2px 6px', borderRadius: 4 }}>
                     {selectedVuln.payload}
@@ -1853,32 +1855,32 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
               </Card>
             )}
 
-            <Card size="small" title="扫描信息" style={{ marginTop: 16 }}>
+            <Card size="small" title={t('scanInfo', '扫描信息')} style={{ marginTop: 16 }}>
               <Descriptions column={1} size="small">
-                <Descriptions.Item label="结果来源">
+                <Descriptions.Item label={t('findingSource', '结果来源')}>
                   {(() => {
                     const source = getFindingSourceTag(selectedVuln)
                     return <Tag color={source.color}>{source.text}</Tag>
                   })()}
                 </Descriptions.Item>
-                <Descriptions.Item label="置信度">
+                <Descriptions.Item label={t('confidence', '置信度')}>
                   {(() => {
                     const confidence = getConfidenceTag(selectedVuln)
                     return <Tag color={confidence.color}>{confidence.text}</Tag>
                   })()}
                 </Descriptions.Item>
-                <Descriptions.Item label="扫描引擎">{selectedVuln.scanner || '-'}</Descriptions.Item>
-                <Descriptions.Item label="扫描方法">
-                  {getMatchModeValue(selectedVuln) || selectedVuln.scan_method || (selectedVuln.scanner === 'vuln-matcher' ? '服务版本匹配' : '-')}
+                <Descriptions.Item label={t('scanner', '扫描引擎')}>{selectedVuln.scanner || '-'}</Descriptions.Item>
+                <Descriptions.Item label={t('scanMethod', '扫描方法')}>
+                  {getMatchModeValue(selectedVuln) || getScanMethodLabel(selectedVuln.scan_method) || (selectedVuln.scanner === 'vuln-matcher' ? t('serviceVersionMatch', '服务版本匹配') : '-')}
                 </Descriptions.Item>
-                <Descriptions.Item label="匹配依据">
+                <Descriptions.Item label={t('matchedOn', '匹配依据')}>
                   {selectedVuln.matched_on || '-'}
                 </Descriptions.Item>
-                <Descriptions.Item label="利用前提">
+                <Descriptions.Item label={t('exploitPrereq', '利用前提')}>
                   {selectedVuln.exploit_prereq || '-'}
                 </Descriptions.Item>
-                <Descriptions.Item label="发现时间">
-                  {selectedVuln.created_at ? new Date(selectedVuln.created_at).toLocaleString('zh-CN') : '-'}
+                <Descriptions.Item label={t('discoveryTime', '发现时间')}>
+                  {selectedVuln.created_at ? formatDateTime(selectedVuln.created_at) : '-'}
                 </Descriptions.Item>
               </Descriptions>
             </Card>

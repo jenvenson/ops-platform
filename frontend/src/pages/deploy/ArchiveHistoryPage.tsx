@@ -5,9 +5,11 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, Table, Tag, Space, Button, Select, DatePicker, message, Modal, Input, List, Typography, Popconfirm } from 'antd'
 import { SearchOutlined, DeleteOutlined, ReloadOutlined, DownloadOutlined, FileZipOutlined, FolderOutlined, LinkOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { cmdbAPI, Application, deployAPI, ArchiveRecord } from '../../api/cmdb'
 import AssistantQuickActions from '../../components/AssistantQuickActions'
 import useAssistantPageContext from '../../components/useAssistantPageContext'
+import { formatDateTime, formatDate } from '../../utils/dateFormat'
 
 const { RangePicker } = DatePicker
 
@@ -71,6 +73,8 @@ const setCachedData = (key: string, data: unknown) => {
 
 export default function ArchiveHistoryPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation('deploy')
+  const { t: tc } = useTranslation('common')
   const [archives, setArchives] = useState<ArchiveRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [refreshingId, setRefreshingId] = useState<number | null>(null)
@@ -194,18 +198,18 @@ export default function ArchiveHistoryPage() {
   // 删除归档记录
   const deleteRecord = async (id: number) => {
     Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除这条归档记录吗？',
-      okText: '确认',
-      cancelText: '取消',
+      title: tc('confirm', '确认删除'),
+      content: t('confirmDeleteArchive', '确定要删除这条归档记录吗？'),
+      okText: tc('confirm', '确认'),
+      cancelText: tc('cancel', '取消'),
       onOk: async () => {
         try {
           await deployAPI.deleteArchiveRecord(id)
-          message.success('删除成功')
+          message.success(tc('deleteSuccess', '删除成功'))
           fetchArchives()
         } catch (error) {
           console.error('删除失败:', error)
-          message.error('删除失败')
+          message.error(tc('deleteFailed', '删除失败'))
         }
       },
     })
@@ -214,7 +218,7 @@ export default function ArchiveHistoryPage() {
   // 复制下载链接
   const copyDownloadLink = (url: string) => {
     navigator.clipboard.writeText(url)
-    message.success('下载链接已复制到剪贴板')
+    message.success(t('copyLinkSuccess', '下载链接已复制到剪贴板'))
   }
 
   // 查看归档文件列表
@@ -230,7 +234,7 @@ export default function ArchiveHistoryPage() {
       setCurrentTimestamp(resp.timestamp || '')
     } catch (error) {
       console.error('获取文件列表失败:', error)
-      message.error('获取文件列表失败')
+      message.error(t('getFilesFailed', '获取文件列表失败'))
     } finally {
       setLoadingFiles(false)
     }
@@ -268,11 +272,11 @@ export default function ArchiveHistoryPage() {
   }, [])
 
   const statusMap: Record<string, { color: string; text: string }> = {
-    pending: { color: 'default', text: '待执行' },
-    queued: { color: 'processing', text: '排队中' },
-    running: { color: 'processing', text: '归档中' },
-    success: { color: 'success', text: '成功' },
-    failed: { color: 'error', text: '失败' },
+    pending: { color: 'default', text: t('statusPending', '待执行') },
+    queued: { color: 'processing', text: t('statusQueued', '排队中') },
+    running: { color: 'processing', text: t('statusArchiving', '归档中') },
+    success: { color: 'success', text: tc('success', '成功') },
+    failed: { color: 'error', text: tc('failed', '失败') },
   }
 
   // 只有 admin 和 ops 角色才能看到删除按钮
@@ -280,13 +284,13 @@ export default function ArchiveHistoryPage() {
 
   const columns = [
     {
-      title: '应用',
+      title: t('colApp', '应用'),
       dataIndex: 'app_name',
       key: 'app_name',
       width: 200,
     },
     {
-      title: '环境',
+      title: t('colEnv', '环境'),
       dataIndex: 'env_name',
       key: 'env_name',
       width: 120,
@@ -297,21 +301,21 @@ export default function ArchiveHistoryPage() {
       ),
     },
     {
-      title: '归档类型',
+      title: t('colArchiveType', '归档类型'),
       dataIndex: 'deploy_type',
       key: 'deploy_type',
       width: 100,
       render: (type: string) => {
         const typeMap: Record<string, string> = {
-          all: '全部',
-          frontend: '前端',
-          backend: '后端',
+          all: t('allDeploy', '全部'),
+          frontend: t('frontendDeploy', '前端'),
+          backend: t('backendDeploy', '后端'),
         }
         return typeMap[type] || type
       },
     },
     {
-      title: '状态',
+      title: tc('status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
@@ -321,14 +325,14 @@ export default function ArchiveHistoryPage() {
       },
     },
     {
-      title: '归档时间',
+      title: t('colArchiveTime', '归档时间'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 180,
-      render: (time: string) => time ? new Date(time).toLocaleString('zh-CN') : '-',
+      render: (time: string) => time ? formatDateTime(time) : '-',
     },
     {
-      title: '下载地址',
+      title: t('colDownloadUrl', '下载地址'),
       dataIndex: 'download_url',
       key: 'download_url',
       width: 300,
@@ -349,14 +353,14 @@ export default function ArchiveHistoryPage() {
                   icon={<FolderOutlined />}
                   onClick={() => viewArchiveFiles(record)}
                 >
-                  查看文件
+                  {t('viewFiles', '查看文件')}
                 </Button>
                 <Button
                   size="small"
                   icon={<FileZipOutlined />}
                   onClick={() => copyDownloadLink(url)}
                 >
-                  复制链接
+                  {t('copyLink', '复制链接')}
                 </Button>
               </Space>
             )}
@@ -365,14 +369,14 @@ export default function ArchiveHistoryPage() {
       },
     },
     {
-      title: '操作人',
+      title: tc('operator', '操作人'),
       dataIndex: 'operator',
       key: 'operator',
       width: 100,
-      render: (name: string) => name || '系统',
+      render: (name: string) => name || t('systemLabel', '系统'),
     },
     {
-      title: '操作',
+      title: tc('action', '操作'),
       key: 'action',
       width: canEdit ? 220 : 180,
       render: (_: unknown, record: ArchiveRecord) => {
@@ -384,7 +388,7 @@ export default function ArchiveHistoryPage() {
               size="small"
               onClick={() => navigate(`/platform/events?object_type=archive_record&object_id=archive_record:deploy:${record.id}&timeline=1`)}
             >
-              事件流
+              {t('eventsFlow', '事件流')}
             </Button>
             {isActive && (
               <Button
@@ -393,24 +397,24 @@ export default function ArchiveHistoryPage() {
                 onClick={() => refreshRecordStatus(record.id)}
                 loading={refreshingId === record.id}
               >
-                刷新
+                {tc('refresh', '刷新')}
               </Button>
             )}
             <a href="http://your-update-server/update/readme.html" target="_blank" rel="noopener noreferrer">
-              更新说明
+              {t('updateInstructions', '更新说明')}
             </a>
             {record.jenkins_console_url && (
               <a href={record.jenkins_console_url} target="_blank" rel="noopener noreferrer">
-                查看日志
+                {t('viewLogs', '查看日志')}
               </a>
             )}
             {canEdit && (
               <Popconfirm
-                title="确认删除"
-                description="确定要删除这条归档记录吗？"
+                title={tc('confirm', '确认删除')}
+                description={t('confirmDeleteArchive', '确定要删除这条归档记录吗？')}
                 onConfirm={() => deleteRecord(record.id)}
-                okText="确认"
-                cancelText="取消"
+                okText={tc('confirm', '确认')}
+                cancelText={tc('cancel', '取消')}
               >
                 <Button
                   type="link"
@@ -418,7 +422,7 @@ export default function ArchiveHistoryPage() {
                   danger
                   icon={<DeleteOutlined />}
                 >
-                  删除
+                  {tc('delete', '删除')}
                 </Button>
               </Popconfirm>
             )}
@@ -435,7 +439,7 @@ export default function ArchiveHistoryPage() {
         <div style={{ marginBottom: 8 }}>
           <Space wrap>
             <Input
-              placeholder="应用名称"
+              placeholder={t('appNamePlaceholder', '应用名称')}
               value={applications.find(a => a.id === filters.appId)?.name || ''}
               onChange={e => {
                 const name = e.target.value.trim()
@@ -453,7 +457,7 @@ export default function ArchiveHistoryPage() {
               onPressEnter={fetchArchives}
             />
             <Select
-              placeholder="选择环境"
+              placeholder={t('selectEnvPlaceholder', '选择环境')}
               value={filters.envId}
               onChange={val => setFilters({ ...filters, envId: val })}
               allowClear
@@ -483,7 +487,7 @@ export default function ArchiveHistoryPage() {
                 }
               }}
               style={{ width: 340 }}
-              placeholder={['开始时间', '结束时间']}
+              placeholder={[t('startTimePlaceholder', '开始时间'), t('endTimePlaceholder', '结束时间')]}
             />
           </Space>
         </div>
@@ -491,21 +495,21 @@ export default function ArchiveHistoryPage() {
         <div>
           <Space>
             <Button type="primary" icon={<SearchOutlined />} onClick={fetchArchives}>
-              搜索
+              {tc('search', '搜索')}
             </Button>
             <Button icon={<ReloadOutlined />} onClick={resetFilters}>
-              重置
+              {tc('reset', '重置')}
             </Button>
           </Space>
         </div>
       </Card>
 
       <AssistantQuickActions
-        description="复用右侧运维小助手，基于当前归档历史页面上下文发起查询"
+        description={t('assistantArchiveDesc', '复用右侧运维小助手，基于当前归档历史页面上下文发起查询')}
         actions={[
-          { label: '最近有哪些归档失败', query: '最近有哪些归档失败' },
-          { label: '最近归档是否正常完成', query: '最近归档是否正常完成' },
-          { label: '如何从下载地址下载归档包', query: '如何从下载地址下载归档包' },
+          { label: t('assistantArchiveRecentFailed', '最近有哪些归档失败'), query: t('assistantArchiveRecentFailed', '最近有哪些归档失败') },
+          { label: t('assistantArchiveNormal', '最近归档是否正常完成'), query: t('assistantArchiveNormal', '最近归档是否正常完成') },
+          { label: t('assistantArchiveDownloadHelp', '如何从下载地址下载归档包'), query: t('assistantArchiveDownloadHelp', '如何从下载地址下载归档包') },
         ]}
       />
 
@@ -518,25 +522,25 @@ export default function ArchiveHistoryPage() {
             onClick: () => setSelectedArchive(record),
           })}
           loading={loading}
-          pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total: number) => `共 ${total} 条`, showQuickJumper: true }}
+          pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total: number) => `${tc('total', '共 {{count}} 条', { count: total })}`, showQuickJumper: true }}
           scroll={{ x: 1400 }}
-          locale={{ emptyText: '暂无归档记录' }}
+          locale={{ emptyText: t('noArchiveRecords', '暂无归档记录') }}
         />
       </Card>
 
       {/* 文件列表弹窗 */}
       <Modal
-        title={`归档文件列表 - ${formatTimestampToLocalTime(currentTimestamp)}`}
+        title={t('archiveFileListTitle', '归档文件列表 - {{time}}', { time: formatTimestampToLocalTime(currentTimestamp) })}
         open={fileModalVisible}
         onCancel={() => setFileModalVisible(false)}
         footer={null}
         width={600}
       >
         {loadingFiles ? (
-          <div style={{ textAlign: 'center', padding: 40 }}>加载中...</div>
+          <div style={{ textAlign: 'center', padding: 40 }}>{tc('loading', '加载中...')}</div>
         ) : currentFiles.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
-            未找到归档文件
+            {t('noArchiveFiles', '未找到归档文件')}
           </div>
         ) : (
           <List
@@ -549,7 +553,7 @@ export default function ArchiveHistoryPage() {
                     icon={<LinkOutlined />}
                     onClick={() => navigator.clipboard.writeText(file.url)}
                   >
-                    复制链接
+                    {t('copyLink', '复制链接')}
                   </Button>,
                   <Button
                     type="link"
@@ -557,7 +561,7 @@ export default function ArchiveHistoryPage() {
                     href={file.url}
                     target="_blank"
                   >
-                    下载
+                    {t('download', '下载')}
                   </Button>,
                 ]}
               >
@@ -566,7 +570,7 @@ export default function ArchiveHistoryPage() {
                   title={file.name}
                   description={
                     <Typography.Text type="secondary">
-                      更新时间: {formatTimestampToLocalTime(file.timestamp)} | 大小: {formatFileSize(file.size)}
+                      {t('updateTime', '更新时间')}: {formatTimestampToLocalTime(file.timestamp)} | {t('fileSize', '大小')}: {formatFileSize(file.size, tc('unknown', '未知'))}
                     </Typography.Text>
                   }
                 />
@@ -579,9 +583,9 @@ export default function ArchiveHistoryPage() {
   )
 }
 
-// 格式化文件大小
-function formatFileSize(bytes: number | undefined | null): string {
-  if (bytes === undefined || bytes === null || bytes <= 0) return '未知'
+// 格式化文件大小 (utility function, i18n not available outside component)
+function formatFileSize(bytes: number | undefined | null, unknownLabel = '未知'): string {
+  if (bytes === undefined || bytes === null || bytes <= 0) return unknownLabel
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -604,7 +608,7 @@ function formatTimestampToLocalTime(timestamp: string): string {
       parseInt(timestamp.slice(12, 14))     // second
     )
     date.setHours(date.getHours() + 8)
-    return date.toLocaleString('zh-CN')
+    return formatDate(date)
   }
 
   // 如果是 "YYYY-MM-DD HH:mm:ss" 格式（后端返回的 UTC 时间），加 8 小时转为北京时间
@@ -612,7 +616,7 @@ function formatTimestampToLocalTime(timestamp: string): string {
     // 后端返回的时间是 UTC 时间，需要加 8 小时转为北京时间
     const date = new Date(timestamp.replace(/-/g, '/'))
     date.setHours(date.getHours() + 8)
-    return date.toLocaleString('zh-CN')
+    return formatDate(date)
   }
 
   // 如果是 ISO 格式（带时区），转换为北京时间
@@ -621,7 +625,7 @@ function formatTimestampToLocalTime(timestamp: string): string {
     if (!isNaN(date.getTime())) {
       // 转换为 UTC+8
       const beijingTime = new Date(date.getTime() + 8 * 60 * 60 * 1000)
-      return beijingTime.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+      return formatDate(beijingTime)
     }
   }
 

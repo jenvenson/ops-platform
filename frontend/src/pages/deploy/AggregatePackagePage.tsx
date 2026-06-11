@@ -5,11 +5,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Card, message, Space, Alert, Row, Col, Select } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { aggregatePackageAPI, ConsulConfig } from '../../api/aggregate-package';
 import { cmdbAPI, Project } from '../../api/cmdb';
 
 export default function AggregatePackagePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation('deploy');
+  const { t: tc } = useTranslation('common');
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -54,7 +57,7 @@ export default function AggregatePackagePage() {
       setProjects(response.data); // 直接使用 response.data，因为它已经是 Project[] 数组
     } catch (error) {
       console.error('加载项目列表失败:', error);
-      message.error('加载项目列表失败');
+      message.error(t('loadProjectsFailed', '加载项目列表失败'));
     } finally {
       setLoadingProjects(false);
     }
@@ -74,11 +77,11 @@ export default function AggregatePackagePage() {
         const tags = Object.keys(response.data);
         setTagOptions(tags);
       } else {
-        message.error('加载Tag列表失败: ' + response.error);
+        message.error(t('loadTagsListFailed', '加载Tag列表失败: ') + response.error);
       }
     } catch (error) {
       console.error('加载Tag列表失败:', error);
-      message.error('加载Tag列表失败');
+      message.error(t('loadTagsFailed', '加载Tag列表失败'));
     } finally {
       setLoadingTags(false);
     }
@@ -91,20 +94,20 @@ export default function AggregatePackagePage() {
       const tagName = values.tag_name || '';
 
       if (!tagName) {
-        message.error('请输入Tag名称');
+        message.error(t('pleaseInputTagName', '请输入Tag名称'));
         return;
       }
 
       // 验证Tag是否存在
       if (!tagOptions.includes(tagName)) {
-        message.error(`Tag "${tagName}" 不存在，请输入有效的Tag名称`);
+        message.error(`Tag "${tagName}" ` + t('tagNotExist', '不存在，请输入有效的Tag名称'));
         return;
       }
 
       // 获取项目名称
       const project = projects.find(p => p.id === values.project_id);
       if (!project?.name) {
-        message.error('未找到对应项目，请重新选择项目');
+        message.error(t('projectNotFound', '未找到对应项目，请重新选择项目'));
         return;
       }
       const projectName = project.name;
@@ -115,19 +118,19 @@ export default function AggregatePackagePage() {
       const response = await aggregatePackageAPI.createTask({
         project_name: projectName,
         app_names: appNames,
-        task_name: `聚合打包_${tagName}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${Math.floor(Math.random() * 10000)}`,
+        task_name: `${t('aggregateTaskNamePrefix', '聚合打包')}_${tagName}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${Math.floor(Math.random() * 10000)}`,
       });
 
       if (response.success && response.data?.task_id) {
-        message.success('聚合打包任务已提交，正在跳转到聚合历史页面...');
+        message.success(t('aggregateTaskSubmitted', '聚合打包任务已提交，正在跳转到聚合历史页面...'));
         setTimeout(() => {
           navigate('/deploy/aggregated-history');
         }, 1000);
       } else {
-        message.error(response.error || '提交失败');
+        message.error(response.error || t('submitFailed', '提交失败'));
       }
     } catch (error: any) {
-      message.error(error.response?.data?.error || '提交失败: ' + error.message);
+      message.error(error.response?.data?.error || t('submitFailed', '提交失败: ') + error.message);
     } finally {
       setLoading(false);
     }
@@ -135,19 +138,19 @@ export default function AggregatePackagePage() {
 
   return (
     <div>
-      <Card title="安装包聚合打包">
+      <Card title={t('aggregatePackage', '安装包聚合打包')}>
         <Alert
-          message="安装包聚合打包说明"
+          message={t('aggregatePackageDesc', '安装包聚合打包说明')}
           description={
             <div>
-              <p>使用前请按以下步骤操作：</p>
+              <p>{t('aggregatePackageSteps', '使用前请按以下步骤操作：')}</p>
               <ol>
-                <li>先提交静态文件修改和聚合打包的代码仓库代码</li>
-                <li>然后在打包机器拉取静态文件的代码</li>
-                <li>最后在此界面操作开始聚合打包</li>
+                <li>{t('step1CommitCode', '先提交静态文件修改和聚合打包的代码仓库代码')}</li>
+                <li>{t('step2PullCode', '然后在打包机器拉取静态文件的代码')}</li>
+                <li>{t('step3StartAggregate', '最后在此界面操作开始聚合打包')}</li>
               </ol>
               <p style={{ marginTop: 12 }}>
-                <strong>说明：</strong>Consul地址从配置管理中的 Consul配置 获取
+                <strong>{t('consulAddressNote', '说明：')}</strong>{t('consulAddressFromConfig', 'Consul地址从配置管理中的 Consul配置 获取')}
               </p>
             </div>
           }
@@ -161,12 +164,12 @@ export default function AggregatePackagePage() {
             <Col span={12}>
               <Form.Item
                 name="consul_config_id"
-                label="Consul配置"
-                rules={[{ required: true, message: '请选择Consul配置' }]}
+                label={t('consulConfig', 'Consul配置')}
+                rules={[{ required: true, message: t('pleaseSelectConsulConfig', '请选择Consul配置') }]}
                 initialValue={selectedConsulConfig}
               >
                 <Select
-                  placeholder="请选择Consul配置"
+                  placeholder={t('pleaseSelectConsulConfigPlaceholder', '请选择Consul配置')}
                   showSearch
                   optionFilterProp="children"
                   value={selectedConsulConfig}
@@ -177,7 +180,7 @@ export default function AggregatePackagePage() {
                 >
                   {consulConfigs.map((config) => (
                     <Select.Option key={config.id} value={config.id}>
-                      {config.name} ({config.address}){config.is_default ? ' [默认]' : ''}
+                      {config.name} ({config.address}){config.is_default ? ' ' + t('defaultConfig', '[默认]') : ''}
                     </Select.Option>
                   ))}
                 </Select>
@@ -189,11 +192,11 @@ export default function AggregatePackagePage() {
             <Col span={12}>
               <Form.Item
                 name="project_id"
-                label="项目名称"
-                rules={[{ required: true, message: '请选择项目名称' }]}
+                label={t('colProjectName', '项目名称')}
+                rules={[{ required: true, message: t('pleaseSelectProjectName', '请选择项目名称') }]}
               >
                 <Select
-                  placeholder="请选择项目"
+                  placeholder={t('selectProjectPlaceholder', '请选择项目')}
                   loading={loadingProjects}
                   showSearch
                   optionFilterProp="children"
@@ -213,12 +216,12 @@ export default function AggregatePackagePage() {
 
           <Form.Item
             name="tag_name"
-            label="Tag名称"
-            rules={[{ required: true, message: '请输入Tag名称' }]}
-            extra="从Consul获取的Tag名称，如V2.5.1"
+            label={t('tagName', 'Tag名称')}
+            rules={[{ required: true, message: t('pleaseInputTagName', '请输入Tag名称') }]}
+            extra={t('tagNameExtra', '从Consul获取的Tag名称，如V2.5.1')}
           >
             <Select
-              placeholder="请输入或选择Tag名称"
+              placeholder={t('tagNamePlaceholder', '请输入或选择Tag名称')}
               loading={loadingTags}
               showSearch
               optionFilterProp="children"
@@ -240,7 +243,7 @@ export default function AggregatePackagePage() {
               loading={loadingTags}
               style={{ marginRight: 8 }}
             >
-              刷新Tag列表
+              {t('refreshTagList', '刷新Tag列表')}
             </Button>
           </div>
 
@@ -251,7 +254,7 @@ export default function AggregatePackagePage() {
                 htmlType="submit"
                 loading={loading}
               >
-                开始聚合打包
+                {t('startAggregatePackage', '开始聚合打包')}
               </Button>
             </Space>
           </Form.Item>

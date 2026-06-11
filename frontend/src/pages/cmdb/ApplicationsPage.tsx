@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Table, Button, Modal, Form, Input, Select, Tag, message, Popconfirm, Space, Alert, Checkbox, Tooltip } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, CloudDownloadOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { cmdbAPI, Application, Environment, Project, JenkinsViewJob } from '../../api/cmdb'
 import AssistantQuickActions from '../../components/AssistantQuickActions'
 import SearchBar, { SearchField } from '../../components/SearchBar'
@@ -25,12 +26,6 @@ const formatJenkinsUrl = (url: string, envName?: string) => {
   }
   return url
 }
-
-const searchFields: SearchField[] = [
-  { name: 'name', label: '应用名称', type: 'text' },
-  { name: 'project_id', label: '所属项目', type: 'select' },
-  { name: 'env_id', label: '项目环境', type: 'select' },
-]
 
 const extractJobPrefixFromView = (viewName: string) => {
   const match = viewName.match(/-(\d+|[Vv]\d+(?:\.\d+)*)$/)
@@ -66,6 +61,9 @@ const applyImportAppNamePrefix = (job: JenkinsViewJob, viewName: string, prefix:
 }
 
 export default function ApplicationsPage() {
+  const { t } = useTranslation('cmdb')
+  const { t: tc } = useTranslation('common')
+
   const [apps, setApps] = useState<Application[]>([])
   const [environments, setEnvironments] = useState<Environment[]>([])
   const [projects, setProjects] = useState<Project[]>([])
@@ -95,6 +93,13 @@ export default function ApplicationsPage() {
     [importJobs, importViewName, importAppNamePrefix]
   )
 
+  // 搜索字段配置
+  const searchFields: SearchField[] = [
+    { name: 'name', label: t('appName', '应用名称'), type: 'text' },
+    { name: 'project_id', label: t('belongProject', '所属项目'), type: 'select' },
+    { name: 'env_id', label: t('belongEnv', '项目环境'), type: 'select' },
+  ]
+
   const fetchData = async () => {
     setLoading(true)
     try {
@@ -107,7 +112,7 @@ export default function ApplicationsPage() {
       setEnvironments(envsResp.data)
       setProjects(projectsResp.data)
     } catch {
-      message.error('加载数据失败')
+      message.error(tc('loadFailed', '加载数据失败'))
     } finally {
       setLoading(false)
     }
@@ -166,22 +171,22 @@ export default function ApplicationsPage() {
   const handleDelete = async (id: number) => {
     try {
       await cmdbAPI.deleteApplication(id)
-      message.success('删除成功')
+      message.success(tc('deleteSuccess', '删除成功'))
       fetchData()
     } catch {
-      message.error('删除失败')
+      message.error(tc('deleteFailed', '删除失败'))
     }
   }
 
   const handleBatchDelete = () => {
     if (selectedRowKeys.length === 0) return
     Modal.confirm({
-      title: '批量删除',
+      title: t('batchDeleteTitle', '批量删除'),
       icon: <ExclamationCircleOutlined />,
-      content: `确定要删除选中的 ${selectedRowKeys.length} 条流水线吗？此操作不可恢复。`,
-      okText: '确定删除',
+      content: t('batchDeleteContent', '确定要删除选中的 {{count}} 条流水线吗？此操作不可恢复。', { count: selectedRowKeys.length }),
+      okText: t('batchDeleteOkText', '确定删除'),
       okType: 'danger',
-      cancelText: '取消',
+      cancelText: tc('cancel', '取消'),
       onOk: async () => {
         let successCount = 0
         let failCount = 0
@@ -196,9 +201,9 @@ export default function ApplicationsPage() {
         setSelectedRowKeys([])
         fetchData()
         if (failCount === 0) {
-          message.success(`成功删除 ${successCount} 条`)
+          message.success(t('batchDeleteSuccess', '成功删除 {{count}} 条', { count: successCount }))
         } else {
-          message.warning(`删除完成：${successCount} 成功，${failCount} 失败`)
+          message.warning(t('batchDeleteSummary', '删除完成：{{success}} 成功，{{fail}} 失败', { success: successCount, fail: failCount }))
         }
       },
     })
@@ -209,15 +214,15 @@ export default function ApplicationsPage() {
       const values = await form.validateFields()
       if (editingApp) {
         await cmdbAPI.updateApplication(editingApp.id, values)
-        message.success('更新成功')
+        message.success(tc('updateSuccess', '更新成功'))
       } else {
         await cmdbAPI.createApplication(values)
-        message.success('创建成功')
+        message.success(tc('createSuccess', '创建成功'))
       }
       setModalVisible(false)
       fetchData()
     } catch {
-      message.error('操作失败')
+      message.error(tc('operationFailed', '操作失败'))
     }
   }
 
@@ -237,7 +242,7 @@ export default function ApplicationsPage() {
 
   const handleFetchJobs = async () => {
     if (!importViewName.trim()) {
-      message.warning('请输入 Jenkins View 名称')
+      message.warning(t('jenkinsViewRequired', '请输入 Jenkins View 名称'))
       return
     }
     setImportLoading(true)
@@ -254,20 +259,20 @@ export default function ApplicationsPage() {
       }
       setImportStep('preview')
       if (jobs.length === 0) {
-        message.info('该 View 下没有 Job')
+        message.info(t('jenkinsNoJobs', '该 View 下没有 Job'))
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } }
-      message.error(err.response?.data?.error || '获取 Jenkins View Jobs 失败')
+      message.error(err.response?.data?.error || t('jenkinsFetchFailed', '获取 Jenkins View Jobs 失败'))
     } finally {
       setImportLoading(false)
     }
   }
 
   const handleImportSubmit = async () => {
-    if (!importProjectId) { message.warning('请选择所属项目'); return }
-    if (!importEnvId) { message.warning('请选择项目环境'); return }
-    if (importSelectedJobs.length === 0) { message.warning('请选择要导入的 Job'); return }
+    if (!importProjectId) { message.warning(t('selectProjectRequired', '请选择所属项目')); return }
+    if (!importEnvId) { message.warning(t('selectEnvRequired', '请选择项目环境')); return }
+    if (importSelectedJobs.length === 0) { message.warning(t('selectJobsRequired', '请选择要导入的 Job')); return }
     setImportLoading(true)
     try {
       const resp = await cmdbAPI.importJenkinsJobs({
@@ -286,30 +291,30 @@ export default function ApplicationsPage() {
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } }
-      message.error(err.response?.data?.error || '导入失败')
+      message.error(err.response?.data?.error || t('importFailed', '导入失败'))
     } finally {
       setImportLoading(false)
     }
   }
 
   const columns = [
-    { title: '应用名称', dataIndex: 'name', key: 'name', width: 200 },
+    { title: t('colAppName', '应用名称'), dataIndex: 'name', key: 'name', width: 200 },
     {
-      title: '所属项目',
+      title: t('colBelongProject', '所属项目'),
       dataIndex: 'project',
       key: 'project',
       width: 150,
       render: (project: Project) => project ? <Tag color="green">{project.name}</Tag> : '-',
     },
     {
-      title: '项目环境',
+      title: t('colBelongEnv', '项目环境'),
       dataIndex: 'environment',
       key: 'environment',
       width: 120,
       render: (env: Environment) => env ? <Tag color="blue">{env.name}</Tag> : '-',
     },
     {
-      title: 'Jenkins发布流水线',
+      title: t('colJenkinsPublishJob', 'Jenkins发布流水线'),
       dataIndex: 'jenkins_job',
       key: 'jenkins_job',
       width: 260,
@@ -325,7 +330,7 @@ export default function ApplicationsPage() {
       },
     },
     {
-      title: 'Jenkins归档流水线',
+      title: t('colJenkinsArchiveJob', 'Jenkins归档流水线'),
       dataIndex: 'jenkins_archive_job',
       key: 'jenkins_archive_job',
       width: 260,
@@ -340,9 +345,9 @@ export default function ApplicationsPage() {
         )
       },
     },
-    { title: '描述', dataIndex: 'code_repo', key: 'code_repo', width: 200, ellipsis: true },
+    { title: t('description', '描述'), dataIndex: 'code_repo', key: 'code_repo', width: 200, ellipsis: true },
     {
-      title: '操作',
+      title: tc('action', '操作'),
       key: 'action',
       width: 220,
       fixed: 'right' as 'right',
@@ -350,10 +355,10 @@ export default function ApplicationsPage() {
         if (!canEdit()) return '-'
         return (
           <div style={{ whiteSpace: 'nowrap' }}>
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} style={{ padding: '4px 8px' }}>编辑</Button>
-            <Button type="link" size="small" icon={<CopyOutlined />} onClick={() => handleCopy(record)} style={{ padding: '4px 8px' }}>复制</Button>
-            <Popconfirm title="确定要删除此流水线吗？" onConfirm={() => handleDelete(record.id)}>
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} style={{ padding: '4px 8px' }}>删除</Button>
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} style={{ padding: '4px 8px' }}>{tc('edit', '编辑')}</Button>
+            <Button type="link" size="small" icon={<CopyOutlined />} onClick={() => handleCopy(record)} style={{ padding: '4px 8px' }}>{t('copy', '复制')}</Button>
+            <Popconfirm title={t('deletePipelineConfirm', '确定要删除此流水线吗？')} onConfirm={() => handleDelete(record.id)}>
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} style={{ padding: '4px 8px' }}>{tc('delete', '删除')}</Button>
             </Popconfirm>
           </div>
         )
@@ -377,14 +382,14 @@ export default function ApplicationsPage() {
         {canEdit() && (
           <Space>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增应用流水线
+              {t('addPipeline', '新增应用流水线')}
             </Button>
             <Button icon={<CloudDownloadOutlined />} onClick={handleOpenImport}>
-              从 Jenkins 导入
+              {t('importFromJenkins', '从 Jenkins 导入')}
             </Button>
             {selectedRowKeys.length > 0 && (
               <Button danger icon={<DeleteOutlined />} onClick={handleBatchDelete}>
-                批量删除 ({selectedRowKeys.length})
+                {t('batchDeleteWithCount', '批量删除 ({{count}})', { count: selectedRowKeys.length })}
               </Button>
             )}
           </Space>
@@ -392,11 +397,11 @@ export default function ApplicationsPage() {
         {!canEdit() && <div />}
       </div>
       <AssistantQuickActions
-        description="复用右侧运维小助手，基于当前应用流水线页面上下文发起查询"
+        description={t('assistantPipelineDesc', '复用右侧运维小助手，基于当前应用流水线页面上下文发起查询')}
         actions={[
-          { label: '最近哪些应用发布最频繁', query: '最近哪些应用发布最频繁' },
-          { label: '哪些应用最近部署失败较多', query: '哪些应用最近部署失败较多' },
-          { label: '哪些应用缺少关键信息配置', query: '哪些应用缺少关键信息配置' },
+          { label: t('assistantFreqDeployQuery', '最近哪些应用发布最频繁'), query: t('assistantFreqDeployQuery', '最近哪些应用发布最频繁') },
+          { label: t('assistantFailDeployQuery', '哪些应用最近部署失败较多'), query: t('assistantFailDeployQuery', '哪些应用最近部署失败较多') },
+          { label: t('assistantMissingInfoQuery', '哪些应用缺少关键信息配置'), query: t('assistantMissingInfoQuery', '哪些应用缺少关键信息配置') },
         ]}
       />
       <Table
@@ -409,99 +414,99 @@ export default function ApplicationsPage() {
           selectedRowKeys,
           onChange: keys => setSelectedRowKeys(keys as number[]),
         } : undefined}
-        pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total) => `共 ${total} 条`, showQuickJumper: true }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'], showTotal: (total) => tc('total', '共 {{count}} 条', { count: total }), showQuickJumper: true }}
       />
 
       <Modal
-        title={editingApp ? '编辑应用流水线' : isCopying ? '复制新增应用流水线' : '新增应用流水线'}
+        title={editingApp ? t('editPipeline', '编辑应用流水线') : isCopying ? t('copyPipeline', '复制新增应用流水线') : t('addPipeline', '新增应用流水线')}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={600}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="name" label="应用名称" rules={[{ required: true, message: '请输入应用名称' }]}>
-            <Input placeholder="请输入应用名称" />
+          <Form.Item name="name" label={t('appName', '应用名称')} rules={[{ required: true, message: t('appNameRequired', '请输入应用名称') }]}>
+            <Input placeholder={t('appNamePlaceholder', '请输入应用名称')} />
           </Form.Item>
-          <Form.Item name="project_id" label="所属项目" rules={[{ required: true, message: '请选择所属项目' }]}>
-            <Select placeholder="请选择所属项目" showSearch optionFilterProp="children">
+          <Form.Item name="project_id" label={t('belongProject', '所属项目')} rules={[{ required: true, message: t('projectRequired', '请选择项目') }]}>
+            <Select placeholder={t('projectPlaceholder', '请选择项目')} showSearch optionFilterProp="children">
               {projects.map((p) => (
                 <Select.Option key={p.id} value={p.id}>{p.name}</Select.Option>
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="env_id" label="项目环境" rules={[{ required: true, message: '请选择项目环境' }]}>
-            <Select placeholder="请选择项目环境" showSearch optionFilterProp="children">
+          <Form.Item name="env_id" label={t('belongEnv', '项目环境')} rules={[{ required: true, message: t('envRequired', '请选择环境') }]}>
+            <Select placeholder={t('envPlaceholder', '请选择环境')} showSearch optionFilterProp="children">
               {environments.map((e) => (
                 <Select.Option key={e.id} value={e.id}>{e.name}</Select.Option>
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="jenkins_job" label="Jenkins发布流水线">
-            <Input placeholder="请输入Jenkins发布流水线地址" />
+          <Form.Item name="jenkins_job" label={t('jenkinsPublishJob', 'Jenkins发布流水线')}>
+            <Input placeholder={t('jenkinsJobPlaceholder', '请输入Jenkins发布流水线地址')} />
           </Form.Item>
-          <Form.Item name="jenkins_archive_job" label="Jenkins归档流水线">
-            <Input placeholder="请输入Jenkins归档流水线地址" />
+          <Form.Item name="jenkins_archive_job" label={t('jenkinsArchiveJob', 'Jenkins归档流水线')}>
+            <Input placeholder={t('jenkinsArchiveJobPlaceholder', '请输入Jenkins归档流水线地址')} />
           </Form.Item>
-          <Form.Item name="code_repo" label="描述">
-            <Input placeholder="请输入描述" />
+          <Form.Item name="code_repo" label={t('description', '描述')}>
+            <Input placeholder={t('descPlaceholder', '请输入描述')} />
           </Form.Item>
         </Form>
       </Modal>
 
       {/* Jenkins 导入弹窗 */}
       <Modal
-        title="从 Jenkins 导入流水线"
+        title={t('importPipelineTitle', '从 Jenkins 导入流水线')}
         open={importModalVisible}
         onCancel={() => setImportModalVisible(false)}
         width={780}
         footer={
           importStep === 'input' ? [
-            <Button key="cancel" onClick={() => setImportModalVisible(false)}>取消</Button>,
-            <Button key="fetch" type="primary" loading={importLoading} onClick={handleFetchJobs}>获取 Jobs</Button>,
+            <Button key="cancel" onClick={() => setImportModalVisible(false)}>{tc('cancel', '取消')}</Button>,
+            <Button key="fetch" type="primary" loading={importLoading} onClick={handleFetchJobs}>{t('fetchJobs', '获取 Jobs')}</Button>,
           ] : importStep === 'preview' ? [
-            <Button key="back" onClick={() => setImportStep('input')}>上一步</Button>,
+            <Button key="back" onClick={() => setImportStep('input')}>{t('prevStep', '上一步')}</Button>,
             <Button key="import" type="primary" loading={importLoading} onClick={handleImportSubmit}
               disabled={importSelectedJobs.length === 0 || !importProjectId || !importEnvId}>
-              导入 ({importSelectedJobs.length} 个)
+              {t('importNItems', '导入 ({{count}} 个)', { count: importSelectedJobs.length })}
             </Button>,
           ] : [
-            <Button key="close" type="primary" onClick={() => setImportModalVisible(false)}>关闭</Button>,
+            <Button key="close" type="primary" onClick={() => setImportModalVisible(false)}>{tc('close', '关闭')}</Button>,
           ]
         }
       >
         {importStep === 'input' && (
           <div>
             <Alert
-              message="Jenkins View 必须存在！ 输入 Jenkins View 名称，自动获取该 View 下的所有 Job 并批量导入为流水线"
-              description={<span>例如：输入 <code>my-view</code> 将获取 <code>http://your-jenkins/view/my-view/</code> 下的所有 Job</span>}
+              message={t('importViewAlert', 'Jenkins View 必须存在！ 输入 Jenkins View 名称，自动获取该 View 下的所有 Job 并批量导入为流水线')}
+              description={<span>{t('importViewAlertDesc', '例如：输入 <code>my-view</code> 将获取 <code>http://your-jenkins/view/my-view/</code> 下的所有 Job')}</span>}
               type="info"
               showIcon
               style={{ marginBottom: 16 }}
             />
             <Form layout="vertical">
-              <Form.Item label="Jenkins View 名称" required>
+              <Form.Item label={t('jenkinsViewName', 'Jenkins View 名称')} required>
                 <Input
-                  placeholder="例如: my-view"
+                  placeholder={t('jenkinsViewNamePlaceholder', '例如: my-view')}
                   value={importViewName}
                   onChange={e => setImportViewName(e.target.value)}
                   onPressEnter={handleFetchJobs}
                   size="large"
                 />
               </Form.Item>
-              <Form.Item label="所属项目" required>
-                <Select placeholder="请选择所属项目" value={importProjectId} onChange={v => setImportProjectId(v)} showSearch optionFilterProp="children">
+              <Form.Item label={t('belongProject', '所属项目')} required>
+                <Select placeholder={t('projectPlaceholder', '请选择项目')} value={importProjectId} onChange={v => setImportProjectId(v)} showSearch optionFilterProp="children">
                   {projects.map(p => (<Select.Option key={p.id} value={p.id}>{p.name}</Select.Option>))}
                 </Select>
               </Form.Item>
-              <Form.Item label="项目环境" required>
-                <Select placeholder="请选择项目环境" value={importEnvId} onChange={v => setImportEnvId(v)} showSearch optionFilterProp="children">
+              <Form.Item label={t('belongEnv', '项目环境')} required>
+                <Select placeholder={t('envPlaceholder', '请选择环境')} value={importEnvId} onChange={v => setImportEnvId(v)} showSearch optionFilterProp="children">
                   {environments.map(e => (<Select.Option key={e.id} value={e.id}>{e.name}</Select.Option>))}
                 </Select>
               </Form.Item>
-              <Form.Item label="应用名前缀清理规则">
+              <Form.Item label={t('appNamePrefixRule', '应用名前缀清理规则')}>
                 <Input
-                  placeholder="可选，输入要从 Job 名开头去掉的前缀，例如: 190-"
+                  placeholder={t('prefixRulePlaceholder', '可选，输入要从 Job 名开头去掉的前缀，例如: 190-')}
                   value={importAppNamePrefix}
                   onChange={e => setImportAppNamePrefix(e.target.value)}
                 />
@@ -513,24 +518,24 @@ export default function ApplicationsPage() {
         {importStep === 'preview' && (
           <div>
             <Alert
-              message={`View "${importViewName}" 共 ${importJobs.length} 个 Job，已选择 ${importSelectedJobs.length} 个`}
+              message={t('importPreviewTitle', 'View "{{viewName}}" 共 {{total}} 个 Job，已选择 {{selected}} 个', { viewName: importViewName, total: importJobs.length, selected: importSelectedJobs.length })}
               type="info"
               showIcon
               style={{ marginBottom: 16 }}
             />
             {importAppNamePrefix.trim() && (
               <Alert
-                message={`已启用应用名前缀清理规则：${importAppNamePrefix.trim()}`}
-                description="预览中的应用名称会先去掉这个 Job 名前缀，导入时也会按相同规则落库。"
+                message={t('importPrefixEnabled', '已启用应用名前缀清理规则：{{prefix}}', { prefix: importAppNamePrefix.trim() })}
+                description={t('importPrefixEnabledDesc', '预览中的应用名称会先去掉这个 Job 名前缀，导入时也会按相同规则落库。')}
                 type="success"
                 showIcon
                 style={{ marginBottom: 16 }}
               />
             )}
             <Form layout="vertical" style={{ marginBottom: 16 }}>
-              <Form.Item label="应用名前缀清理规则">
+              <Form.Item label={t('appNamePrefixRule', '应用名前缀清理规则')}>
                 <Input
-                  placeholder="可选，输入要从 Job 名开头去掉的前缀，例如: 190-"
+                  placeholder={t('prefixRulePlaceholder', '可选，输入要从 Job 名开头去掉的前缀，例如: 190-')}
                   value={importAppNamePrefix}
                   onChange={e => setImportAppNamePrefix(e.target.value)}
                 />
@@ -538,10 +543,10 @@ export default function ApplicationsPage() {
             </Form>
             <div style={{ marginBottom: 12, padding: '8px 12px', background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 4 }}>
               <span style={{ marginRight: 8, fontWeight: 500 }}>
-                <span style={{ color: '#ff4d4f' }}>*</span> 归档流水线：
+                <span style={{ color: '#ff4d4f' }}>*</span> {t('archivePipelineLabel', '归档流水线：')}
               </span>
               <Select
-                placeholder="选择归档流水线 Job（所有流水线共用）"
+                placeholder={t('archiveJobPlaceholder', '选择归档流水线 Job（所有流水线共用）')}
                 value={importArchiveJob}
                 onChange={v => setImportArchiveJob(v)}
                 showSearch
@@ -555,8 +560,8 @@ export default function ApplicationsPage() {
               </Select>
               {importArchiveJob && (
                 <div style={{ marginTop: 6, fontSize: 12, color: '#52c41a' }}>
-                  归档流水线主要用于现场迭代更新的部署包归档。
-                  归档地址：{`${window.location.protocol}//your-jenkins/view/${importViewName}/job/${importArchiveJob}`}
+                  {t('importArchiveDesc', '归档流水线主要用于现场迭代更新的部署包归档。')}
+                  {t('importArchiveUrl', '归档地址：')}{`${window.location.protocol}//your-jenkins/view/${importViewName}/job/${importArchiveJob}`}
                 </div>
               )}
             </div>
@@ -573,11 +578,11 @@ export default function ApplicationsPage() {
                     }
                   }}
                 >
-                  全选新增
+                  {t('selectAllNew', '全选新增')}
                 </Checkbox>
                 <span style={{ color: '#999', fontSize: 12 }}>
-                  <Tag color="green">新增</Tag> 可导入 &nbsp;
-                  <Tag>已存在</Tag> 自动跳过
+                  <Tag color="green">{t('tagNew', '新增')}</Tag> {t('tagCanImport', '可导入')} &nbsp;
+                  <Tag>{t('tagExists', '已存在')}</Tag> {t('tagAutoSkip', '自动跳过')}
                 </span>
               </Space>
             </div>
@@ -594,19 +599,19 @@ export default function ApplicationsPage() {
               }}
               columns={[
                 {
-                  title: '应用名称',
+                  title: t('colAppName', '应用名称'),
                   dataIndex: 'app_name',
                   key: 'app_name',
                   width: 200,
                   render: (appName: string, record: JenkinsViewJob) => (
                     <span>
                       {appName}
-                      {record.exists && <Tag style={{ marginLeft: 8 }}>已存在</Tag>}
+                      {record.exists && <Tag style={{ marginLeft: 8 }}>{t('tagExists', '已存在')}</Tag>}
                     </span>
                   ),
                 },
                 {
-                  title: 'Jenkins 地址',
+                  title: t('colJenkinsUrl', 'Jenkins 地址'),
                   dataIndex: 'job_url',
                   key: 'job_url',
                   ellipsis: true,
@@ -617,19 +622,19 @@ export default function ApplicationsPage() {
                   ),
                 },
                 {
-                  title: '状态',
+                  title: tc('status', '状态'),
                   dataIndex: 'color',
                   key: 'color',
                   width: 80,
                   render: (color: string) => {
                     const colorMap: Record<string, { tag: string; label: string }> = {
-                      blue: { tag: 'processing', label: '正常' },
-                      blue_anime: { tag: 'processing', label: '构建中' },
-                      red: { tag: 'error', label: '失败' },
-                      red_anime: { tag: 'error', label: '构建中' },
-                      yellow: { tag: 'warning', label: '不稳定' },
-                      disabled: { tag: 'default', label: '禁用' },
-                      notbuilt: { tag: 'default', label: '未构建' },
+                      blue: { tag: 'processing', label: t('statusNormal', '正常') },
+                      blue_anime: { tag: 'processing', label: t('statusBuilding', '构建中') },
+                      red: { tag: 'error', label: t('statusFailed', '失败') },
+                      red_anime: { tag: 'error', label: t('statusBuilding', '构建中') },
+                      yellow: { tag: 'warning', label: t('statusUnstable', '不稳定') },
+                      disabled: { tag: 'default', label: t('statusDisabled', '禁用') },
+                      notbuilt: { tag: 'default', label: t('statusNotBuilt', '未构建') },
                     }
                     const c = colorMap[color] || { tag: 'default', label: color }
                     return <Tag color={c.tag}>{c.label}</Tag>
@@ -645,10 +650,10 @@ export default function ApplicationsPage() {
             <CheckCircleOutlined style={{ fontSize: 48, color: '#52c41a', marginBottom: 16 }} />
             <h3>{importResult.message}</h3>
             <div style={{ marginTop: 16, textAlign: 'left', maxWidth: 400, margin: '16px auto' }}>
-              <p>新增应用流水线: <strong>{importResult.created}</strong> 个</p>
-              <p>跳过已存在: <strong>{importResult.skipped}</strong> 个</p>
+              <p>{t('importResultNewApps', '新增应用流水线')}: <strong>{importResult.created}</strong> 个</p>
+              <p>{t('importResultSkipped', '跳过已存在')}: <strong>{importResult.skipped}</strong> 个</p>
               {importResult.errors?.length > 0 && (
-                <Alert type="warning" message="部分导入失败" description={importResult.errors.join('\n')} style={{ marginTop: 8 }} />
+                <Alert type="warning" message={t('importResultPartialFailed', '部分导入失败')} description={importResult.errors.join('\n')} style={{ marginTop: 8 }} />
               )}
             </div>
           </div>

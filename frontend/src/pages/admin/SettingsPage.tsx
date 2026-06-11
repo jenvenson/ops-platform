@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Divider, Form, Input, InputNumber, Select, Space, Switch, Tabs, Tag, Typography, message } from 'antd'
 import { SaveOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { adminAPI, type AuditLogSetting, type FIMSSHSetting, type AssistantModelSetting, type SystemGeneralSetting } from '../../api/admin'
 import { canEdit } from '../../utils/menuAccess'
 import { useLocale } from '../../contexts/LocaleContext'
@@ -11,6 +12,8 @@ import { useLocale } from '../../contexts/LocaleContext'
 const { Text } = Typography
 
 export default function SettingsPage() {
+  const { t } = useTranslation('admin')
+  const { t: tc } = useTranslation('common')
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [fimForm] = Form.useForm()
@@ -39,7 +42,7 @@ export default function SettingsPage() {
         setLang(setting.language)
       }
     } catch {
-      message.error('加载通用配置失败')
+      message.error(t('loadGeneralFailed', '加载通用配置失败'))
     } finally {
       setGeneralLoading(false)
     }
@@ -60,16 +63,16 @@ export default function SettingsPage() {
         timezone: result.timezone,
         language: result.language,
       })
-      document.title = result.site_name || '运维管理平台'
+      document.title = result.site_name || 'OPS Platform'
       if (result.language) {
         setLang(result.language)
       }
-      message.success('通用设置已保存')
+      message.success(t('generalSaved', '通用设置已保存'))
     } catch (error: unknown) {
       const msg =
         (error as { message?: string }).message ||
         (error as { errorFields?: Array<{ errors: string[] }> }).errorFields?.[0]?.errors?.[0] ||
-        '保存通用配置失败'
+        t('saveGeneralFailed', '保存通用配置失败')
       message.error(msg)
     } finally {
       setGeneralLoading(false)
@@ -79,7 +82,7 @@ export default function SettingsPage() {
   const handleSubmit = () => {
     setLoading(true)
     setTimeout(() => {
-      message.success('保存成功')
+      message.success(tc('saveSuccess', '保存成功'))
       setLoading(false)
     }, 500)
   }
@@ -99,7 +102,7 @@ export default function SettingsPage() {
         test_port: 22,
       })
     } catch {
-      message.error('加载 FIM SSH 配置失败')
+      message.error(t('loadFimFailed', '加载 FIM SSH 配置失败'))
     } finally {
       setFIMLoading(false)
     }
@@ -111,7 +114,7 @@ export default function SettingsPage() {
       const setting = await adminAPI.getAuditLogSetting()
       auditForm.setFieldsValue(setting)
     } catch {
-      message.error('加载平台审计配置失败')
+      message.error(t('loadAuditFailed', '加载平台审计配置失败'))
     } finally {
       setAuditLoading(false)
     }
@@ -133,7 +136,7 @@ export default function SettingsPage() {
         timeout_sec: setting.timeout_sec,
       })
     } catch {
-      message.error('加载 AI 模型配置失败')
+      message.error(t('loadModelFailed', '加载 AI 模型配置失败'))
     } finally {
       setModelLoading(false)
     }
@@ -156,10 +159,10 @@ export default function SettingsPage() {
         login_log_enabled: !!values.login_log_enabled,
       }
       await adminAPI.updateAuditLogSetting(payload)
-      message.success('平台审计开关已保存')
+      message.success(t('auditSaved', '平台审计开关已保存'))
     } catch (error) {
       if (error instanceof Error) {
-        message.error(error.message || '保存平台审计配置失败')
+        message.error(error.message || t('saveAuditFailed', '保存平台审计配置失败'))
       }
     } finally {
       setAuditLoading(false)
@@ -187,10 +190,10 @@ export default function SettingsPage() {
         private_key: '',
       })
       setFIMTestResult(null)
-      message.success('FIM SSH 配置已保存')
+      message.success(t('fimSaved', 'FIM SSH 配置已保存'))
     } catch (error) {
       if (error instanceof Error) {
-        message.error(error.message || '保存 FIM SSH 配置失败')
+        message.error(error.message || t('saveFimFailed', '保存 FIM SSH 配置失败'))
       }
     } finally {
       setFIMLoading(false)
@@ -210,7 +213,7 @@ export default function SettingsPage() {
       message[result.success ? 'success' : 'warning'](result.message)
     } catch (error) {
       if (error instanceof Error) {
-        message.error(error.message || '测试 SSH 连接失败')
+        message.error(error.message || t('testSshFailed', '测试 SSH 连接失败'))
       }
     } finally {
       setFIMTesting(false)
@@ -233,10 +236,10 @@ export default function SettingsPage() {
       }
       await adminAPI.updateAssistantModelSetting(payload)
       modelForm.setFieldsValue({ api_key: '' })
-      message.success('AI 模型配置已保存，将在下一次请求时生效')
+      message.success(t('modelSaved', 'AI 模型配置已保存，将在下一次请求时生效'))
     } catch (error) {
       if (error instanceof Error) {
-        message.error(error.message || '保存 AI 模型配置失败')
+        message.error(error.message || t('saveModelFailed', '保存 AI 模型配置失败'))
       }
     } finally {
       setModelLoading(false)
@@ -246,13 +249,13 @@ export default function SettingsPage() {
   const tabItems = [
     {
       key: 'general',
-      label: '通用设置',
+      label: t('general', '通用设置'),
       children: (
-        <Form form={form} layout="vertical" initialValues={{ siteName: '运维管理平台', timezone: 'Asia/Shanghai', language: 'zh-CN' }}>
-          <Form.Item label="系统名称" name="siteName">
-            <Input placeholder="请输入系统名称" />
+        <Form form={form} layout="vertical" initialValues={{ siteName: 'OPS Platform', timezone: 'Asia/Shanghai', language: 'zh-CN' }}>
+          <Form.Item label={t('siteName', '系统名称')} name="siteName">
+            <Input placeholder={t('siteNamePlaceholder', '请输入系统名称')} />
           </Form.Item>
-          <Form.Item label="时区" name="timezone">
+          <Form.Item label={t('timezone', '时区')} name="timezone">
             <Select
               options={[
                 { label: 'Asia/Shanghai (UTC+8)', value: 'Asia/Shanghai' },
@@ -260,17 +263,17 @@ export default function SettingsPage() {
               ]}
             />
           </Form.Item>
-          <Form.Item label="语言" name="language">
+          <Form.Item label={t('language', '语言')} name="language">
             <Select
               options={[
-                { label: '简体中文', value: 'zh-CN' },
-                { label: 'English', value: 'en-US' },
+                { label: t('zhCN', '简体中文'), value: 'zh-CN' },
+                { label: t('enUS', 'English'), value: 'en-US' },
               ]}
             />
           </Form.Item>
           <Form.Item>
             {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={generalLoading} onClick={() => void handleSaveGeneralSetting()}>
-              保存设置
+              {t('saveSettings', '保存设置')}
             </Button>}
           </Form.Item>
         </Form>
@@ -278,21 +281,21 @@ export default function SettingsPage() {
     },
     {
       key: 'security',
-      label: '安全设置',
+      label: t('security', '安全设置'),
       children: (
         <Form layout="vertical" initialValues={{ tokenExpiry: 24, loginRetry: 5 }}>
-          <Form.Item label="Token 有效期（小时）" name="tokenExpiry">
+          <Form.Item label={t('tokenExpiry', 'Token 有效期（小时）')} name="tokenExpiry">
             <Input type="number" min={1} max={72} />
           </Form.Item>
-          <Form.Item label="登录失败锁定次数" name="loginRetry">
+          <Form.Item label={t('loginRetry', '登录失败锁定次数')} name="loginRetry">
             <Input type="number" min={3} max={10} />
           </Form.Item>
-          <Form.Item label="强制启用双因素认证" valuePropName="checked">
+          <Form.Item label={t('forceMfa', '强制启用双因素认证')} valuePropName="checked">
             <Switch />
           </Form.Item>
           <Form.Item>
             {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={loading} onClick={handleSubmit}>
-              保存设置
+              {t('saveSettings', '保存设置')}
             </Button>}
           </Form.Item>
         </Form>
@@ -300,7 +303,7 @@ export default function SettingsPage() {
     },
     {
       key: 'audit',
-      label: '平台审计',
+      label: t('audit', '平台审计'),
       children: (
         <Form
           form={auditForm}
@@ -315,24 +318,24 @@ export default function SettingsPage() {
             type="info"
             showIcon
             style={{ marginBottom: 16 }}
-            message="平台审计开关会影响后端是否继续写入访问日志、操作审计和登录日志。关闭后，已有历史日志不会删除，只是不再新增。"
+            message={t('auditInfo', '平台审计开关会影响后端是否继续写入访问日志、操作审计和登录日志。关闭后，已有历史日志不会删除，只是不再新增。')}
           />
-          <Card size="small" title="日志采集开关" loading={auditLoading}>
+          <Card size="small" title={t('logCollectTitle', '日志采集开关')} loading={auditLoading}>
             <Space direction="vertical" size={20} style={{ width: '100%' }}>
-              <Form.Item label="访问日志" name="access_log_enabled" valuePropName="checked">
-                <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+              <Form.Item label={t('accessLog', '访问日志')} name="access_log_enabled" valuePropName="checked">
+                <Switch checkedChildren={t('enabled', '开启')} unCheckedChildren={t('disabled', '关闭')} />
               </Form.Item>
-              <Form.Item label="操作审计" name="operation_log_enabled" valuePropName="checked">
-                <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+              <Form.Item label={t('operationLog', '操作审计')} name="operation_log_enabled" valuePropName="checked">
+                <Switch checkedChildren={t('enabled', '开启')} unCheckedChildren={t('disabled', '关闭')} />
               </Form.Item>
-              <Form.Item label="登录日志" name="login_log_enabled" valuePropName="checked">
-                <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+              <Form.Item label={t('loginLog', '登录日志')} name="login_log_enabled" valuePropName="checked">
+                <Switch checkedChildren={t('enabled', '开启')} unCheckedChildren={t('disabled', '关闭')} />
               </Form.Item>
             </Space>
           </Card>
           <Form.Item style={{ marginTop: 16, marginBottom: 0 }}>
             {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={auditLoading} onClick={() => void handleSaveAuditSetting()}>
-              保存平台审计配置
+              {t('saveAuditConfig', '保存平台审计配置')}
             </Button>}
           </Form.Item>
         </Form>
@@ -340,7 +343,7 @@ export default function SettingsPage() {
     },
     {
       key: 'fim',
-      label: 'FIM SSH',
+      label: t('fimSsh', 'FIM SSH'),
       children: (
         <Form
           form={fimForm}
@@ -351,16 +354,16 @@ export default function SettingsPage() {
             type="info"
             showIcon
             style={{ marginBottom: 16 }}
-            message="文件完整性巡检通过后端发起 SSH 连接。私钥方式只需要在平台保存私钥，目标主机上需提前部署对应公钥。"
+            message={t('fimInfo', '文件完整性巡检通过后端发起 SSH 连接。私钥方式只需要在平台保存私钥，目标主机上需提前部署对应公钥。')}
           />
-          <Form.Item label="SSH 用户" name="ssh_user" rules={[{ required: true, message: '请输入 SSH 用户' }]}>
-            <Input placeholder="例如 root 或 ubuntu" />
+          <Form.Item label={t('sshUser', 'SSH 用户')} name="ssh_user" rules={[{ required: true, message: t('sshUserRequired', '请输入 SSH 用户') }]}>
+            <Input placeholder={t('sshUserPlaceholder', '例如 root 或 ubuntu')} />
           </Form.Item>
-          <Form.Item label="认证方式" name="auth_mode" rules={[{ required: true, message: '请选择认证方式' }]}>
+          <Form.Item label={t('authMode', '认证方式')} name="auth_mode" rules={[{ required: true, message: t('authModeRequired', '请选择认证方式') }]}>
             <Select
               options={[
-                { label: '账号密码', value: 'password' },
-                { label: '公私钥', value: 'private_key' },
+                { label: t('authPassword', '账号密码'), value: 'password' },
+                { label: t('authPrivateKey', '公私钥'), value: 'private_key' },
               ]}
             />
           </Form.Item>
@@ -370,16 +373,16 @@ export default function SettingsPage() {
               if (authMode === 'private_key') {
                 return (
                   <Form.Item
-                    label="私钥内容"
+                    label={t('privateKeyLabel', '私钥内容')}
                     name="private_key"
-                    extra={fimSetting?.private_key_configured ? <Tag color="green">已保存私钥，留空表示继续使用当前私钥</Tag> : '支持 OpenSSH 私钥内容'}
+                    extra={fimSetting?.private_key_configured ? <Tag color="green">{t('privateKeySaved', '已保存私钥，留空表示继续使用当前私钥')}</Tag> : t('privateKeyExtra', '支持 OpenSSH 私钥内容')}
                     rules={[
                       {
                         validator: async (_rule, value) => {
                           if (value?.trim() || fimSetting?.private_key_configured) {
                             return
                           }
-                          throw new Error('请输入私钥内容')
+                          throw new Error(t('privateKeyRequired', '请输入私钥内容'))
                         },
                       },
                     ]}
@@ -390,53 +393,53 @@ export default function SettingsPage() {
               }
               return (
                 <Form.Item
-                  label="SSH 密码"
+                  label={t('sshPasswordLabel', 'SSH 密码')}
                   name="password"
-                  extra={fimSetting?.password_configured ? <Tag color="green">已保存密码，留空表示继续使用当前密码</Tag> : undefined}
+                  extra={fimSetting?.password_configured ? <Tag color="green">{t('sshPasswordSaved', '已保存密码，留空表示继续使用当前密码')}</Tag> : undefined}
                   rules={[
                     {
                       validator: async (_rule, value) => {
                         if (value?.trim() || fimSetting?.password_configured) {
                           return
                         }
-                        throw new Error('请输入 SSH 密码')
+                        throw new Error(t('sshPasswordRequired', '请输入 SSH 密码'))
                       },
                     },
                   ]}
                 >
-                  <Input.Password placeholder="请输入 SSH 密码" />
+                  <Input.Password placeholder={t('sshPasswordPlaceholder', '请输入 SSH 密码')} />
                 </Form.Item>
               )
             }}
           </Form.Item>
-          <Form.Item label="SSH 超时（秒）" name="timeout_sec" rules={[{ required: true, message: '请输入超时秒数' }]}>
+          <Form.Item label={t('sshTimeout', 'SSH 超时（秒）')} name="timeout_sec" rules={[{ required: true, message: t('sshTimeoutRequired', '请输入超时秒数') }]}>
             <InputNumber min={3} max={120} style={{ width: '100%' }} />
           </Form.Item>
           <Space size={12} style={{ marginBottom: 16 }}>
-            <Tag color={fimSetting?.password_configured ? 'green' : 'default'}>密码: {fimSetting?.password_configured ? '已配置' : '未配置'}</Tag>
-            <Tag color={fimSetting?.private_key_configured ? 'green' : 'default'}>私钥: {fimSetting?.private_key_configured ? '已配置' : '未配置'}</Tag>
+            <Tag color={fimSetting?.password_configured ? 'green' : 'default'}>{t('passwordTag', '密码')}: {fimSetting?.password_configured ? t('passwordConfigured', '已配置') : t('passwordNotConfigured', '未配置')}</Tag>
+            <Tag color={fimSetting?.private_key_configured ? 'green' : 'default'}>{t('privateKeyTag', '私钥')}: {fimSetting?.private_key_configured ? t('privateKeyConfigured', '已配置') : t('privateKeyNotConfigured', '未配置')}</Tag>
           </Space>
-          <Divider style={{ marginTop: 8 }}>连通性测试</Divider>
-          <Form.Item label="测试主机" name="test_host" rules={[{ required: true, message: '请输入测试主机 IP 或域名' }]}>
-            <Input placeholder="例如 192.168.1.100" />
+          <Divider style={{ marginTop: 8 }}>{t('connectivityTest', '连通性测试')}</Divider>
+          <Form.Item label={t('testHost', '测试主机')} name="test_host" rules={[{ required: true, message: t('testHostRequired', '请输入测试主机 IP 或域名') }]}>
+            <Input placeholder={t('testHostPlaceholder', '例如 192.168.1.100')} />
           </Form.Item>
-          <Form.Item label="测试端口" name="test_port" initialValue={22}>
+          <Form.Item label={t('testPort', '测试端口')} name="test_port" initialValue={22}>
             <InputNumber min={1} max={65535} style={{ width: '100%' }} />
           </Form.Item>
           <Space size={12} style={{ marginBottom: 16 }}>
             {canEdit() && <Button onClick={() => void handleTestFIMConnection()} loading={fimTesting}>
-              测试 SSH 连接
+              {t('testConnection', '测试 SSH 连接')}
             </Button>}
             {fimTestResult && (
               <Text type={fimTestResult.success ? 'success' : 'danger'}>
                 {fimTestResult.message}
-                {fimTestResult.output ? ` | 远端主机: ${fimTestResult.output}` : ''}
+                {fimTestResult.output ? ` | ${t('remoteHost', '远端主机')}: ${fimTestResult.output}` : ''}
               </Text>
             )}
           </Space>
           <Form.Item>
             {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={fimLoading} onClick={() => void handleSaveFIMSetting()}>
-              保存 FIM SSH 配置
+              {t('saveFimConfig', '保存 FIM SSH 配置')}
             </Button>}
           </Form.Item>
         </Form>
@@ -444,7 +447,7 @@ export default function SettingsPage() {
     },
     {
       key: 'ai-model',
-      label: 'AI 模型',
+      label: t('aiModel', 'AI 模型'),
       children: (
         <Form
           form={modelForm}
@@ -460,31 +463,31 @@ export default function SettingsPage() {
             type="info"
             showIcon
             style={{ marginBottom: 16 }}
-            message="配置 AI 运维小助手使用的模型提供商。支持本地 Ollama 和第三方云模型。修改后保存将在下一次对话请求中生效，无需重启服务。"
+            message={t('modelInfo', '配置 AI 运维小助手使用的模型提供商。支持本地 Ollama 和第三方云模型。修改后保存将在下一次对话请求中生效，无需重启服务。')}
           />
-          <Form.Item label="启用 AI 助手" name="enabled" valuePropName="checked">
-            <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+          <Form.Item label={t('enableAssistant', '启用 AI 助手')} name="enabled" valuePropName="checked">
+            <Switch checkedChildren={t('enabled', '开启')} unCheckedChildren={t('disabled', '关闭')} />
           </Form.Item>
           <Form.Item
-            label="模型提供商"
+            label={t('provider', '模型提供商')}
             name="provider"
-            rules={[{ required: true, message: '请选择模型提供商' }]}
+            rules={[{ required: true, message: t('providerRequired', '请选择模型提供商') }]}
           >
             <Select
               showSearch
               options={[
-                { label: 'Ollama (本地)', value: 'ollama' },
-                { label: 'OpenAI', value: 'openai' },
-                { label: 'DeepSeek', value: 'deepseek' },
-                { label: '通义千问 (Qwen)', value: 'qwen' },
-                { label: '智谱 GLM', value: 'zhipu' },
-                { label: 'Kimi / Moonshot', value: 'moonshot' },
-                { label: 'MiniMax', value: 'minimax' },
-                { label: '豆包 (Doubao)', value: 'doubao' },
-                { label: '百川 (Baichuan)', value: 'baichuan' },
-                { label: '混元 (Hunyuan)', value: 'hunyuan' },
-                { label: '文心一言 (Ernie)', value: 'ernie' },
-                { label: '自定义中转', value: 'custom' },
+                { label: t('providerOllama', 'Ollama (本地)'), value: 'ollama' },
+                { label: t('providerOpenAI', 'OpenAI'), value: 'openai' },
+                { label: t('providerDeepSeek', 'DeepSeek'), value: 'deepseek' },
+                { label: t('providerQwen', '通义千问 (Qwen)'), value: 'qwen' },
+                { label: t('providerZhipu', '智谱 GLM'), value: 'zhipu' },
+                { label: t('providerMoonshot', 'Kimi / Moonshot'), value: 'moonshot' },
+                { label: t('providerMiniMax', 'MiniMax'), value: 'minimax' },
+                { label: t('providerDoubao', '豆包 (Doubao)'), value: 'doubao' },
+                { label: t('providerBaichuan', '百川 (Baichuan)'), value: 'baichuan' },
+                { label: t('providerHunyuan', '混元 (Hunyuan)'), value: 'hunyuan' },
+                { label: t('providerErnie', '文心一言 (Ernie)'), value: 'ernie' },
+                { label: t('providerCustom', '自定义中转'), value: 'custom' },
               ]}
             />
           </Form.Item>
@@ -497,16 +500,16 @@ export default function SettingsPage() {
               if (provider && provider !== 'ollama') {
                 return (
                   <Form.Item
-                    label="API Key"
+                    label={t('apiKey', 'API Key')}
                     name="api_key"
-                    extra={modelSetting?.api_key_configured ? <Tag color="green">已保存 API Key，留空表示继续使用当前 Key</Tag> : undefined}
+                    extra={modelSetting?.api_key_configured ? <Tag color="green">{t('apiKeySaved', '已保存 API Key，留空表示继续使用当前 Key')}</Tag> : undefined}
                     rules={[
                       {
                         validator: async (_rule, value) => {
                           if (value?.trim() || modelSetting?.api_key_configured) {
                             return
                           }
-                          throw new Error('请输入 API Key')
+                          throw new Error(t('apiKeyRequired', '请输入 API Key'))
                         },
                       },
                     ]}
@@ -529,35 +532,35 @@ export default function SettingsPage() {
               }
               return (
                 <Form.Item
-                  label="API 地址"
+                  label={t('apiUrl', 'API 地址')}
                   name="base_url"
-                  extra="选填。使用第三方中转地址时在此填写完整 API Base URL，例如 https://your-relay.example.com/v1"
+                  extra={t('apiUrlExtra', '选填。使用第三方中转地址时在此填写完整 API Base URL，例如 https://your-relay.example.com/v1')}
                 >
-                  <Input placeholder="留空使用提供商默认地址" />
+                  <Input placeholder={t('apiUrlPlaceholder', '留空使用提供商默认地址')} />
                 </Form.Item>
               )
             }}
           </Form.Item>
-          <Form.Item label="聊天模型" name="chat_model" extra="选填。留空使用该提供商的默认模型">
-            <Input placeholder="例如 deepseek-chat 或 gpt-4o" />
+          <Form.Item label={t('chatModel', '聊天模型')} name="chat_model" extra={t('chatModelExtra', '选填。留空使用该提供商的默认模型')}>
+            <Input placeholder={t('chatModelPlaceholder', '例如 deepseek-chat 或 gpt-4o')} />
           </Form.Item>
-          <Form.Item label="嵌入模型" name="embed_model" extra="选填。用于知识库语义搜索，留空则降级为词法搜索">
-            <Input placeholder="例如 text-embedding-3-small" />
+          <Form.Item label={t('embedModel', '嵌入模型')} name="embed_model" extra={t('embedModelExtra', '选填。用于知识库语义搜索，留空则降级为词法搜索')}>
+            <Input placeholder={t('embedModelPlaceholder', '例如 text-embedding-3-small')} />
           </Form.Item>
-          <Form.Item label="温度" name="temperature" extra="控制回答的随机性，0-2 之间，越低越确定">
+          <Form.Item label={t('temperature', '温度')} name="temperature" extra={t('temperatureExtra', '控制回答的随机性，0-2 之间，越低越确定')}>
             <InputNumber min={0} max={2} step={0.1} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item label="请求超时（秒）" name="timeout_sec" rules={[{ required: true, message: '请输入超时秒数' }]}>
+          <Form.Item label={t('requestTimeout', '请求超时（秒）')} name="timeout_sec" rules={[{ required: true, message: t('requestTimeoutRequired', '请输入超时秒数') }]}>
             <InputNumber min={5} max={300} style={{ width: '100%' }} />
           </Form.Item>
           <Space size={12} style={{ marginBottom: 16 }}>
-            <Tag color={modelSetting?.enabled ? 'green' : 'default'}>状态: {modelSetting?.enabled ? '已启用' : '已禁用'}</Tag>
-            <Tag color={modelSetting?.api_key_configured ? 'green' : 'default'}>API Key: {modelSetting?.api_key_configured ? '已配置' : '未配置'}</Tag>
+            <Tag color={modelSetting?.enabled ? 'green' : 'default'}>{t('statusTag', '状态')}: {modelSetting?.enabled ? t('statusEnabled', '已启用') : t('statusDisabled', '已禁用')}</Tag>
+            <Tag color={modelSetting?.api_key_configured ? 'green' : 'default'}>API Key: {modelSetting?.api_key_configured ? t('apiKeyConfigured', '已配置') : t('apiKeyNotConfigured', '未配置')}</Tag>
             <Tag>{modelSetting?.provider || 'ollama'}</Tag>
           </Space>
           <Form.Item>
             {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={modelLoading} onClick={() => void handleSaveModelSetting()}>
-              保存 AI 模型配置
+              {t('saveSettings', '保存设置')}
             </Button>}
           </Form.Item>
         </Form>
@@ -565,32 +568,32 @@ export default function SettingsPage() {
     },
     {
       key: 'notification',
-      label: '通知设置',
+      label: t('notification', '通知设置'),
       children: (
         <Form layout="vertical" initialValues={{ emailEnabled: true, dingTalkEnabled: false }}>
-          <Divider>邮件通知</Divider>
-          <Form.Item label="启用邮件通知" valuePropName="checked">
+          <Divider>{t('emailNotification', '邮件通知')}</Divider>
+          <Form.Item label={t('enableEmailNotification', '启用邮件通知')} valuePropName="checked">
             <Switch />
           </Form.Item>
-          <Form.Item label="SMTP 服务器">
+          <Form.Item label={t('smtpServer', 'SMTP 服务器')}>
             <Input placeholder="smtp.example.com" />
           </Form.Item>
-          <Form.Item label="端口">
+          <Form.Item label={t('port', '端口')}>
             <Input type="number" placeholder="465" />
           </Form.Item>
-          <Form.Item label="发件邮箱">
+          <Form.Item label={t('senderEmail', '发件邮箱')}>
             <Input placeholder="noreply@example.com" />
           </Form.Item>
-          <Divider>钉钉通知</Divider>
-          <Form.Item label="启用钉钉通知" valuePropName="checked">
+          <Divider>{t('dingTalkNotification', '钉钉通知')}</Divider>
+          <Form.Item label={t('enableDingTalkNotification', '启用钉钉通知')} valuePropName="checked">
             <Switch />
           </Form.Item>
-          <Form.Item label="钉钉 Access Token">
-            <Input.Password placeholder="请输入 Access Token" />
+          <Form.Item label={t('dingTalkAccessToken', '钉钉 Access Token')}>
+            <Input.Password placeholder={t('accessTokenPlaceholder', '请输入 Access Token')} />
           </Form.Item>
           <Form.Item>
             {canEdit() && <Button type="primary" icon={<SaveOutlined />} loading={loading} onClick={handleSubmit}>
-              保存设置
+              {t('saveSettings', '保存设置')}
             </Button>}
           </Form.Item>
         </Form>

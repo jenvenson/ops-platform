@@ -262,17 +262,17 @@ func GetPlatformArchivedLogs() gin.HandlerFunc {
 		}
 
 		unionSQL := `
-			SELECT id, 'access' AS archive_type, username, real_name, role, COALESCE(menu_title, '访问日志') AS title,
+			SELECT id, 'access' AS archive_type, username, real_name, role, COALESCE(menu_title, 'Access Log') AS title,
 				request_path, request_method, request_ip, operation_status, status_code, duration_ms, error_message,
 				accessed_at AS occurred_at, archived_at
 			FROM platform_access_logs_archive
 			UNION ALL
-			SELECT id, 'operation' AS archive_type, username, real_name, role, COALESCE(resource_name, action_label, '操作审计') AS title,
+			SELECT id, 'operation' AS archive_type, username, real_name, role, COALESCE(resource_name, action_label, 'Operation Audit') AS title,
 				request_path, request_method, request_ip, operation_status, status_code, duration_ms, error_message,
 				operated_at AS occurred_at, archived_at
 			FROM platform_audit_logs_archive
 			UNION ALL
-			SELECT id, 'login' AS archive_type, username, real_name, role, '登录日志' AS title,
+			SELECT id, 'login' AS archive_type, username, real_name, role, 'Login Log' AS title,
 				request_path, request_method, request_ip, operation_status, status_code, duration_ms, error_message,
 				logged_in_at AS occurred_at, archived_at
 			FROM platform_login_logs_archive
@@ -464,31 +464,31 @@ func sanitizeAuditFilenameSegment(value string) string {
 
 func buildPlatformAuditExportSummary(c *gin.Context, exportType, filename string) string {
 	label := map[string]string{
-		"access":    "访问日志",
-		"operation": "操作审计",
-		"login":     "登录日志",
-		"archive":   "归档日志",
+		"access":    "Access Logs",
+		"operation": "Operation Audit",
+		"login":     "Login Logs",
+		"archive":   "Archived Logs",
 	}[exportType]
 	if label == "" {
-		label = "平台审计日志"
+		label = "Platform Audit Logs"
 	}
 	if exportType == "archive" {
 		if archiveType := strings.TrimSpace(c.Query("archive_type")); archiveType != "" && archiveType != "all" {
 			typeLabel := map[string]string{
-				"access":    "访问日志",
-				"operation": "操作审计",
-				"login":     "登录日志",
+				"access":    "Access Logs",
+				"operation": "Operation Audit",
+				"login":     "Login Logs",
 			}[archiveType]
 			if typeLabel != "" {
-				label = "归档" + typeLabel
+				label = "Archived " + typeLabel
 			}
 		}
 	}
 	dateRange := buildAuditExportDateRangeLabel(c)
 	if dateRange != "" {
-		return fmt.Sprintf("导出了%s，时间范围 %s，文件 %s。", label, dateRange, filename)
+		return fmt.Sprintf("Exported %s, time range %s, file %s.", label, dateRange, filename)
 	}
-	return fmt.Sprintf("导出了%s，文件 %s。", label, filename)
+	return fmt.Sprintf("Exported %s, file %s.", label, filename)
 }
 
 func buildAuditExportDateRangeLabel(c *gin.Context) string {
@@ -496,11 +496,11 @@ func buildAuditExportDateRangeLabel(c *gin.Context) string {
 	end := strings.TrimSpace(c.Query("end"))
 	switch {
 	case start != "" && end != "":
-		return start + " 至 " + end
+		return start + " to " + end
 	case start != "":
-		return start + " 之后"
+		return "After " + start
 	case end != "":
-		return end + " 之前"
+		return "Before " + end
 	default:
 		return ""
 	}
@@ -536,7 +536,7 @@ func exportAccessLogsCSV(c *gin.Context, writer *csv.Writer) error {
 }
 
 func buildAccessLogCSVRows(items []models.PlatformAccessLog) [][]string {
-	rows := [][]string{{"时间", "操作人", "菜单", "请求路径", "请求方法", "请求IP", "状态", "耗时", "错误信息"}}
+	rows := [][]string{{"Time", "Operator", "Menu", "Request Path", "Method", "Client IP", "Status", "Duration", "Error"}}
 	for _, item := range items {
 		rows = append(rows, []string{
 			formatAuditTime(item.AccessedAt),
@@ -566,7 +566,7 @@ func exportOperationLogsCSV(c *gin.Context, writer *csv.Writer) error {
 	if err := query.Order("id DESC").Find(&items).Error; err != nil {
 		return err
 	}
-	rows := [][]string{{"时间", "操作人", "模块", "动作", "资源名称", "请求路径", "请求方法", "请求IP", "状态", "耗时", "错误信息"}}
+	rows := [][]string{{"Time", "Operator", "Module", "Action", "Resource", "Request Path", "Method", "Client IP", "Status", "Duration", "Error"}}
 	for _, item := range items {
 		rows = append(rows, []string{
 			formatAuditTime(item.OperatedAt),
@@ -592,7 +592,7 @@ func exportLoginLogsCSV(c *gin.Context, writer *csv.Writer) error {
 	if err := query.Order("id DESC").Find(&items).Error; err != nil {
 		return err
 	}
-	rows := [][]string{{"时间", "操作人", "角色", "登录类型", "请求路径", "请求方法", "请求IP", "状态", "耗时", "错误信息"}}
+	rows := [][]string{{"Time", "Operator", "Role", "Login Type", "Request Path", "Method", "Client IP", "Status", "Duration", "Error"}}
 	for _, item := range items {
 		rows = append(rows, []string{
 			formatAuditTime(item.LoggedInAt),
@@ -629,17 +629,17 @@ func exportArchivedLogsCSV(c *gin.Context, writer *csv.Writer) error {
 	}
 
 	unionSQL := `
-		SELECT id, 'access' AS archive_type, username, real_name, role, COALESCE(menu_title, '访问日志') AS title,
+		SELECT id, 'access' AS archive_type, username, real_name, role, COALESCE(menu_title, 'Access Log') AS title,
 			request_path, request_method, request_ip, operation_status, status_code, duration_ms, error_message,
 			accessed_at AS occurred_at, archived_at
 		FROM platform_access_logs_archive
 		UNION ALL
-		SELECT id, 'operation' AS archive_type, username, real_name, role, COALESCE(resource_name, action_label, '操作审计') AS title,
+		SELECT id, 'operation' AS archive_type, username, real_name, role, COALESCE(resource_name, action_label, 'Operation Audit') AS title,
 			request_path, request_method, request_ip, operation_status, status_code, duration_ms, error_message,
 			operated_at AS occurred_at, archived_at
 		FROM platform_audit_logs_archive
 		UNION ALL
-		SELECT id, 'login' AS archive_type, username, real_name, role, '登录日志' AS title,
+		SELECT id, 'login' AS archive_type, username, real_name, role, 'Login Log' AS title,
 			request_path, request_method, request_ip, operation_status, status_code, duration_ms, error_message,
 			logged_in_at AS occurred_at, archived_at
 		FROM platform_login_logs_archive
@@ -655,7 +655,7 @@ func exportArchivedLogsCSV(c *gin.Context, writer *csv.Writer) error {
 		return err
 	}
 
-	rows := [][]string{{"归档时间", "原始时间", "类型", "操作人", "标题", "请求路径", "请求方法", "请求IP", "状态", "错误信息"}}
+	rows := [][]string{{"Archived At", "Original Time", "Type", "Operator", "Title", "Request Path", "Method", "Client IP", "Status", "Error"}}
 	for _, item := range items {
 		rows = append(rows, []string{
 			formatAuditTime(item.ArchivedAt),
@@ -1001,9 +1001,9 @@ func formatAuditTime(value time.Time) string {
 
 func formatAuditStatus(value string) string {
 	if strings.EqualFold(strings.TrimSpace(value), "success") {
-		return "成功"
+		return "Success"
 	}
-	return "失败"
+	return "Failed"
 }
 
 func displayAuditOperator(realName, username string) string {

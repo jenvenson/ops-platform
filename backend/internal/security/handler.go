@@ -447,15 +447,15 @@ func riskCategoryForVulnerability(vuln *models.SecurityVulnerability) string {
 		return ""
 	}
 	if strings.TrimSpace(vuln.FindingFamily) == "inventory" || strings.TrimSpace(vuln.ScanMethod) == "服务识别" || strings.Contains(strings.TrimSpace(vuln.VulnType), "资产识别") {
-		return "资产识别"
+		return "inventory"
 	}
 	if strings.TrimSpace(vuln.PrimaryCVEID) != "" || strings.TrimSpace(vuln.CVEID) != "" {
-		return "CVE 风险"
+		return "cve_risk"
 	}
 	if strings.Contains(strings.TrimSpace(vuln.VulnType), "配置") {
-		return "配置风险"
+		return "config_risk"
 	}
-	return "通用风险"
+	return "generic_risk"
 }
 
 func decorateVulnerabilityRiskCategory(vuln *models.SecurityVulnerability) {
@@ -475,13 +475,13 @@ func decorateVulnerabilityListRiskCategory(vulns []models.SecurityVulnerability)
 
 func applyRiskCategoryFilter(query *gorm.DB, riskCategory string) *gorm.DB {
 	switch strings.TrimSpace(riskCategory) {
-	case "资产识别":
+	case "inventory":
 		return query.Where("scan_method = ? OR vuln_type LIKE ?", "服务识别", "%资产识别%")
-	case "CVE 风险":
+	case "cve_risk":
 		return query.Where("cve_id IS NOT NULL AND cve_id <> ''")
-	case "配置风险":
+	case "config_risk":
 		return query.Where("vuln_type LIKE ?", "%配置%")
-	case "通用风险":
+	case "generic_risk":
 		return query.Where("(scan_method IS NULL OR scan_method <> ?) AND (vuln_type IS NULL OR vuln_type NOT LIKE ?) AND (cve_id IS NULL OR cve_id = '') AND (vuln_type IS NULL OR vuln_type NOT LIKE ?)", "服务识别", "%资产识别%", "%配置%")
 	default:
 		return query
