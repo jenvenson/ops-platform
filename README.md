@@ -26,7 +26,8 @@
 | **告警中心** | 规则管理、联系人、渠道、模板、Webhook |
 | **监控大屏** | Grafana 仪表盘代理、健康检查、Prometheus 集成 |
 | **安全扫描** | 主机扫描、Web 扫描、漏洞管理、FIM 文件完整性监控 |
-| **运维小助手** | AI 对话助手，支持 Ollama 本地模型及主流第三方模型 |
+| **运维小助手** | AI 对话助手，支持 Ollama 本地模型及主流第三方模型，回答语言跟随界面语言 |
+| **国际化** | 中英文界面一键切换，浏览器标题与系统名称同步翻译（自定义站点名保持原样） |
 | **权限管理** | JWT 认证、RBAC 角色权限、菜单控制 |
 | **审计日志** | 操作审计、平台事件流 |
 
@@ -36,13 +37,13 @@
 |--------|---------------|
 | ![工作台](docs/screenshots/dashboard.png) | ![CMDB](docs/screenshots/cmdb-projects.png) |
 
-| 监控大屏 | 安全扫描 |
-|----------|----------|
-| ![监控](docs/screenshots/monitor-bigscreen.png) | ![安全](docs/screenshots/security-tasks.png) |
+| 工作台（English） | 安全扫描 |
+|-------------------|----------|
+| ![工作台英文](docs/screenshots/dashboard-en.png) | ![安全](docs/screenshots/security-tasks.png) |
 
-| 部署发布 | 告警规则 | 运维小助手 |
-|----------|----------|------------|
-| ![部署](docs/screenshots/deploy-release.png) | ![告警](docs/screenshots/alert-rules.png) | ![AI助手](docs/screenshots/ai-chatbot.png) |
+| 部署发布 | 告警模板（English） | 运维小助手 |
+|----------|---------------------|------------|
+| ![部署](docs/screenshots/deploy-release.png) | ![告警模板英文](docs/screenshots/alert-templates-en.png) | ![AI助手](docs/screenshots/ai-chatbot.png) |
 
 ## 技术栈
 
@@ -231,6 +232,12 @@ ASSISTANT_API_KEY=sk-your-api-key
 ```
 
 支持的工具调用：CMDB 查询、告警管理、部署操作、安全扫描。
+
+## 国际化
+
+- 顶栏一键切换中文 / English，全部页面、菜单、提示文案即时生效
+- 浏览器标题与系统名称随语言切换翻译；管理员自定义的站点名称保持原样
+- 运维小助手的回答语言自动跟随当前界面语言
 
 ## 文档
 

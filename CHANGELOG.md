@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Added
+- Internationalization (i18n): full Chinese/English UI switching with 13 translation namespaces
+- AI Assistant replies follow the current UI language
+- Browser title and site name translate with UI language (custom site names stay verbatim)
 - DB-backed AI model configuration with hot-reload
 - Multi-provider AI model support (DeepSeek, Qwen, Zhipu, Kimi, MiniMax, Doubao, Baichuan)
 - Custom provider support via `ASSISTANT_BASE_URL`
