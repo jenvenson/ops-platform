@@ -363,6 +363,7 @@ const AIChatbot = () => {
         body: JSON.stringify({
           sessionId: sessionId,
           message: userMessage,
+          lang: i18next.language,
           pageContext: buildPageContext()
         })
       });

@@ -84,7 +84,7 @@ func TestGenerateReplyBuildsCompatibleDecision(t *testing.T) {
 		PagePath:  "/deploy/archived",
 		ModuleKey: "deploy",
 		PageTitle: "归档历史",
-	})
+	}, "")
 	if reply.Decision == nil {
 		t.Fatal("expected decision to be populated")
 	}
@@ -319,7 +319,7 @@ func TestGenerateReplyReadonlyQueryBuildsDecisionWithResolvedTool(t *testing.T) 
 		PagePath:  "/deploy/archived",
 		ModuleKey: "deploy",
 		PageTitle: "归档历史",
-	})
+	}, "")
 	if reply.Decision == nil {
 		t.Fatal("expected decision to be populated")
 	}
@@ -366,7 +366,7 @@ func TestGenerateReplyUsesPageContextForGenericReadonlyQuestion(t *testing.T) {
 		PagePath:  "/deploy/history",
 		ModuleKey: "deploy",
 		PageTitle: "部署记录",
-	})
+	}, "")
 	if reply.Decision == nil {
 		t.Fatal("expected decision to be populated")
 	}
@@ -446,7 +446,7 @@ func TestSummarizeCitationsForQuestionUsesTypedPrefix(t *testing.T) {
 		},
 	}
 
-	answer := summarizeCitationsForQuestion("运维小助手一期验收标准是什么", citations)
+	answer := summarizeCitationsForQuestion("运维小助手一期验收标准是什么", citations, false)
 	if !strings.HasPrefix(answer, "根据当前检索到的文档内容，验收标准主要包括：") {
 		t.Fatalf("unexpected answer prefix: %q", answer)
 	}
@@ -473,7 +473,7 @@ func TestSummarizeCitationsForPlatformUsageUsesOnboardingGuide(t *testing.T) {
 			Path:    "docs/user_manual.md",
 			Snippet: "平台包含配置管理、发布管理、告警和安全管理等模块。",
 		},
-	})
+	}, false)
 
 	if !strings.HasPrefix(answer, "可以按下面这个顺序上手平台：") {
 		t.Fatalf("unexpected onboarding answer prefix: %q", answer)
@@ -494,7 +494,7 @@ func TestSummarizeCitationsForRoadmapSkipsIntroLine(t *testing.T) {
 		},
 	}
 
-	answer := summarizeCitationsForQuestion("运维小助手推荐开发顺序是什么", citations)
+	answer := summarizeCitationsForQuestion("运维小助手推荐开发顺序是什么", citations, false)
 	if strings.Contains(answer, "\n- 建议按以下顺序推进：") {
 		t.Fatalf("unexpected intro bullet in %q", answer)
 	}

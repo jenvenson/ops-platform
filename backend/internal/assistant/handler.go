@@ -514,7 +514,7 @@ func (h *Handler) SendMessage(c *gin.Context) {
 	history, _ := loadHistory(req.SessionID, h.service.cfg.Assistant.MaxContextMessages)
 	ctx, cancel := context.WithTimeout(c.Request.Context(), assistantTimeout(h.service.cfg))
 	defer cancel()
-	reply, promptTokens, completionTokens, latency := h.service.GenerateReply(ctx, req.Message, history, req.PageContext)
+	reply, promptTokens, completionTokens, latency := h.service.GenerateReply(ctx, req.Message, history, req.PageContext, req.Lang)
 	reply.MessageID = generateID("msg")
 
 	assistantMessage := models.AssistantMessage{

@@ -63,6 +63,7 @@ type SessionListResponse struct {
 type MessageRequest struct {
 	SessionID   string                `json:"sessionId"`
 	Message     string                `json:"message"`
+	Lang        string                `json:"lang,omitempty"`
 	PageContext *AssistantPageContext `json:"pageContext,omitempty"`
 }
 

@@ -62,18 +62,26 @@ func (s *Service) ReloadFromRuntimeConfig(provider string, enabled bool, apiKey,
 	s.knowledge = loadKnowledgeBase(s.cfg, newEmbedProvider(s.cfg.Assistant, s.chatProvider))
 }
 
-func (s *Service) GenerateReply(ctx context.Context, message string, history []historyMessage, pageContext *AssistantPageContext) (MessageResponse, int, int, int64) {
+func normalizeLang(lang string) string {
+	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(lang)), "en") {
+		return "en-US"
+	}
+	return "zh-CN"
+}
+
+func (s *Service) GenerateReply(ctx context.Context, message string, history []historyMessage, pageContext *AssistantPageContext, lang string) (MessageResponse, int, int, int64) {
 	start := time.Now()
+	lang = normalizeLang(lang)
 	pageContext = sanitizePageContext(pageContext)
 	intent := resolveIntentWithPageContext(message, pageContext, classifyAssistantIntent(message))
 	actions := s.buildActions(message, intent, pageContext)
 	citations := s.buildCitations(message, intent.Name, actions)
 	toolResult := s.runReadonlyTools(message, intent, pageContext)
 
-	answer, promptTokens, completionTokens, err := s.generateModelAnswer(ctx, intent.Name, message, history, citations, actions, toolResult, pageContext)
+	answer, promptTokens, completionTokens, err := s.generateModelAnswer(ctx, intent.Name, message, history, citations, actions, toolResult, pageContext, lang)
 	model := s.responseModelName(answer, err)
 	if err != nil || strings.TrimSpace(answer) == "" {
-		answer = fallbackAnswer(message, intent.Name, citations, actions, toolResult)
+		answer = fallbackAnswer(message, intent.Name, citations, actions, toolResult, lang)
 	}
 
 	decision := s.buildDecision(intent, message, history, pageContext, answer, citations, actions, toolResult)
@@ -232,7 +240,7 @@ func (s *Service) responseModelName(answer string, err error) string {
 	return "ops-assistant-fallback"
 }
 
-func (s *Service) generateModelAnswer(ctx context.Context, intent, message string, history []historyMessage, citations []Citation, actions []Action, toolResult *toolContext, pageContext *AssistantPageContext) (string, int, int, error) {
+func (s *Service) generateModelAnswer(ctx context.Context, intent, message string, history []historyMessage, citations []Citation, actions []Action, toolResult *toolContext, pageContext *AssistantPageContext, lang string) (string, int, int, error) {
 	if s == nil || s.chatProvider == nil {
 		return "", 0, 0, fmt.Errorf("assistant model unavailable")
 	}
@@ -240,13 +248,13 @@ func (s *Service) generateModelAnswer(ctx context.Context, intent, message strin
 	promptHistory := append(make([]historyMessage, 0, len(history)+1), history...)
 	promptHistory = append(promptHistory, historyMessage{
 		Role:    "user",
-		Content: buildUserPrompt(intent, message, citations, actions, toolResult, pageContext),
+		Content: buildUserPrompt(intent, message, citations, actions, toolResult, pageContext, lang),
 	})
 
-	return s.chatProvider.Chat(ctx, s.buildSystemPrompt(), promptHistory)
+	return s.chatProvider.Chat(ctx, s.buildSystemPrompt(lang), promptHistory)
 }
 
-func (s *Service) buildSystemPrompt() string {
+func (s *Service) buildSystemPrompt(lang string) string {
 	model := "未知模型"
 	baseURL := ""
 	if s.chatProvider != nil {
@@ -254,6 +262,16 @@ func (s *Service) buildSystemPrompt() string {
 	}
 	if s.cfg != nil && s.cfg.Assistant.BaseURL != "" {
 		baseURL = s.cfg.Assistant.BaseURL
+	}
+	if normalizeLang(lang) == "en-US" {
+		return fmt.Sprintf(
+			"You are the OPS Assistant of OPS Platform. You are running on the %s model with API endpoint %s. "+
+				"When asked which model you use, you must answer strictly with the model name and endpoint above; never make up other names. "+
+				"Your job is to help users understand platform features, locate page entries, and summarize query results. "+
+				"Answer only based on the given context; never invent pages, statuses, or operation results that do not exist. "+
+				"The provided context may be in Chinese; always respond in English with concise, clear, and actionable answers.",
+			model, baseURL,
+		)
 	}
 	return fmt.Sprintf(
 		"你是 OPS Platform 的运维小助手。你正在使用 %s 模型，API 地址为 %s。"+
@@ -265,7 +283,7 @@ func (s *Service) buildSystemPrompt() string {
 	)
 }
 
-func buildUserPrompt(intent, message string, citations []Citation, actions []Action, toolResult *toolContext, pageContext *AssistantPageContext) string {
+func buildUserPrompt(intent, message string, citations []Citation, actions []Action, toolResult *toolContext, pageContext *AssistantPageContext, lang string) string {
 	var builder strings.Builder
 	builder.WriteString("用户问题：")
 	builder.WriteString(message)
@@ -312,7 +330,11 @@ func buildUserPrompt(intent, message string, citations []Citation, actions []Act
 		builder.WriteString(toolResult.Summary)
 	}
 
-	builder.WriteString("\n\n请先给结论，再给简短操作建议。如果有页面入口，请自然提到路径。")
+	if normalizeLang(lang) == "en-US" {
+		builder.WriteString("\n\nRespond in English. Give the conclusion first, then brief actionable suggestions. If there is a page entry, mention its path naturally.")
+	} else {
+		builder.WriteString("\n\n请先给结论，再给简短操作建议。如果有页面入口，请自然提到路径。")
+	}
 	return builder.String()
 }
 
@@ -803,11 +825,18 @@ func filterActionsForKnowledgeQuery(message string, actions []Action) []Action {
 	return actions
 }
 
-func fallbackAnswer(message, intent string, citations []Citation, actions []Action, toolResult *toolContext) string {
+func fallbackAnswer(message, intent string, citations []Citation, actions []Action, toolResult *toolContext, lang string) string {
+	en := normalizeLang(lang) == "en-US"
 	switch intent {
 	case "page_navigation":
 		if len(actions) > 0 {
+			if en {
+				return fmt.Sprintf("You can enter from the corresponding feature page. Try opening %s directly.", actions[0].Path)
+			}
 			return fmt.Sprintf("可以从对应功能页面进入，建议直接打开 %s。", actions[0].Path)
+		}
+		if en {
+			return "Please describe the specific module name and I will help you locate the page entry."
 		}
 		return "可以描述一下具体模块名称，我再帮你定位页面入口。"
 	case "readonly_query":
@@ -815,27 +844,39 @@ func fallbackAnswer(message, intent string, citations []Citation, actions []Acti
 			return toolResult.Summary
 		}
 		if len(actions) > 0 {
+			if en {
+				return fmt.Sprintf("This question is better explored with page data. Open %s first, then continue analyzing from the list results.", actions[0].Path)
+			}
 			return fmt.Sprintf("这个问题更适合结合页面数据查看，建议先打开 %s，再根据列表结果继续分析。", actions[0].Path)
+		}
+		if en {
+			return "The current version focuses on page navigation and basic query suggestions. For real-time data queries, I can help you narrow down to a specific module."
 		}
 		return "当前版本优先提供入口定位和基础查询建议，如需实时数据查询，我可以继续帮你收敛到具体模块。"
 	case "knowledge_qa":
 		if len(citations) > 0 {
-			return summarizeCitationsForQuestion(message, citations)
+			return summarizeCitationsForQuestion(message, citations, en)
+		}
+		if en {
+			return "The OPS Assistant currently supports platform usage Q&A, page navigation, and read-only queries. Ask me how a feature works, or let me take you to the corresponding page."
 		}
 		return "运维小助手一期主要支持平台使用问答、页面导航和只读查询。你可以直接问我某个功能怎么用，或者让我带你到对应页面。"
 	default:
+		if en {
+			return "I am the OPS Assistant of OPS Platform. I support basic Q&A, page navigation, and read-only query suggestions. Feel free to ask me about deployment, monitoring, alerts, security, or system administration."
+		}
 		return "我是 OPS Platform 的运维小助手。目前已支持基础问答、页面导航和只读查询建议。你可以继续问我部署、监控、告警、安全或系统管理相关问题。"
 	}
 }
 
-func summarizeCitationsForQuestion(message string, citations []Citation) string {
+func summarizeCitationsForQuestion(message string, citations []Citation, en bool) string {
 	if len(citations) == 0 {
 		return ""
 	}
 
 	questionType := classifyKnowledgeQuestion(message)
 	if questionType == "onboarding" && isPlatformUsageQuestion(message) {
-		return summarizePlatformUsageQuestion()
+		return summarizePlatformUsageQuestion(en)
 	}
 	bullets := make([]string, 0, 6)
 	seenBullets := map[string]struct{}{}
@@ -859,7 +900,7 @@ func summarizeCitationsForQuestion(message string, citations []Citation) string 
 		if len(bullets) > maxBullets {
 			bullets = bullets[:maxBullets]
 		}
-		return summaryPrefix(questionType) + "\n- " + strings.Join(bullets, "\n- ")
+		return summaryPrefix(questionType, en) + "\n- " + strings.Join(bullets, "\n- ")
 	}
 
 	parts := make([]string, 0, minInt(len(citations), 2))
@@ -877,9 +918,12 @@ func summarizeCitationsForQuestion(message string, citations []Citation) string 
 		parts = append(parts, shorten(text, 120))
 	}
 	if len(parts) == 0 {
+		if en {
+			return "I found related documents but could not extract a useful summary. Try narrowing down the question and I will search again."
+		}
 		return "我找到了相关文档，但暂时无法提炼出有效摘要。你可以继续缩小问题范围，我再进一步检索。"
 	}
-	return summaryPrefix(questionType) + "\n- " + strings.Join(parts, "\n- ")
+	return summaryPrefix(questionType, en) + "\n- " + strings.Join(parts, "\n- ")
 }
 
 func minInt(a, b int) int {
@@ -918,7 +962,25 @@ func classifyKnowledgeQuestion(message string) string {
 	}
 }
 
-func summaryPrefix(questionType string) string {
+func summaryPrefix(questionType string, en bool) string {
+	if en {
+		switch questionType {
+		case "onboarding":
+			return "You can get started with the platform in the following order:"
+		case "acceptance":
+			return "Based on the retrieved documents, the acceptance criteria mainly include:"
+		case "roadmap":
+			return "Based on the retrieved documents, the suggested development order is:"
+		case "scope":
+			return "Based on the retrieved documents, the current scope mainly covers:"
+		case "architecture":
+			return "Based on the retrieved documents, the key design points are:"
+		case "howto":
+			return "Based on the retrieved documents, you can proceed as follows:"
+		default:
+			return "Based on the retrieved documents, the conclusion is:"
+		}
+	}
 	switch questionType {
 	case "onboarding":
 		return "可以按下面这个顺序上手平台："
@@ -953,7 +1015,17 @@ func isPlatformUsageQuestion(message string) bool {
 	return containsAny(msg, "平台") && containsAny(msg, "如何使用", "怎么用", "怎么使用", "如何用", "上手", "入门")
 }
 
-func summarizePlatformUsageQuestion() string {
+func summarizePlatformUsageQuestion(en bool) string {
+	if en {
+		return strings.Join([]string{
+			"You can get started with the platform in the following order:",
+			"- Configure base data first: `/cmdb/projects`, `/cmdb/environments`, `/cmdb/servers`, `/cmdb/applications`",
+			"- Then handle releases and artifacts: `/deploy/release`, `/deploy/history`, `/deploy/archived`, `/deploy/aggregated-history`",
+			"- For day-to-day runtime status, check: `/monitor/bigscreen`, `/alarm/events`",
+			"- For security investigation, check: `/security/tasks`, `/security/vulnerabilities`",
+			"- For a full overview of all features, open `/user-manual`",
+		}, "\n")
+	}
 	return strings.Join([]string{
 		"可以按下面这个顺序上手平台：",
 		"- 先配置基础数据：`/cmdb/projects`、`/cmdb/environments`、`/cmdb/servers`、`/cmdb/applications`",
