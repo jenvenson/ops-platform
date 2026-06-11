@@ -1052,5 +1052,6 @@
   "manualConfirmation": "Manual Confirmation",
   "webVulnCategory": "Web Vulnerability",
   "hostVulnCategory": "Host Vulnerability",
-  "genericDiscovery": "Generic Discovery"
+  "genericDiscovery": "Generic Discovery",
+  "vulnDetailTitle": "Vulnerability Details"
 }

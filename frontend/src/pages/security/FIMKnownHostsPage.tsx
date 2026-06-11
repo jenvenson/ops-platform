@@ -644,7 +644,7 @@ export default function FIMKnownHostsPage() {
                     </Space>
                   ) : '-'}
                 </Descriptions.Item>
-                <Descriptions.Item label={t('status', '状态')}>
+                <Descriptions.Item label={t('common:status', '状态')}>
                   <Badge
                     status={selectedHost.is_enabled ? 'success' : 'default'}
                     text={selectedHost.is_enabled ? t('fimKnownHosts.statusEnabled', '已启用') : t('fimKnownHosts.statusDisabled', '已禁用')}
@@ -694,7 +694,7 @@ export default function FIMKnownHostsPage() {
                   </Select>
                 </Form.Item>
 
-                <Form.Item label={t('status', '状态')} name="is_enabled" valuePropName="checked">
+                <Form.Item label={t('common:status', '状态')} name="is_enabled" valuePropName="checked">
                   <Switch checkedChildren={t('fimKnownHosts.statusEnabled', '已启用')} unCheckedChildren={t('fimKnownHosts.statusDisabled', '已禁用')} />
                 </Form.Item>
 

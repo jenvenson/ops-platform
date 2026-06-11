@@ -1609,7 +1609,7 @@ export default function TaskDetail({ task, onClose, onRefresh }: TaskDetailProps
 
       {/* 漏洞详情抽屉 */}
       <Drawer
-        title={t('vulnDetail', '漏洞详情')}
+        title={t('vulnDetailTitle', '漏洞详情')}
         placement="right"
         width={600}
         open={detailDrawerOpen}

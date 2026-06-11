@@ -286,7 +286,7 @@ export default function TaskList() {
       },
     },
     {
-      title: t('status', '状态'),
+      title: t('common:status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
@@ -388,7 +388,7 @@ export default function TaskList() {
               ]}
             />
             <Select
-              placeholder={t('status', '状态')}
+              placeholder={t('common:status', '状态')}
               allowClear
               value={statusFilter || undefined}
               style={{ width: 140 }}

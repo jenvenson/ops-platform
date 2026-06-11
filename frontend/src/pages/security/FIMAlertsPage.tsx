@@ -243,7 +243,7 @@ export default function FIMAlertsPage() {
       render: (value: string) => <Tag color={severityColorMap[value] || 'default'}>{t(`severity.${value}`, value)}</Tag>,
     },
     {
-      title: t('status', '状态'),
+      title: t('common:status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 120,
@@ -439,7 +439,7 @@ export default function FIMAlertsPage() {
               <Descriptions.Item label={t('severityLevel', '级别')}>
                 <Tag color={severityColorMap[detailAlert.severity] || 'default'}>{t(`severity.${detailAlert.severity}`, detailAlert.severity)}</Tag>
               </Descriptions.Item>
-              <Descriptions.Item label={t('status', '状态')}>
+              <Descriptions.Item label={t('common:status', '状态')}>
                 <Tag color={statusColorMap[detailAlert.status] || 'default'}>{t(`status.${detailAlert.status}`, detailAlert.status)}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label={t('fimAlerts.summary', '摘要')}>{detailAlert.summary || '-'}</Descriptions.Item>

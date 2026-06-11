@@ -1052,5 +1052,6 @@
   "manualConfirmation": "人工确认",
   "webVulnCategory": "网站漏洞",
   "hostVulnCategory": "主机漏洞",
-  "genericDiscovery": "通用发现"
+  "genericDiscovery": "通用发现",
+  "vulnDetailTitle": "漏洞详情"
 }

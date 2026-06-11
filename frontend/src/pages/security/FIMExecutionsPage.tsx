@@ -219,7 +219,7 @@ export default function FIMExecutionsPage() {
       },
     },
     {
-      title: t('status', '状态'),
+      title: t('common:status', '状态'),
       dataIndex: 'status',
       key: 'status',
       width: 110,
@@ -434,7 +434,7 @@ export default function FIMExecutionsPage() {
                   {t(`fim.executions.baselineStateLabels.${getBaselineState(detail)}`, getBaselineState(detail))}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label={t('status', '状态')}>
+              <Descriptions.Item label={t('common:status', '状态')}>
                 <Tag color={statusColorMap[detail.status] || 'default'}>{t(`status.${detail.status}`, detail.status)}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label={t('fim.policyName', '策略')}>
