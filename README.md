@@ -233,6 +233,7 @@ ASSISTANT_API_KEY=sk-your-api-key
 
 ## 文档
 
+- [快速开始](docs/quickstart.md)
 - [部署指南](deploy/DEPLOY.md)
 - [用户手册](docs/user_manual.md)
 - [测试说明](docs/testing.md)

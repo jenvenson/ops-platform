@@ -233,6 +233,7 @@ Supported tool calls: CMDB queries, alert management, deployment operations, sec
 
 ## Documentation
 
+- [Quick Start](docs/quickstart.en.md)
 - [Deployment Guide](deploy/DEPLOY.md)
 - [User Manual](docs/user_manual.md)
 - [Testing Guide](docs/testing.md)
