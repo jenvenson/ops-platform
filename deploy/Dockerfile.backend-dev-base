@@ -41,15 +41,5 @@ RUN _proxy="${GOPROXY}"; \
     mv /go/bin/nuclei /usr/local/bin/nuclei && \
     nuclei -version 2>&1 | head -1
 
-# Install RustScan (optional — skip if download fails)
-RUN cd /tmp && \
-    curl -fL --retry 2 --max-time 30 -O \
-      https://github.com/bee-san/RustScan/releases/download/2.4.1/x86_64-linux-rustscan.tar.gz.zip && \
-    unzip -o x86_64-linux-rustscan.tar.gz.zip && \
-    tar xzf x86_64-linux-rustscan.tar.gz && \
-    mv rustscan /usr/local/bin/ && \
-    chmod +x /usr/local/bin/rustscan && \
-    rm -rf /tmp/x86_64-* || echo "RustScan install skipped (download failed)"
-
 # Marker: tells start.sh all tools are pre-installed, skip runtime installs
 RUN touch /opt/.dev-base-image

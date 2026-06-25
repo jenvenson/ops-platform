@@ -41,24 +41,6 @@ EOF
   return 1
 }
 
-install_rustscan() {
-  if which rustscan >/dev/null 2>&1; then
-    rustscan --version
-    return 0
-  fi
-
-  echo "Installing RustScan..."
-  cd /tmp
-  rm -f x86_64-linux-rustscan.tar.gz.zip rustscan
-  curl -fL --retry 1 --max-time 20 -O https://github.com/bee-san/RustScan/releases/download/2.4.1/x86_64-linux-rustscan.tar.gz.zip
-  unzip -o x86_64-linux-rustscan.tar.gz.zip
-  tar xzf x86_64-linux-rustscan.tar.gz
-  mv rustscan /usr/local/bin/
-  chmod +x /usr/local/bin/rustscan
-  rm -rf /tmp/x86_64-* /tmp/rustscan /tmp/x86_64-linux-rustscan.tar.gz.zip
-  rustscan --version
-}
-
 install_nuclei() {
   NUCLEI_VERSION="${NUCLEI_VERSION:-v3.7.1}"
   NUCLEI_ZIP="nuclei_${NUCLEI_VERSION#v}_linux_amd64.zip"
@@ -137,7 +119,6 @@ if [ -f /opt/.dev-base-image ]; then
   echo "Dev base image detected, skipping tool installation."
 else
   install_required_packages
-  install_rustscan || echo "Warning: RustScan install failed, continuing without rustscan"
   install_nuclei
 fi
 init_database_schema
