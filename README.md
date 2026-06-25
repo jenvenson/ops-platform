@@ -60,7 +60,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone git@github.com:jenvenson/ops-platform.git
+git clone git@github.com:jenvenson/ops-platform.git //若失败，使用git clone https://github.com/jenvenson/ops-platform.git
 cd ops-platform
 ```
 
