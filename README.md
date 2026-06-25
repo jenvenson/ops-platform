@@ -78,13 +78,21 @@ REDIS_PASSWORD=your_secure_redis_password
 JWT_SECRET=your_jwt_secret_key_change_in_production
 ```
 
-### 3. 启动服务
+### 3. 构建开发 Base 镜像（首次必做）
+
+开发环境使用预置扫描工具的 base 镜像，**首次需构建一次**，后续重启无需重复：
+
+```bash
+docker build -f deploy/Dockerfile.backend-dev-base -t ops-backend-dev-base .
+```
+
+> 构建过程会编译 nuclei 等工具，约需 5–10 分钟（取决于网络）。构建完成后永久缓存，重启容器约 1 分钟即可就绪。
+
+### 4. 启动服务
 
 ```bash
 docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d
 ```
-
-首次启动拉取镜像并安装依赖，约需 3-5 分钟。
 
 ### 4. 验证
 
@@ -115,7 +123,9 @@ curl http://localhost:28080/health
 
 ### 开发模式说明（全部服务均在 Docker 中运行）
 
-`docker-compose.dev.yml` 会启动全部服务：MySQL、Redis、后端（golang 容器内 `go run`）、前端（node 容器内 Vite）、Nginx。源码目录挂载进容器，无需本地安装 Go / Node：
+`docker-compose.dev.yml` 会启动全部服务：MySQL、Redis、后端（golang 容器内 `go run`）、前端（node 容器内 Vite）、Nginx。源码目录挂载进容器，无需本地安装 Go / Node。
+
+后端基于 `ops-backend-dev-base` 镜像（已预装 nmap、mariadb-client、nuclei 等扫描工具），容器启动时**跳过工具安装**，直接编译运行，重启时间约 1 分钟：
 
 ```bash
 # 前端：Vite 热更新，改完代码自动生效
@@ -183,10 +193,11 @@ GOPROXY=https://goproxy.cn,direct
 │       ├── pages/          # 页面 (cmdb/security/alarm/deploy/...)
 │       └── styles/         # 主题样式
 ├── deploy/                 # 部署配置
-│   ├── docker-compose.yml        # 生产环境
-│   ├── docker-compose.dev.yml    # 开发环境
-│   ├── Dockerfile.backend        # 后端镜像
-│   ├── Dockerfile.frontend       # 前端镜像
+│   ├── docker-compose.yml              # 生产环境
+│   ├── docker-compose.dev.yml          # 开发环境
+│   ├── Dockerfile.backend              # 后端生产镜像
+│   ├── Dockerfile.backend-dev-base     # 后端开发 base 镜像（预装扫描工具）
+│   ├── Dockerfile.frontend             # 前端镜像
 │   ├── nginx.conf.template       # Nginx 模板
 │   ├── .env.example              # 环境变量示例
 │   ├── deploy-init.sh            # 首次部署

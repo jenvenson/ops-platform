@@ -41,7 +41,7 @@ services:
       - ops-network
 
   backend:
-    image: golang:1.25-alpine
+    image: ops-backend-dev-base
     container_name: ops-backend-dev
     ports:
       - "28080:8080"

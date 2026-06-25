@@ -78,13 +78,21 @@ REDIS_PASSWORD=your_secure_redis_password
 JWT_SECRET=your_jwt_secret_key_change_in_production
 ```
 
-### 3. Start the services
+### 3. Build the dev base image (first time only)
+
+The development environment uses a pre-built base image with scan tools included. **Build it once** before the first startup:
+
+```bash
+docker build -f deploy/Dockerfile.backend-dev-base -t ops-backend-dev-base .
+```
+
+> This compiles nuclei and other tools — takes 5–10 minutes depending on network speed. The result is cached permanently; subsequent container restarts take about 1 minute.
+
+### 4. Start the services
 
 ```bash
 docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d
 ```
-
-The first startup pulls images and installs dependencies, which takes about 3–5 minutes.
 
 ### 4. Verify
 
@@ -115,7 +123,9 @@ Open **http://localhost:18890** in your browser and log in with the default acco
 
 ### Development mode (all services run in Docker)
 
-`docker-compose.dev.yml` starts everything: MySQL, Redis, backend (`go run` inside a golang container), frontend (Vite inside a node container), and Nginx. Source directories are mounted into the containers, so no local Go / Node installation is needed:
+`docker-compose.dev.yml` starts everything: MySQL, Redis, backend (`go run` inside a golang container), frontend (Vite inside a node container), and Nginx. Source directories are mounted into the containers, so no local Go / Node installation is needed.
+
+The backend uses the `ops-backend-dev-base` image (pre-installed with nmap, mariadb-client, nuclei, etc.), so the container **skips tool installation on startup** and goes straight to compilation. Restart time is about 1 minute:
 
 ```bash
 # Frontend: Vite hot-reload — code changes apply automatically
@@ -183,10 +193,11 @@ GOPROXY=https://goproxy.cn,direct
 │       ├── pages/          # Pages (cmdb/security/alarm/deploy/...)
 │       └── styles/         # Theme styles
 ├── deploy/                 # Deployment configs
-│   ├── docker-compose.yml        # Production
-│   ├── docker-compose.dev.yml    # Development
-│   ├── Dockerfile.backend        # Backend image
-│   ├── Dockerfile.frontend       # Frontend image
+│   ├── docker-compose.yml              # Production
+│   ├── docker-compose.dev.yml          # Development
+│   ├── Dockerfile.backend              # Backend production image
+│   ├── Dockerfile.backend-dev-base     # Backend dev base image (pre-installed scan tools)
+│   ├── Dockerfile.frontend             # Frontend image
 │   ├── nginx.conf.template       # Nginx template
 │   ├── .env.example              # Env var example
 │   ├── deploy-init.sh            # First deployment

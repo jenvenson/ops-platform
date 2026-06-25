@@ -10,6 +10,10 @@ mysql_client_bin() {
 }
 
 install_required_packages() {
+  if which nmap >/dev/null 2>&1; then
+    return 0
+  fi
+
   echo "Installing required scan dependencies..."
   PACKAGES="bash nmap nmap-nselibs nmap-scripts unzip curl libc6-compat mariadb-client"
 
@@ -129,9 +133,13 @@ apply_database_migrations() {
   bash /app/deploy/apply-migrations.sh --direct
 }
 
-install_required_packages
-install_rustscan || echo "Warning: RustScan install failed, continuing without rustscan"
-install_nuclei
+if [ -f /opt/.dev-base-image ]; then
+  echo "Dev base image detected, skipping tool installation."
+else
+  install_required_packages
+  install_rustscan || echo "Warning: RustScan install failed, continuing without rustscan"
+  install_nuclei
+fi
 init_database_schema
 apply_database_migrations
 
