@@ -1,10 +1,21 @@
 # Dev base image — pre-installs all slow scan tools so container restarts are fast.
 # Build once with: docker build -f deploy/Dockerfile.backend-dev-base -t ops-backend-dev-base .
 # Rebuild only when tool versions or apk packages change.
+#
+# Options:
+#   --build-arg CN_MIRROR=true   Use Aliyun apk mirror + goproxy.cn (default in China)
+#   --build-arg CN_MIRROR=false  Use default mirrors (for non-China machines)
+#   --build-arg GOPROXY=...      Override Go module proxy explicitly
 FROM golang:1.25-alpine
 
-# Use Chinese mirror for reliable apk access
-RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirrors.aliyun.com|g' /etc/apk/repositories
+ARG CN_MIRROR=true
+ARG NUCLEI_VERSION=v3.6.2
+ARG GOPROXY=""
+
+# Switch to Aliyun mirror for faster apk in China (skipped when CN_MIRROR=false)
+RUN if [ "$CN_MIRROR" = "true" ]; then \
+      sed -i 's|https://dl-cdn.alpinelinux.org|https://mirrors.aliyun.com|g' /etc/apk/repositories; \
+    fi
 
 RUN apk add --no-cache \
     bash \
@@ -19,10 +30,14 @@ RUN apk add --no-cache \
     ca-certificates \
     tzdata
 
-# Install nuclei via go install (most reliable method in China)
-ARG NUCLEI_VERSION=v3.6.2
-ARG GOPROXY=https://goproxy.cn,direct
-RUN GOPROXY=${GOPROXY} go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@${NUCLEI_VERSION} && \
+# Install nuclei via go install
+# GOPROXY arg overrides CN_MIRROR default; if empty, pick proxy based on CN_MIRROR
+RUN _proxy="${GOPROXY}"; \
+    if [ -z "$_proxy" ]; then \
+      if [ "$CN_MIRROR" = "true" ]; then _proxy="https://goproxy.cn,direct"; \
+      else _proxy="https://proxy.golang.org,direct"; fi; \
+    fi && \
+    GOPROXY="$_proxy" go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@${NUCLEI_VERSION} && \
     mv /go/bin/nuclei /usr/local/bin/nuclei && \
     nuclei -version 2>&1 | head -1
 
