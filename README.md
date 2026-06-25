@@ -94,7 +94,7 @@ docker build -f deploy/Dockerfile.backend-dev-base -t ops-backend-dev-base .
 docker compose -f deploy/docker-compose.dev.yml -p ops-dev up -d
 ```
 
-### 4. 验证
+### 5. 验证
 
 ```bash
 curl http://localhost:28080/health
