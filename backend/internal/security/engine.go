@@ -3324,8 +3324,7 @@ func handleWebURLScan(taskID uint, target string, engine *ScanEngine, config *We
 }
 
 // AsyncScan 异步执行扫描任务
-func AsyncScan(taskID uint, target string, targetType string, scanType string, webConfig *WebScanConfig) {
-	go func() {
+func runScan(taskID uint, target string, targetType string, scanType string, webConfig *WebScanConfig) {
 		engine := NewScanEngine()
 
 		if continueScan, msg := CheckTaskStatus(taskID); !continueScan {
@@ -3553,5 +3552,16 @@ func AsyncScan(taskID uint, target string, targetType string, scanType string, w
 				"completed_at": completedAt,
 			}),
 		})
-	}()
+	
+}
+
+// AsyncScan 异步执行扫描任务（放入受控队列）
+func AsyncScan(taskID uint, target string, targetType string, scanType string, webConfig *WebScanConfig) {
+	EnqueueScan(ScanJob{
+		TaskID:     taskID,
+		Target:     target,
+		TargetType: targetType,
+		ScanType:   scanType,
+		WebConfig:  webConfig,
+	})
 }

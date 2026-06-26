@@ -11,17 +11,6 @@ RUN go build -o server cmd/server/main.go
 FROM alpine:3.21
 RUN apk --no-cache add ca-certificates tzdata nmap nmap-nselibs nmap-scripts curl wget
 
-# 安装 RustScan (直接下载预编译二进制文件)
-RUN apk add --no-cache unzip curl && \
-    cd /tmp && \
-    curl -LO https://github.com/bee-san/RustScan/releases/download/2.4.1/x86_64-linux-rustscan.tar.gz.zip && \
-    unzip -o x86_64-linux-rustscan.tar.gz.zip && \
-    tar xzf x86_64-linux-rustscan.tar.gz && \
-    mv rustscan /usr/local/bin/ && \
-    chmod +x /usr/local/bin/rustscan && \
-    rm -rf /tmp/x86_64-* && \
-    rustscan --version
-
 # 使用 go install 安装 nuclei（版本通过环境变量 NUCLEI_VERSION 控制）
 ARG NUCLEI_VERSION=v3.6.2
 RUN go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@${NUCLEI_VERSION} && \
